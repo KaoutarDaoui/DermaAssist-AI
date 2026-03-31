@@ -1,0 +1,786 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DermAssist AI - Module 1 + Module 2 Test</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #f0f7f5 0%, #e8f5f1 100%);
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      header {
+        text-align: center;
+        margin-bottom: 40px;
+        color: #0a3f34;
+      }
+
+      header h1 {
+        font-size: 2.5em;
+        font-weight: 900;
+        margin-bottom: 10px;
+      }
+
+      header p {
+        font-size: 1.1em;
+        color: #0f6e56;
+        font-weight: 500;
+      }
+
+      .main-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+        margin-bottom: 30px;
+      }
+
+      .card {
+        background: white;
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 4px 20px rgba(15, 110, 86, 0.1);
+        border: 2px solid #d1fae5;
+      }
+
+      .card h2 {
+        color: #0a3f34;
+        font-size: 1.5em;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .card h2::before {
+        width: 4px;
+        height: 30px;
+        background: #10b981;
+        border-radius: 2px;
+      }
+
+      .form-group {
+        margin-bottom: 20px;
+      }
+
+      label {
+        display: block;
+        color: #10b981;
+        font-weight: 600;
+        font-size: 0.9em;
+        text-transform: uppercase;
+        margin-bottom: 8px;
+        letter-spacing: 0.5px;
+      }
+
+      input[type="text"],
+      input[type="number"],
+      input[type="file"],
+      select {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #a7f3d0;
+        border-radius: 10px;
+        font-size: 1em;
+        transition: all 0.3s ease;
+        color: #0a3f34;
+      }
+
+      input[type="text"]:focus,
+      input[type="number"]:focus,
+      input[type="file"]:focus,
+      select:focus {
+        outline: none;
+        border-color: #059669;
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        background-color: #f0fdf4;
+      }
+
+      input[type="file"] {
+        padding: 10px;
+        cursor: pointer;
+      }
+
+      .checkbox-group {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        margin-top: 15px;
+      }
+
+      .checkbox-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+        accent-color: #10b981;
+      }
+
+      .checkbox-item label {
+        margin: 0;
+        font-size: 0.85em;
+        text-transform: none;
+        font-weight: 500;
+        color: #0a3f34;
+      }
+
+      button {
+        width: 100%;
+        padding: 14px;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-size: 1.1em;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        background: linear-gradient(135deg, #059669 0%, #047857 100%);
+      }
+
+      button:active {
+        transform: translateY(0);
+      }
+
+      .loading {
+        display: none;
+        text-align: center;
+        padding: 20px;
+        color: #10b981;
+        font-weight: 600;
+        font-size: 1.1em;
+      }
+
+      .spinner {
+        display: inline-block;
+        width: 30px;
+        height: 30px;
+        border: 4px solid #d1fae5;
+        border-top: 4px solid #10b981;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-right: 10px;
+        vertical-align: middle;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .results-section {
+        margin-top: 30px;
+      }
+
+      .results-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+      }
+
+      .result-card {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        box-shadow: 0 4px 15px rgba(15, 110, 86, 0.1);
+        border-left: 5px solid #10b981;
+      }
+
+      .result-card h3 {
+        color: #0a3f34;
+        margin-bottom: 15px;
+        font-size: 1.3em;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .badge {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.85em;
+        font-weight: 600;
+        margin-bottom: 10px;
+      }
+
+      .badge-success {
+        background: #d1fae5;
+        color: #059669;
+      }
+
+      .badge-warning {
+        background: #fef3c7;
+        color: #d97706;
+      }
+
+      .badge-danger {
+        background: #fee2e2;
+        color: #dc2626;
+      }
+
+      .result-value {
+        font-size: 2em;
+        color: #10b981;
+        font-weight: 900;
+        margin: 10px 0;
+      }
+
+      .result-text {
+        color: #0a3f34;
+        font-size: 0.95em;
+        line-height: 1.6;
+        margin: 10px 0;
+      }
+
+      .result-list {
+        list-style: none;
+        margin: 15px 0;
+      }
+
+      .result-list li {
+        padding: 10px;
+        background: #f0fdf4;
+        border-left: 3px solid #10b981;
+        margin-bottom: 8px;
+        border-radius: 5px;
+        color: #0a3f34;
+        font-size: 0.9em;
+      }
+
+      .error-message {
+        background: #fee2e2;
+        border: 2px solid #fca5a5;
+        color: #991b1b;
+        padding: 15px;
+        border-radius: 10px;
+        margin-top: 20px;
+        display: none;
+      }
+
+      .success-message {
+        background: #d1fae5;
+        border: 2px solid #6ee7b7;
+        color: #065f46;
+        padding: 15px;
+        border-radius: 10px;
+        margin-top: 20px;
+        display: none;
+      }
+
+      .info-box {
+        background: #ecfdf5;
+        border-left: 4px solid #10b981;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        color: #047857;
+        font-size: 0.9em;
+      }
+
+      @media (max-width: 768px) {
+        .main-grid,
+        .results-grid {
+          grid-template-columns: 1fr;
+        }
+
+        header h1 {
+          font-size: 2em;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>🏥 DermAssist AI</h1>
+        <p>Module 1 (CNN) + Module 2 (RAG) Integration Test</p>
+      </header>
+
+      <div class="main-grid">
+        <!-- LEFT: Form -->
+        <div class="card">
+          <h2>Patient Data</h2>
+
+          <div class="info-box">
+            ℹ️ Upload a skin lesion image and enter patient information to test
+            the analysis pipeline
+          </div>
+
+          <form id="analyzeForm">
+            <div class="form-group">
+              <label for="image">📸 Skin Lesion Image *</label>
+              <input
+                type="file"
+                id="image"
+                name="image"
+                accept="image/*"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="age">👤 Age *</label>
+              <input
+                type="number"
+                id="age"
+                name="age"
+                min="0"
+                max="120"
+                value="45"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="sexe">⚥️ Sex *</label>
+              <select id="sexe" name="sexe" required>
+                <option value="">Select...</option>
+                <option value="homme">Male</option>
+                <option value="femme">Female</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="fitzpatrick">🔅 Fitzpatrick Type *</label>
+              <select id="fitzpatrick" name="fitzpatrick" required>
+                <option value="">Select...</option>
+                <option value="1">Type I (Very Fair)</option>
+                <option value="2">Type II (Fair)</option>
+                <option value="3">Type III (Medium Fair)</option>
+                <option value="4" selected>Type IV (Medium)</option>
+                <option value="5">Type V (Medium Dark)</option>
+                <option value="6">Type VI (Very Dark)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="localisation">📍 Body Location</label>
+              <select id="localisation" name="localisation">
+                <option value="unknown">Unknown</option>
+                <option value="face">Face</option>
+                <option value="chest">Chest</option>
+                <option value="back" selected>Back</option>
+                <option value="abdomen">Abdomen</option>
+                <option value="upper extremity">Upper Extremity</option>
+                <option value="lower extremity">Lower Extremity</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="ville">🏙️ City</label>
+              <input
+                type="text"
+                id="ville"
+                name="ville"
+                value="Alger"
+                placeholder="Patient city"
+              />
+            </div>
+
+            <div class="form-group">
+              <label>🏥 Comorbidities</label>
+              <div class="checkbox-group">
+                <div class="checkbox-item">
+                  <input type="checkbox" id="diabete" name="diabete" />
+                  <label for="diabete">Diabetes</label>
+                </div>
+                <div class="checkbox-item">
+                  <input
+                    type="checkbox"
+                    id="hypertension"
+                    name="hypertension"
+                  />
+                  <label for="hypertension">Hypertension</label>
+                </div>
+                <div class="checkbox-item">
+                  <input
+                    type="checkbox"
+                    id="insuffisance_cardiaque"
+                    name="insuffisance_cardiaque"
+                  />
+                  <label for="insuffisance_cardiaque">Heart Disease</label>
+                </div>
+                <div class="checkbox-item">
+                  <input
+                    type="checkbox"
+                    id="insuffisance_renale"
+                    name="insuffisance_renale"
+                  />
+                  <label for="insuffisance_renale">Kidney Disease</label>
+                </div>
+              </div>
+            </div>
+
+            <button type="submit">🚀 Analyze Image (Full Pipeline)</button>
+
+            <button
+              type="button"
+              id="cnnOnlyBtn"
+              style="
+                background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+                margin-top: 10px;
+              "
+            >
+              ⚡ Quick Test (CNN Only)
+            </button>
+
+            <div class="loading" id="loading">
+              <div class="spinner"></div>
+              Processing... (this may take 3-5 seconds)
+            </div>
+
+            <div class="error-message" id="errorMessage"></div>
+            <div class="success-message" id="successMessage"></div>
+          </form>
+        </div>
+
+        <!-- RIGHT: Results Preview -->
+        <div class="card">
+          <h2>Quick Results</h2>
+          <div
+            id="quickResults"
+            style="color: #0a3f34; text-align: center; padding: 40px 20px"
+          >
+            <p style="font-size: 1.1em; color: #10b981">
+              Results will appear here...
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Full Results -->
+      <div id="resultsSection" style="display: none">
+        <h2 style="color: #0a3f34; margin-bottom: 20px; font-size: 1.8em">
+          📊 Full Analysis Results
+        </h2>
+
+        <div class="results-grid">
+          <!-- Module 1 Results -->
+          <div class="result-card">
+            <h3>🧠 Module 1: CNN Diagnosis</h3>
+            <div id="module1Results"></div>
+          </div>
+
+          <!-- Module 2 Results -->
+          <div class="result-card">
+            <h3>💊 Module 2: RAG Analysis</h3>
+            <div id="module2Results"></div>
+          </div>
+        </div>
+
+        <!-- Detailed RAG Analysis -->
+        <div class="card" style="margin-top: 30px">
+          <h3 style="color: #0a3f34; margin-bottom: 15px">
+            📖 Clinical Analysis
+          </h3>
+          <div id="clinicalAnalysis"></div>
+        </div>
+
+        <!-- Alerts -->
+        <div class="card" style="margin-top: 30px">
+          <h3 style="color: #0a3f34; margin-bottom: 15px">
+            ⚠️ Alerts & Warnings
+          </h3>
+          <div id="alertsAnalysis"></div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const API_BASE = "http://localhost:8001";
+
+      // ===== CNN ONLY QUICK TEST =====
+      document
+        .getElementById("cnnOnlyBtn")
+        .addEventListener("click", async () => {
+          const imageInput = document.getElementById("image");
+          if (!imageInput.files.length) {
+            document.getElementById("errorMessage").textContent =
+              "❌ Please select an image first";
+            document.getElementById("errorMessage").style.display = "block";
+            return;
+          }
+
+          const form = new FormData();
+          form.append("image", imageInput.files[0]);
+          form.append("age", document.getElementById("age").value || 25);
+          form.append("sexe", document.getElementById("sexe").value || "homme");
+          form.append(
+            "fitzpatrick",
+            document.getElementById("fitzpatrick").value || 3,
+          );
+          form.append(
+            "localisation",
+            document.getElementById("localisation").value || "unknown",
+          );
+          form.append(
+            "ville",
+            document.getElementById("ville").value || "Alger",
+          );
+
+          document.getElementById("loading").style.display = "block";
+          document.getElementById("errorMessage").style.display = "none";
+          document.getElementById("successMessage").style.display = "none";
+
+          try {
+            const response = await fetch(`${API_BASE}/ai/analyze-cnn`, {
+              method: "POST",
+              body: form,
+            });
+
+            if (!response.ok) {
+              const error = await response.json();
+              throw new Error(error.detail || "CNN analysis failed");
+            }
+
+            const data = await response.json();
+            console.log("CNN Result:", data);
+
+            // Display simple results
+            displayCNNResults(data);
+
+            document.getElementById("successMessage").textContent =
+              `✅ CNN Test Result: ${data.illness_name} (${data.confidence_pct}% confidence)`;
+            document.getElementById("successMessage").style.display = "block";
+          } catch (error) {
+            console.error("Error:", error);
+            document.getElementById("errorMessage").textContent =
+              `❌ Error: ${error.message}`;
+            document.getElementById("errorMessage").style.display = "block";
+          } finally {
+            document.getElementById("loading").style.display = "none";
+          }
+        });
+
+      // ===== FULL PIPELINE ANALYSIS =====
+      document
+        .getElementById("analyzeForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          const form = new FormData(e.target);
+
+          // Show loading
+          document.getElementById("loading").style.display = "block";
+          document.getElementById("errorMessage").style.display = "none";
+          document.getElementById("successMessage").style.display = "none";
+          document.getElementById("resultsSection").style.display = "none";
+
+          try {
+            // Convert checkboxes to form data
+            const checkboxes = [
+              "diabete",
+              "hypertension",
+              "insuffisance_cardiaque",
+              "insuffisance_renale",
+              "immunodepression",
+              "allergie_penicilline",
+            ];
+            checkboxes.forEach((cb) => {
+              const checkbox = document.getElementById(cb);
+              if (checkbox && checkbox.checked) {
+                form.append(cb, "true");
+              }
+            });
+
+            const response = await fetch(`${API_BASE}/ai/analyze`, {
+              method: "POST",
+              body: form,
+            });
+
+            if (!response.ok) {
+              const error = await response.json();
+              throw new Error(error.detail || "Analysis failed");
+            }
+
+            const data = await response.json();
+            console.log("Response:", data);
+
+            displayResults(data);
+
+            document.getElementById("successMessage").textContent =
+              "✅ Analysis completed successfully!";
+            document.getElementById("successMessage").style.display = "block";
+          } catch (error) {
+            console.error("Error:", error);
+            document.getElementById("errorMessage").textContent =
+              `❌ Error: ${error.message}`;
+            document.getElementById("errorMessage").style.display = "block";
+          } finally {
+            document.getElementById("loading").style.display = "none";
+          }
+        });
+
+      // ===== DISPLAY CNN RESULTS =====
+      function displayCNNResults(data) {
+        document.getElementById("resultsSection").style.display = "block";
+        document.getElementById("quickResults").innerHTML = `
+                <div style="text-align: center; padding: 20px;">
+                    <div style="font-size: 2em; color: #10b981; font-weight: bold; margin: 20px 0;">
+                        ${data.illness_name}
+                    </div>
+                    <div style="font-size: 1.5em; color: #0A3F34; margin: 10px 0;">
+                        Confidence: <span style="color: #f59e0b; font-weight: bold;">${data.confidence_pct}%</span>
+                    </div>
+                    <div style="font-size: 0.9em; color: #6b7280; margin-top: 15px;">
+                        Condition ID: ${data.condition_id}
+                    </div>
+                    ${
+                      data.top_alternatives && data.top_alternatives.length > 0
+                        ? `
+                        <div style="margin-top: 20px; text-align: left; background: #f3f4f6; padding: 15px; border-radius: 8px;">
+                            <strong>Top Alternatives:</strong>
+                            <ul style="margin-top: 10px; margin-left: 20px;">
+                                ${data.top_alternatives.map((alt) => `<li>${alt}</li>`).join("")}
+                            </ul>
+                        </div>
+                    `
+                        : ""
+                    }
+                </div>
+            `;
+      }
+
+      // ===== DISPLAY FULL RESULTS =====
+      function displayResults(data) {
+        const m1 = data.module1;
+        const rag = data.rag;
+
+        // Quick Results
+        document.getElementById("quickResults").innerHTML = `
+                <div style="text-align: left;">
+                    <div class="badge badge-success">Module 1: CNN Ready</div>
+                    <div class="result-value" style="color: #10b981;">${m1.condition_name}</div>
+                    <div class="result-text" style="font-size: 1.3em; color: #059669;">${m1.confidence_pct}% Confidence</div>
+                    <hr style="border: none; border-top: 2px solid #d1fae5; margin: 20px 0;">
+                    <div class="badge badge-success">Module 2: RAG Ready</div>
+                    <div class="result-text" style="font-size: 1.1em; color: #10b981;"><strong>${rag.urgence}</strong> Urgency</div>
+                    <div class="result-text" style="font-size: 0.95em;">Confidence: <strong>${rag.confidence_level}</strong></div>
+                </div>
+            `;
+
+        // Module 1 Results
+        const alt =
+          m1.top_alternatives.length > 0
+            ? `<div class="result-text"><strong>Alternatives:</strong>${m1.top_alternatives.map((a) => `<div style="margin-left: 10px;">• ${a.name} (${(a.confidence * 100).toFixed(1)}%)</div>`).join("")}</div>`
+            : "";
+
+        document.getElementById("module1Results").innerHTML = `
+                <div class="badge badge-success">Diagnosis</div>
+                <div class="result-value">${m1.condition_id}</div>
+                <div class="result-text"><strong>${m1.condition_name}</strong></div>
+                <div class="result-text">Confidence: <strong>${m1.confidence_pct}%</strong></div>
+                ${alt}
+            `;
+
+        // Module 2 Results
+        document.getElementById("module2Results").innerHTML = `
+                <div class="badge badge-success">Status</div>
+                <div class="result-text"><strong>Confidence Level:</strong> ${rag.confidence_level}</div>
+                <div class="result-text"><strong>Urgency:</strong> ${rag.urgence}</div>
+                <div class="result-text"><strong>Orientation:</strong> ${rag.orientation}</div>
+                ${
+                  rag.medicaments.length > 0
+                    ? `<div class="result-text"><strong>Recommended Medications:</strong>
+                    <ul class="result-list">
+                        ${rag.medicaments.map((m) => `<li>${m.nom || m}</li>`).join("")}
+                    </ul>
+                </div>`
+                    : ""
+                }
+                ${
+                  rag.questions.length > 0
+                    ? `<div class="result-text"><strong>Follow-up Questions:</strong>
+                    <ul class="result-list">
+                        ${rag.questions.map((q) => `<li>${q}</li>`).join("")}
+                    </ul>
+                </div>`
+                    : ""
+                }
+            `;
+
+        // Clinical Analysis
+        document.getElementById("clinicalAnalysis").innerHTML = `
+                <div class="result-text"><strong>Initial Analysis:</strong></div>
+                <div class="result-text" style="background: #f0fdf4; padding: 15px; border-radius: 8px; margin: 10px 0;">
+                    ${rag.analyse_initiale || "No initial analysis available"}
+                </div>
+                ${
+                  rag.analyse_affinee
+                    ? `
+                <div class="result-text" style="margin-top: 15px;"><strong>Detailed Analysis:</strong></div>
+                <div class="result-text" style="background: #f0fdf4; padding: 15px; border-radius: 8px; margin: 10px 0;">
+                    ${rag.analyse_affinee}
+                </div>
+                `
+                    : ""
+                }
+            `;
+
+        // Alerts
+        const alertsSummary = rag.alertes_summary;
+        document.getElementById("alertsAnalysis").innerHTML = `
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                    <div style="background: #fee2e2; padding: 15px; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 1.8em; color: #dc2626; font-weight: 900;">${alertsSummary.n_danger}</div>
+                        <div style="color: #991b1b; font-weight: 600;">Danger Alerts</div>
+                    </div>
+                    <div style="background: #fef3c7; padding: 15px; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 1.8em; color: #d97706; font-weight: 900;">${alertsSummary.n_warning}</div>
+                        <div style="color: #92400e; font-weight: 600;">Warnings</div>
+                    </div>
+                    <div style="background: #dbeafe; padding: 15px; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 1.8em; color: #2563eb; font-weight: 900;">${alertsSummary.n_questions}</div>
+                        <div style="color: #1e40af; font-weight: 600;">Questions</div>
+                    </div>
+                </div>
+                ${
+                  rag.alertes_patient.length > 0
+                    ? `
+                <div class="result-text"><strong>Patient Alerts:</strong>
+                    <ul class="result-list">
+                        ${rag.alertes_patient.map((a) => `<li>${a.message} <small>(${a.severite})</small></li>`).join("")}
+                    </ul>
+                </div>
+                `
+                    : '<div class="result-text">✅ No alerts detected</div>'
+                }
+            `;
+
+        document.getElementById("resultsSection").style.display = "block";
+        document.body.scrollIntoView({ behavior: "smooth" });
+      }
+    </script>
+  </body>
+</html>

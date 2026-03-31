@@ -328,11 +328,14 @@ export default function PatientDetailsPage() {
     return (
       <>
         <NavBar />
-        <div className="flex h-screen bg-[#F8F9FA]">
+        <div className="flex h-screen bg-slate-50">
           <Sidebar open={sidebarOpen} />
           <div className="flex-1 flex items-center justify-center">
-            <div className="animate-spin">
-              <div className="w-8 h-8 border-4 border-[#0F6E56] border-t-transparent rounded-full"></div>
+            <div className="flex flex-col items-center gap-3">
+              <div className="relative w-12 h-12">
+                <div className="absolute inset-0 border-4 border-slate-200 border-t-[#0F6E56] rounded-full animate-spin"></div>
+              </div>
+              <p className="text-slate-600 font-medium text-sm">Chargement en cours...</p>
             </div>
           </div>
         </div>
@@ -341,66 +344,88 @@ export default function PatientDetailsPage() {
   }
 
   return (
-    <div className="flex h-screen bg-[#F8F9FA]">
+    <div className="flex h-screen bg-gray-50">
       <Sidebar open={sidebarOpen} />
 
       <div className="flex-1 flex flex-col overflow-hidden min-w-0">
         <NavBar onMenuToggle={() => setSidebarOpen(!sidebarOpen)} />
 
         <div className="flex-1 overflow-auto">
-          <div className="p-8 space-y-6 max-w-7xl mx-auto">
+          <div className="p-8 space-y-6 max-w-7xl mx-auto pb-12">
             {/* Back Button */}
             <button
               onClick={() => navigate("/patients")}
-              className="flex items-center gap-2 text-[#0F6E56] hover:opacity-80 transition-all font-medium"
+              className="flex items-center gap-2 text-[#0F6E56] hover:text-[#0d5a47] transition-colors font-semibold text-sm mb-4"
             >
-              <ArrowLeft size={20} />
-              Back to Patients
+              <ArrowLeft size={18} />
+              Retour aux Patients
             </button>
 
             {/* Patient Info Card */}
             {patient && (
-              <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-100">
-                <div className="grid grid-cols-2 gap-6">
-                  <div>
-                    <h1 className="text-3xl font-bold text-gray-800 mb-1">
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 hover:shadow-md transition-shadow">
+                {/* Top Section */}
+                <div className="grid grid-cols-2 gap-8 mb-8">
+                  <div className="space-y-2">
+                    <h1 className="text-4xl font-bold text-gray-900">
                       {patient.user?.full_name || "Patient"}
                     </h1>
-                    <p className="text-gray-600">{patient.user?.email}</p>
+                    <p className="text-[#0F6E56] font-medium text-sm">
+                      {patient.user?.email}
+                    </p>
                   </div>
-                  <div className="text-right">
-                    <p className="text-sm text-gray-500 mb-1">Phone</p>
-                    <p className="text-lg font-semibold text-gray-800">
-                      {patient.phone || "N/A"}
-                    </p>
-                    <p className="text-sm text-gray-500 mt-2">
-                      City: {patient.city || "N/A"}
-                    </p>
+                  <div className="text-right space-y-4">
+                    <div className="inline-block ml-auto">
+                      <p className="text-xs text-gray-500 uppercase tracking-wider mb-1 font-semibold">
+                        Téléphone
+                      </p>
+                      <p className="text-2xl font-bold text-gray-900">
+                        {patient.phone || "—"}
+                      </p>
+                    </div>
+                    <div className="inline-block ml-auto">
+                      <p className="text-xs text-gray-500 uppercase tracking-wider mb-1 font-semibold">
+                        Ville
+                      </p>
+                      <p className="text-lg font-semibold text-gray-700">
+                        {patient.city || "—"}
+                      </p>
+                    </div>
                   </div>
                 </div>
-                <div className="mt-6 pt-6 border-t border-gray-200 grid grid-cols-3 gap-4">
-                  <div>
-                    <p className="text-xs text-gray-500 uppercase mb-1">
-                      Fitzpatrick Type
+
+                {/* Divider */}
+                <div className="h-px bg-gray-200 mb-8"></div>
+
+                {/* Info Grid */}
+                <div className="grid grid-cols-3 gap-6">
+                  <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                    <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-2">
+                      Type Fitzpatrick
                     </p>
-                    <p className="text-lg font-semibold text-gray-800">
+                    <p className="text-lg font-bold text-[#0F6E56]">
                       {patient.fitzpatrick_type?.replace("TYPE_", "Type ")}
                     </p>
                   </div>
-                  <div>
-                    <p className="text-xs text-gray-500 uppercase mb-1">
-                      Medical History
+
+                  <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                    <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-2">
+                      Antécédents Médicaux
                     </p>
-                    <p className="text-sm text-gray-700">
-                      {patient.medical_history || "None"}
+                    <p className="text-sm text-gray-700 font-medium">
+                      {patient.medical_history || "Aucun"}
                     </p>
                   </div>
-                  <div>
-                    <p className="text-xs text-gray-500 uppercase mb-1">
-                      Status
+
+                  <div className="bg-gray-50 rounded-lg p-4 border border-gray-200 flex flex-col justify-between">
+                    <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-2">
+                      Statut
                     </p>
-                    <span className="inline-block px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
-                      Active
+                    <span className="inline-flex items-center gap-2 w-fit">
+                      <span className="w-2.5 h-2.5 bg-[#0F6E56] rounded-full"></span>
+                      <span className="px-3 py-1 bg-[#0F6E56]/10 text-[#0F6E56] rounded-full text-xs font-semibold uppercase tracking-wider border border-[#0F6E56]/20">
+                        Actif
+                      </span>
                     </span>
                   </div>
                 </div>
@@ -411,23 +436,31 @@ export default function PatientDetailsPage() {
             <div className="grid grid-cols-3 gap-6">
               {/* Left: Upload Section */}
               <div className="col-span-2">
-                <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-100">
-                  <div className="mb-4">
-                    <h2 className="text-xl font-bold text-gray-800">
-                      Skin Image Analysis
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+                  {/* Header */}
+                  <div className="mb-6 flex items-center gap-3">
+                    <div className="w-10 h-10 bg-[#0F6E56] rounded-lg flex items-center justify-center">
+                      <Upload size={20} className="text-white" />
+                    </div>
+                    <h2 className="text-2xl font-bold text-gray-900">
+                      Analyse d'Images Dermato
                     </h2>
                   </div>
 
                   {!imagePreview ? (
-                    <label className="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed border-[#0F6E56] rounded-lg cursor-pointer hover:bg-gray-50 transition-all">
-                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                        <Upload size={48} className="text-[#0F6E56] mb-2" />
-                        <p className="text-sm text-gray-700">
-                          <span className="font-semibold">Click to upload</span>{" "}
-                          or drag and drop
+                    <label className="flex flex-col items-center justify-center w-full h-80 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:border-[#0F6E56] hover:bg-gray-50 transition-all group">
+                      <div className="flex flex-col items-center justify-center pt-8 pb-8">
+                        <div className="w-16 h-16 bg-[#0F6E56]/10 rounded-full flex items-center justify-center mb-4 group-hover:bg-[#0F6E56]/20 transition-colors">
+                          <Upload size={32} className="text-[#0F6E56]" />
+                        </div>
+                        <p className="text-sm text-gray-700 text-center">
+                          <span className="font-bold text-[#0F6E56]">
+                            Cliquez pour télécharger
+                          </span>{" "}
+                          ou glissez-déposez
                         </p>
-                        <p className="text-xs text-gray-500">
-                          PNG, JPG, GIF up to 10MB
+                        <p className="text-xs text-gray-500 mt-1">
+                          PNG, JPG, GIF jusqu'à 10MB
                         </p>
                       </div>
                       <input
@@ -439,19 +472,21 @@ export default function PatientDetailsPage() {
                     </label>
                   ) : (
                     <div className="space-y-4">
-                      <img
-                        src={imagePreview}
-                        alt="Skin image preview"
-                        className="w-full h-64 object-cover rounded-lg"
-                      />
+                      <div className="relative rounded-xl overflow-hidden shadow-sm">
+                        <img
+                          src={imagePreview}
+                          alt="Aperçu de l'image dermato"
+                          className="w-full h-80 object-cover"
+                        />
+                      </div>
                       <button
                         onClick={() => {
                           setImagePreview(null);
                           setShowAnalysis(false);
                         }}
-                        className="text-sm text-[#0F6E56] hover:underline"
+                        className="text-sm text-[#0F6E56] hover:text-[#0d5a47] font-semibold hover:underline transition-colors"
                       >
-                        Change Image
+                        Changer l'image
                       </button>
                     </div>
                   )}
@@ -459,24 +494,23 @@ export default function PatientDetailsPage() {
                   {imagePreview && analyzing && (
                     <button
                       disabled
-                      className="w-full mt-4 bg-[#0F6E56] text-white py-3 rounded-lg font-semibold opacity-50 flex items-center justify-center gap-2"
+                      className="w-full mt-6 bg-[#0F6E56] text-white py-3 rounded-lg font-bold uppercase tracking-wider opacity-70 flex items-center justify-center gap-2"
                     >
-                      <span className="animate-spin">◐</span>
-                      Analyzing...
+                      <span className="inline-block animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></span>
+                      Analyse en cours...
                     </button>
                   )}
 
                   {imagePreview && !analyzing && !showAnalysis && (
-                    <div className="space-y-2">
+                    <div className="space-y-3 mt-6">
                       <button
                         onClick={handleAnalyze}
-                        className="w-full mt-4 bg-[#0F6E56] text-white py-3 rounded-lg font-semibold hover:bg-[#0d5a47] transition-all flex items-center justify-center gap-2"
+                        className="w-full bg-[#0F6E56] text-white py-3 rounded-lg font-bold uppercase tracking-wider hover:bg-[#0d5a47] transition-colors"
                       >
-                        Start Analysis
+                        Démarrer l'Analyse
                       </button>
                       <p className="text-xs text-gray-500 text-center">
-                        Runs Module 1 and saves illness + confidence in
-                        skin_images.
+                        Lance le Module 1 CNN et enregistre les résultats
                       </p>
                     </div>
                   )}
@@ -484,347 +518,399 @@ export default function PatientDetailsPage() {
                   {imagePreview && showAnalysis && (
                     <button
                       onClick={() => setShowAnalysis(false)}
-                      className="w-full mt-4 bg-gray-500 text-white py-3 rounded-lg font-semibold hover:bg-gray-600 transition-all"
+                      className="w-full mt-6 bg-gray-300 text-gray-700 hover:bg-gray-400 py-3 rounded-lg font-semibold uppercase tracking-wider transition-colors"
                     >
-                      Hide Analysis
+                      Masquer les résultats
                     </button>
                   )}
                 </div>
               </div>
             </div>
 
-            {/* Module 1 Results */}
+            {/* Module 1 Results - Enhanced */}
             {showAnalysis && analysisResults && (
-              <div className="space-y-6">
-                <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-100">
-                  <p className="text-xs text-gray-500 uppercase mb-2 font-semibold">
-                    Illness Name
-                  </p>
-                  <p className="text-2xl font-black text-gray-800">
-                    {displayedIllness}
-                  </p>
+              <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                {/* Illness Name - Cards with gradient */}
+                <div className="grid grid-cols-2 gap-6">
+                  <div className="bg-gradient-to-br from-[#0F6E56] via-emerald-500 to-teal-500 rounded-2xl shadow-xl p-8 text-white transform hover:scale-105 transition-transform duration-300">
+                    <p className="text-xs uppercase tracking-widest font-bold opacity-90 mb-3">
+                      🦠 Diagnostic
+                    </p>
+                    <p className="text-4xl font-black leading-tight mb-4 drop-shadow-lg">
+                      {displayedIllness}
+                    </p>
+                    <div className="h-1 w-20 bg-white/40 rounded-full"></div>
+                  </div>
+
+                  {/* Confidence Score - Radial */}
+                  <div className="bg-white rounded-2xl shadow-xl p-8 border border-emerald-100">
+                    <p className="text-xs text-gray-500 uppercase tracking-widest font-bold mb-4">
+                      📊 Score de Confiance
+                    </p>
+                    <div className="flex items-center justify-between gap-6">
+                      <div className="flex-1">
+                        <span className="text-5xl font-black bg-gradient-to-r from-[#0F6E56] to-emerald-500 bg-clip-text text-transparent">
+                          {displayedConfidence}%
+                        </span>
+                        <div className="w-full h-2 bg-gradient-to-r from-red-300 via-yellow-300 to-green-300 rounded-full mt-4 overflow-hidden shadow-sm">
+                          <div
+                            className="h-full bg-gradient-to-r from-red-500 via-yellow-500 to-green-500 shadow-lg"
+                            style={{
+                              width: `${displayedConfidence}%`,
+                            }}
+                          ></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
-                <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-100">
-                  <p className="text-xs text-gray-500 uppercase mb-2 font-semibold">
-                    Confidence Score
-                  </p>
-                  <div className="mb-2">
-                    <span className="text-3xl font-black text-[#0F6E56]">
-                      {displayedConfidence}%
+                {/* Top Alternatives */}
+                <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
+                  <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+                    <span className="w-8 h-8 bg-gradient-to-br from-orange-100 to-amber-100 rounded-lg flex items-center justify-center text-lg">
+                      🔍
                     </span>
-                  </div>
-                  <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-gradient-to-r from-red-500 via-yellow-500 to-green-500 transition-all"
-                      style={{
-                        width: `${displayedConfidence}%`,
-                      }}
-                    ></div>
-                  </div>
-                </div>
-
-                <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-100">
-                  <h3 className="text-lg font-bold text-gray-800 mb-3">
-                    Top Alternatives
+                    Diagnostics Alternatifs
                   </h3>
 
                   {analysisResults.top_alternatives?.length > 0 ? (
-                    <ul className="space-y-2 text-sm text-gray-700">
+                    <div className="space-y-3">
                       {analysisResults.top_alternatives.map((item, idx) => (
-                        <li key={idx}>
-                          •{" "}
-                          {typeof item === "string"
-                            ? item
-                            : item.name ||
-                              item.condition_name ||
-                              item.condition_id ||
-                              item.id ||
-                              "Unknown"}
-                          {typeof item === "object" && item.confidence != null
-                            ? ` (${Math.round(item.confidence * 100)}%)`
-                            : ""}
-                        </li>
+                        <div
+                          key={idx}
+                          className="group flex items-center gap-4 p-4 bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl border border-amber-200/50 hover:border-orange-300 hover:shadow-md transition-all"
+                        >
+                          <div className="w-8 h-8 bg-gradient-to-br from-orange-400 to-amber-500 text-white rounded-full flex items-center justify-center font-bold text-sm group-hover:scale-110 transition-transform">
+                            {idx + 1}
+                          </div>
+                          <div className="flex-1">
+                            <p className="font-semibold text-gray-800">
+                              {typeof item === "string"
+                                ? item
+                                : item.name ||
+                                  item.condition_name ||
+                                  item.condition_id ||
+                                  item.id ||
+                                  "Inconnu"}
+                            </p>
+                          </div>
+                          {typeof item === "object" && item.confidence != null && (
+                            <span className="text-xs font-bold px-3 py-1.5 bg-white rounded-full text-orange-600 border border-orange-200">
+                              {Math.round(item.confidence * 100)}%
+                            </span>
+                          )}
+                        </div>
                       ))}
-                    </ul>
+                    </div>
                   ) : (
-                    <p className="text-sm text-gray-500">
-                      No alternatives available.
+                    <p className="text-sm text-gray-500 text-center py-6 italic">
+                      Aucune alternative disponible.
                     </p>
                   )}
                 </div>
 
-                <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-100">
+                {/* Advanced Analysis Button */}
+                <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
                   <button
                     onClick={handleAdvancedAnalysis}
                     disabled={advancedAnalyzing}
-                    className="w-full bg-[#0F6E56] text-white py-3 rounded-lg font-semibold hover:bg-[#0d5a47] transition-all disabled:opacity-50"
+                    className="w-full bg-gradient-to-r from-[#0F6E56] to-emerald-500 text-white py-4 rounded-xl font-bold uppercase tracking-wider text-lg hover:shadow-2xl hover:shadow-emerald-500/30 hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 transition-all duration-200 flex items-center justify-center gap-3"
                   >
+                    <span className="text-xl">🏥</span>
                     {advancedAnalyzing
-                      ? "Running Advanced Analysis..."
-                      : "Advances Analysis"}
+                      ? "Analyse Avancée en cours..."
+                      : "Lancer l'Analyse Avancée (Module 2 - RAG)"}
                   </button>
                 </div>
 
                 {advancedResults && (
-                  <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-100 space-y-3">
-                    <h3 className="text-lg font-bold text-gray-800">
-                      Advanced Analysis (RAG)
-                    </h3>
-                    <p className="text-sm text-gray-700">
-                      <span className="font-semibold">Urgency:</span>{" "}
-                      {toDisplayText(advancedResults.urgence)}
-                    </p>
-                    <p className="text-sm text-gray-700">
-                      <span className="font-semibold">Confidence Level:</span>{" "}
-                      {toDisplayText(advancedResults.confidence_level)}
-                    </p>
-                    <p className="text-sm text-gray-700">
-                      <span className="font-semibold">Orientation:</span>{" "}
-                      {toDisplayText(advancedResults.orientation)}
-                    </p>
+                  <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    {/* Advanced Analysis Summary */}
+                    <div className="bg-gradient-to-br from-white via-emerald-50 to-white rounded-2xl shadow-xl border border-emerald-100 p-8 space-y-6">
+                      <h3 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
+                        <span className="w-8 h-8 bg-gradient-to-br from-emerald-100 to-teal-100 rounded-lg flex items-center justify-center">
+                          🏥
+                        </span>
+                        Analyse Avancée - Résultats RAG
+                      </h3>
 
-                    {advancedResults.analyse_initiale && (
-                      <div>
-                        <p className="text-xs text-gray-500 uppercase mb-1 font-semibold">
-                          Initial Clinical Analysis
-                        </p>
-                        <p className="text-sm text-gray-700 leading-relaxed">
-                          {toDisplayText(advancedResults.analyse_initiale)}
-                        </p>
-                      </div>
-                    )}
-
-                    {clinicalQuestions.length > 0 && (
-                      <div>
-                        <div className="rounded-xl border border-[#0F6E56]/20 bg-[#F5FBF8] overflow-hidden">
-                          <div className="px-4 py-3 border-b border-[#0F6E56]/15 bg-white flex items-center justify-between gap-3">
-                            <p className="text-[11px] tracking-[0.22em] uppercase font-semibold text-[#0F6E56]">
-                              Questions Cliniques
+                      {/* Key Metrics Grid */}
+                      <div className="grid grid-cols-3 gap-4">
+                        {[
+                          {
+                            label: "⚠️ Urgence",
+                            value: advancedResults.urgence,
+                          },
+                          {
+                            label: "🎯 Confiance",
+                            value: advancedResults.confidence_level,
+                          },
+                          {
+                            label: "🧭 Orientation",
+                            value: advancedResults.orientation,
+                          },
+                        ].map((metric, idx) => (
+                          <div
+                            key={idx}
+                            className="bg-white rounded-xl p-4 border border-emerald-100/50 hover:shadow-md transition-all"
+                          >
+                            <p className="text-xs text-gray-500 uppercase tracking-widest font-bold mb-2">
+                              {metric.label}
                             </p>
-                            <p className="text-[11px] tracking-[0.2em] uppercase text-[#0F6E56]/70">
-                              {clinicalQuestions.length} questions - niveau{" "}
+                            <p className="text-lg font-bold text-[#0F6E56]">
+                              {toDisplayText(metric.value)}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Initial Analysis */}
+                      {advancedResults.analyse_initiale && (
+                        <div className="bg-gradient-to-br from-blue-50 to-cyan-50 border border-blue-200/50 rounded-xl p-6">
+                          <p className="text-xs text-blue-600 uppercase tracking-widest font-bold mb-3">
+                            📋 Analyse Clinique Initiale
+                          </p>
+                          <p className="text-sm text-gray-700 leading-relaxed text-justify">
+                            {toDisplayText(advancedResults.analyse_initiale)}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Clinical Questions Section */}
+                    {clinicalQuestions.length > 0 && (
+                      <div className="rounded-2xl border border-[#0F6E56]/20 bg-gradient-to-br from-white via-emerald-50 to-white overflow-hidden shadow-lg">
+                        <div className="px-8 py-5 border-b border-[#0F6E56]/10 bg-gradient-to-r from-[#0F6E56] to-emerald-500">
+                          <div className="flex items-center justify-between gap-3">
+                            <p className="text-xs tracking-widest uppercase font-bold text-white flex items-center gap-2">
+                              <span>❓</span> Questions Cliniques
+                            </p>
+                            <p className="text-xs tracking-widest uppercase font-semibold text-white/80">
+                              {clinicalQuestions.length} questions • Niveau{" "}
                               {toDisplayText(
                                 advancedResults.confidence_level,
                                 "N/A",
                               )}
                             </p>
                           </div>
+                        </div>
 
-                          <div className="p-4 space-y-3">
-                            {clinicalQuestions.map((question, questionIdx) => (
-                              <div
-                                key={questionIdx}
-                                className="rounded-xl border border-[#0F6E56]/20 bg-white p-4 shadow-sm"
-                              >
-                                <p className="text-[24px] leading-none font-bold text-[#0F6E56] mb-1">
-                                  {questionIdx + 1}.
-                                </p>
-                                <p className="text-lg font-semibold text-gray-800 leading-snug">
-                                  {question.text}
-                                </p>
+                        <div className="p-6 space-y-5">
+                          {clinicalQuestions.map((question, questionIdx) => (
+                            <div
+                              key={questionIdx}
+                              className="rounded-xl border border-[#0F6E56]/15 bg-white p-5 hover:shadow-md hover:border-[#0F6E56]/30 transition-all group"
+                            >
+                              <div className="flex gap-4">
+                                <span className="inline-flex items-center justify-center w-8 h-8 bg-gradient-to-br from-[#0F6E56] to-emerald-500 text-white font-bold rounded-lg text-sm flex-shrink-0 group-hover:scale-110 transition-transform">
+                                  {questionIdx + 1}
+                                </span>
+                                <div className="flex-1 space-y-3">
+                                  <p className="font-semibold text-gray-800">
+                                    {question.text}
+                                  </p>
 
-                                {question.options.length > 0 && (
-                                  <div className="mt-3 flex flex-wrap gap-2">
-                                    {question.options.map(
-                                      (option, optionIdx) => {
-                                        const isSelected =
-                                          selectedQuestionOptions[
-                                            questionIdx
-                                          ] === optionIdx;
+                                  {question.options.length > 0 && (
+                                    <div className="flex flex-wrap gap-2">
+                                      {question.options.map(
+                                        (option, optionIdx) => {
+                                          const isSelected =
+                                            selectedQuestionOptions[
+                                              questionIdx
+                                            ] === optionIdx;
 
-                                        return (
-                                          <button
-                                            key={`${questionIdx}-${optionIdx}`}
-                                            type="button"
-                                            onClick={() =>
-                                              setSelectedQuestionOptions(
-                                                (prev) => ({
-                                                  ...prev,
-                                                  [questionIdx]: optionIdx,
-                                                }),
-                                              )
-                                            }
-                                            className={`px-4 py-1.5 rounded-full border text-sm transition-all ${
-                                              isSelected
-                                                ? "border-[#0F6E56] bg-[#0F6E56] text-white shadow-md"
-                                                : "border-[#0F6E56]/35 bg-[#F2FBF8] text-[#0F6E56] hover:border-[#0F6E56] hover:bg-[#E7F6F0]"
-                                            }`}
-                                          >
-                                            {option}
-                                          </button>
-                                        );
-                                      },
-                                    )}
-                                  </div>
-                                )}
+                                          return (
+                                            <button
+                                              key={`${questionIdx}-${optionIdx}`}
+                                              type="button"
+                                              onClick={() =>
+                                                setSelectedQuestionOptions(
+                                                  (prev) => ({
+                                                    ...prev,
+                                                    [questionIdx]: optionIdx,
+                                                  }),
+                                                )
+                                              }
+                                              className={`px-4 py-2 rounded-full font-medium text-sm transition-all transform hover:scale-105 border-2 ${
+                                                isSelected
+                                                  ? "border-[#0F6E56] bg-gradient-to-r from-[#0F6E56] to-emerald-500 text-white shadow-lg shadow-emerald-500/30"
+                                                  : "border-[#0F6E56]/30 bg-white text-[#0F6E56] hover:border-[#0F6E56] hover:bg-emerald-50"
+                                              }`}
+                                            >
+                                              {option}
+                                            </button>
+                                          );
+                                        },
+                                      )}
+                                    </div>
+                                  )}
+                                </div>
                               </div>
-                            ))}
-                          </div>
+                            </div>
+                          ))}
                         </div>
                       </div>
                     )}
 
-                    <div>
-                      <div className="rounded-xl border border-[#0F6E56]/20 bg-[#F5FBF8] overflow-hidden">
-                        <div className="px-4 py-3 border-b border-[#0F6E56]/15 bg-white flex items-center justify-between gap-3">
-                          <p className="text-[11px] tracking-[0.22em] uppercase font-semibold text-[#0F6E56]">
-                            Traitements Proposés
+                    {/* Treatments Section */}
+                    <div className="rounded-2xl border border-[#0F6E56]/20 bg-white overflow-hidden shadow-lg">
+                      <div className="px-8 py-5 border-b border-[#0F6E56]/10 bg-gradient-to-r from-[#0F6E56] to-emerald-500">
+                        <div className="flex items-center justify-between gap-3">
+                          <p className="text-xs tracking-widest uppercase font-bold text-white flex items-center gap-2">
+                            <span>💊</span> Traitements Proposés
                           </p>
-                          <p className="text-[11px] tracking-[0.2em] uppercase text-[#0F6E56]/70">
+                          <p className="text-xs tracking-widest uppercase font-semibold text-white/80">
                             {selectedTreatmentCount}/{allTreatmentRows.length}{" "}
                             sélectionné
                             {allTreatmentRows.length > 1 ? "s" : ""}
                           </p>
                         </div>
+                      </div>
 
-                        <div className="overflow-x-auto">
-                          <table className="min-w-full text-sm">
-                            <thead className="bg-white">
-                              <tr className="text-left text-[11px] tracking-[0.15em] uppercase text-[#0F6E56]/80">
-                                <th className="px-4 py-3 font-semibold">
-                                  Choix
-                                </th>
-                                <th className="px-4 py-3 font-semibold">
-                                  Médicament
-                                </th>
-                                <th className="px-4 py-3 font-semibold">
-                                  Classe
-                                </th>
-                                <th className="px-4 py-3 font-semibold">
-                                  Indication
-                                </th>
-                                <th className="px-4 py-3 font-semibold">
-                                  Posologie
-                                </th>
+                      <div className="overflow-x-auto">
+                        <table className="min-w-full text-sm">
+                          <thead className="bg-gray-50 border-b border-gray-200">
+                            <tr className="text-left text-xs tracking-widest uppercase font-bold text-[#0F6E56]/70">
+                              <th className="px-6 py-4">Sélection</th>
+                              <th className="px-6 py-4">Médicament</th>
+                              <th className="px-6 py-4">Classe</th>
+                              <th className="px-6 py-4">Indication</th>
+                              <th className="px-6 py-4">Posologie</th>
+                            </tr>
+                          </thead>
+
+                          <tbody className="divide-y divide-gray-100">
+                            {allTreatmentRows.length === 0 && (
+                              <tr className="bg-gray-50 hover:bg-gray-100">
+                                <td
+                                  colSpan={5}
+                                  className="px-6 py-6 text-center text-sm text-gray-500 italic"
+                                >
+                                  Aucun traitement proposé pour le moment.
+                                </td>
                               </tr>
-                            </thead>
+                            )}
 
-                            <tbody className="divide-y divide-[#0F6E56]/10">
-                              {allTreatmentRows.length === 0 && (
-                                <tr className="bg-[#F9FDFC]">
-                                  <td
-                                    colSpan={5}
-                                    className="px-4 py-3 text-sm text-gray-600"
-                                  >
-                                    Aucun traitement proposé pour le moment.
-                                  </td>
-                                </tr>
-                              )}
+                            {allTreatmentRows.map((treatment, idx) => {
+                              const treatmentKey = `${treatment.id}-${idx}`;
+                              const isChecked =
+                                !!selectedTreatments[treatmentKey];
 
-                              {allTreatmentRows.map((treatment, idx) => {
-                                const treatmentKey = `${treatment.id}-${idx}`;
-                                const isChecked =
-                                  !!selectedTreatments[treatmentKey];
-
-                                return (
-                                  <tr
-                                    key={treatmentKey}
-                                    className="bg-[#F9FDFC]"
-                                  >
-                                    <td className="px-4 py-3 align-top">
-                                      <input
-                                        type="checkbox"
-                                        checked={isChecked}
-                                        onChange={() =>
-                                          setSelectedTreatments((prev) => ({
-                                            ...prev,
-                                            [treatmentKey]: !prev[treatmentKey],
-                                          }))
-                                        }
-                                        className="h-4 w-4 accent-[#0F6E56] cursor-pointer"
-                                      />
-                                    </td>
-                                    <td className="px-4 py-3 align-top text-gray-800 font-semibold whitespace-nowrap">
-                                      {treatment.nom}
-                                    </td>
-                                    <td className="px-4 py-3 align-top text-gray-700">
-                                      {treatment.classe}
-                                    </td>
-                                    <td className="px-4 py-3 align-top text-gray-700">
-                                      {treatment.indication}
-                                    </td>
-                                    <td className="px-4 py-3 align-top text-gray-700">
-                                      {treatment.posologie}
-                                    </td>
-                                  </tr>
-                                );
-                              })}
-
-                              <tr className="bg-white border-t border-[#0F6E56]/20">
-                                <td className="px-4 py-3 align-top text-xs font-semibold uppercase tracking-[0.1em] text-[#0F6E56]/70">
-                                  Nouveau
-                                </td>
-                                <td className="px-4 py-3 align-top">
-                                  <input
-                                    type="text"
-                                    value={newTreatmentDraft.nom}
-                                    onChange={(e) =>
-                                      setNewTreatmentDraft((prev) => ({
-                                        ...prev,
-                                        nom: e.target.value,
-                                      }))
-                                    }
-                                    placeholder="Médicament"
-                                    className="w-full px-3 py-2 rounded-lg border border-[#0F6E56]/25 text-sm focus:outline-none focus:ring-2 focus:ring-[#0F6E56]/25"
-                                  />
-                                </td>
-                                <td className="px-4 py-3 align-top">
-                                  <input
-                                    type="text"
-                                    value={newTreatmentDraft.classe}
-                                    onChange={(e) =>
-                                      setNewTreatmentDraft((prev) => ({
-                                        ...prev,
-                                        classe: e.target.value,
-                                      }))
-                                    }
-                                    placeholder="Classe"
-                                    className="w-full px-3 py-2 rounded-lg border border-[#0F6E56]/25 text-sm focus:outline-none focus:ring-2 focus:ring-[#0F6E56]/25"
-                                  />
-                                </td>
-                                <td className="px-4 py-3 align-top">
-                                  <input
-                                    type="text"
-                                    value={newTreatmentDraft.indication}
-                                    onChange={(e) =>
-                                      setNewTreatmentDraft((prev) => ({
-                                        ...prev,
-                                        indication: e.target.value,
-                                      }))
-                                    }
-                                    placeholder="Indication"
-                                    className="w-full px-3 py-2 rounded-lg border border-[#0F6E56]/25 text-sm focus:outline-none focus:ring-2 focus:ring-[#0F6E56]/25"
-                                  />
-                                </td>
-                                <td className="px-4 py-3 align-top">
-                                  <div className="flex gap-2">
+                              return (
+                                <tr
+                                  key={treatmentKey}
+                                  className={`transition-all ${
+                                    isChecked
+                                      ? "bg-emerald-50 hover:bg-emerald-100"
+                                      : "bg-white hover:bg-gray-50"
+                                  }`}
+                                >
+                                  <td className="px-6 py-4 align-top">
                                     <input
-                                      type="text"
-                                      value={newTreatmentDraft.posologie}
-                                      onChange={(e) =>
-                                        setNewTreatmentDraft((prev) => ({
+                                      type="checkbox"
+                                      checked={isChecked}
+                                      onChange={() =>
+                                        setSelectedTreatments((prev) => ({
                                           ...prev,
-                                          posologie: e.target.value,
+                                          [treatmentKey]: !prev[treatmentKey],
                                         }))
                                       }
-                                      placeholder="Posologie"
-                                      className="flex-1 px-3 py-2 rounded-lg border border-[#0F6E56]/25 text-sm focus:outline-none focus:ring-2 focus:ring-[#0F6E56]/25"
+                                      className="w-5 h-5 accent-[#0F6E56] cursor-pointer rounded transition-transform hover:scale-110"
                                     />
-                                    <button
-                                      type="button"
-                                      onClick={handleAddCustomTreatment}
-                                      disabled={!newTreatmentDraft.nom.trim()}
-                                      className="px-4 py-2 rounded-lg bg-[#0F6E56] text-white text-sm font-semibold hover:bg-[#0d5a47] disabled:opacity-50 disabled:cursor-not-allowed"
-                                    >
-                                      Ajouter
-                                    </button>
-                                  </div>
-                                </td>
-                              </tr>
-                            </tbody>
-                          </table>
-                        </div>
+                                  </td>
+                                  <td className="px-6 py-4 align-top text-gray-800 font-semibold">
+                                    {treatment.nom}
+                                  </td>
+                                  <td className="px-6 py-4 align-top text-gray-600">
+                                    {treatment.classe}
+                                  </td>
+                                  <td className="px-6 py-4 align-top text-gray-600">
+                                    {treatment.indication}
+                                  </td>
+                                  <td className="px-6 py-4 align-top text-gray-600">
+                                    {treatment.posologie}
+                                  </td>
+                                </tr>
+                              );
+                            })}
+
+                            {/* New Treatment Row */}
+                            <tr className="bg-gradient-to-r from-emerald-50 to-transparent border-t-2 border-[#0F6E56]/20">
+                              <td className="px-6 py-4 align-top">
+                                <p className="text-xs font-bold uppercase tracking-widest text-[#0F6E56]/60">
+                                  + Nouveau
+                                </p>
+                              </td>
+                              <td className="px-6 py-4 align-top">
+                                <input
+                                  type="text"
+                                  value={newTreatmentDraft.nom}
+                                  onChange={(e) =>
+                                    setNewTreatmentDraft((prev) => ({
+                                      ...prev,
+                                      nom: e.target.value,
+                                    }))
+                                  }
+                                  placeholder="Nom du médicament"
+                                  className="w-full px-3 py-2.5 rounded-lg border border-[#0F6E56]/25 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#0F6E56]/40 focus:border-transparent transition-all placeholder:text-gray-400"
+                                />
+                              </td>
+                              <td className="px-6 py-4 align-top">
+                                <input
+                                  type="text"
+                                  value={newTreatmentDraft.classe}
+                                  onChange={(e) =>
+                                    setNewTreatmentDraft((prev) => ({
+                                      ...prev,
+                                      classe: e.target.value,
+                                    }))
+                                  }
+                                  placeholder="Classe"
+                                  className="w-full px-3 py-2.5 rounded-lg border border-[#0F6E56]/25 text-sm focus:outline-none focus:ring-2 focus:ring-[#0F6E56]/40 focus:border-transparent transition-all placeholder:text-gray-400"
+                                />
+                              </td>
+                              <td className="px-6 py-4 align-top">
+                                <input
+                                  type="text"
+                                  value={newTreatmentDraft.indication}
+                                  onChange={(e) =>
+                                    setNewTreatmentDraft((prev) => ({
+                                      ...prev,
+                                      indication: e.target.value,
+                                    }))
+                                  }
+                                  placeholder="Indication"
+                                  className="w-full px-3 py-2.5 rounded-lg border border-[#0F6E56]/25 text-sm focus:outline-none focus:ring-2 focus:ring-[#0F6E56]/40 focus:border-transparent transition-all placeholder:text-gray-400"
+                                />
+                              </td>
+                              <td className="px-6 py-4 align-top">
+                                <div className="flex gap-2">
+                                  <input
+                                    type="text"
+                                    value={newTreatmentDraft.posologie}
+                                    onChange={(e) =>
+                                      setNewTreatmentDraft((prev) => ({
+                                        ...prev,
+                                        posologie: e.target.value,
+                                      }))
+                                    }
+                                    placeholder="Posologie"
+                                    className="flex-1 px-3 py-2.5 rounded-lg border border-[#0F6E56]/25 text-sm focus:outline-none focus:ring-2 focus:ring-[#0F6E56]/40 focus:border-transparent transition-all placeholder:text-gray-400"
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={handleAddCustomTreatment}
+                                    disabled={!newTreatmentDraft.nom.trim()}
+                                    className="px-5 py-2.5 rounded-lg bg-gradient-to-r from-[#0F6E56] to-emerald-500 text-white text-sm font-bold uppercase tracking-wider hover:shadow-lg hover:-translate-y-0.5 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0 transition-all whitespace-nowrap"
+                                  >
+                                    + Ajouter
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
                       </div>
                     </div>
                   </div>
