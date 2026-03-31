@@ -14,8 +14,9 @@ from app.models.ai_result import AIResult
 from app.models.patient_advice import PatientAdvice
 from app.models.checkin import CheckIn
 from app.models.rag_analysis import AIAnalysis, ClinicalQuestion, Treatment, Alert, KnowledgeChunk
+from app.models.chat_message import ChatMessage
 
-from app.api import auth, patients, consultations, images, ai, advice, checkins, skin_images, analysis
+from app.api import auth, patients, consultations, images, ai, advice, checkins, skin_images, analysis, chat
 
 # Initialiser l'application FastAPI
 app = FastAPI(
@@ -64,6 +65,7 @@ app.include_router(advice.router)
 app.include_router(checkins.router)
 app.include_router(skin_images.router)
 app.include_router(analysis.router)
+app.include_router(chat.router)
 
 # Health check endpoint
 @app.get("/health")
