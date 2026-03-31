@@ -16,6 +16,7 @@ export default function ConsultationPage() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [consultationData, setConsultationData] = useState(null);
   const [aiResults, setAiResults] = useState(null);
+  const [skinImage, setSkinImage] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -42,6 +43,17 @@ export default function ConsultationPage() {
           id: consultationId,
           date: aiResultsResponse.data.generated_at,
         });
+
+        // Fetch skin image for this consultation
+        try {
+          const skinImageResponse = await ai.getSkinImage(
+            patientId,
+            consultationNumber
+          );
+          setSkinImage(skinImageResponse.data);
+        } catch (imgError) {
+          console.log("No skin image found for this consultation:", imgError);
+        }
       } catch (error) {
         console.error("Error loading consultation:", error);
         const errorMsg =
@@ -138,6 +150,38 @@ export default function ConsultationPage() {
                     </div>
                   </div>
                 </div>
+
+                {/* Skin Image Section */}
+                {skinImage && (
+                  <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+                    <h2 className="text-lg font-bold text-gray-900 mb-4">
+                      Photo de la Peau
+                    </h2>
+                    <div className="flex flex-col items-center">
+                      {skinImage.image_data ? (
+                        <img
+                          src={skinImage.image_data}
+                          alt="Skin Image"
+                          className="max-w-2xl max-h-96 object-cover rounded-lg border border-gray-300"
+                        />
+                      ) : skinImage.image_url ? (
+                        <img
+                          src={skinImage.image_url}
+                          alt="Skin Image"
+                          className="max-w-2xl max-h-96 object-cover rounded-lg border border-gray-300"
+                        />
+                      ) : (
+                        <p className="text-gray-600">Aucune image disponible</p>
+                      )}
+                      <div className="mt-4 flex items-center gap-2 text-xs text-gray-600">
+                        <span>Source: <strong>{skinImage.source === "doctor" ? "Médecin" : "Patient"}</strong></span>
+                        {skinImage.uploaded_at && (
+                          <span>• Uploadée le: <strong>{new Date(skinImage.uploaded_at).toLocaleDateString("fr-FR")}</strong></span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {aiResults && (
                   <div className="space-y-6">

@@ -76,6 +76,10 @@ export const ai = {
     apiClient.get(
       `/patients/${patientId}/consultations/${consultationId}/ai-results`
     ),
+  getSkinImage: (patientId, consultationId) =>
+    apiClient.get(
+      `/patients/${patientId}/consultations/${consultationId}/skin-image`
+    ),
   getPatientHistory: (patientId) =>
     apiClient.get(`/patients/${patientId}/ai-results-history`),
   getEnvSnapshot: (city) =>

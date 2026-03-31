@@ -740,3 +740,76 @@ def get_patient_ai_results(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to retrieve AI results history: {str(e)}"
         )
+
+
+@router.get("/{patient_id}/consultations/{consultation_id}/skin-image")
+def get_consultation_skin_image(
+    patient_id: str,
+    consultation_id: int,
+    db: Session = Depends(get_db)
+):
+    """Récupérer la photo du skin pour une consultation."""
+    try:
+        # Get AI result for this consultation to find skin_image_id
+        ai_result = db.query(AIResult).filter(
+            AIResult.consultation_id == consultation_id,
+            AIResult.patient_id == patient_id
+        ).first()
+        
+        if not ai_result:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="AI results not found for this consultation"
+            )
+        
+        if not ai_result.skin_image_id:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="No skin image found for this consultation"
+            )
+        
+        # Get the skin image
+        skin_image = db.query(SkinImage).filter(
+            SkinImage.id == ai_result.skin_image_id
+        ).first()
+        
+        if not skin_image:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Skin image not found"
+            )
+        
+        # Return image data or URL
+        if skin_image.image_data:
+            # If image is stored as binary data
+            import base64
+            encoded_image = base64.b64encode(skin_image.image_data).decode('utf-8')
+            return {
+                "image_data": f"data:image/jpeg;base64,{encoded_image}",
+                "source": skin_image.source,
+                "uploaded_at": skin_image.uploaded_at.isoformat() if skin_image.uploaded_at else None
+            }
+        elif skin_image.minio_url:
+            # If image is stored via MinIO (URL)
+            return {
+                "image_url": skin_image.minio_url,
+                "source": skin_image.source,
+                "uploaded_at": skin_image.uploaded_at.isoformat() if skin_image.uploaded_at else None
+            }
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="No image data or URL found"
+            )
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        import traceback
+        print(f"Error retrieving skin image: {e}")
+        print(traceback.format_exc())
+        
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to retrieve skin image: {str(e)}"
+        )
