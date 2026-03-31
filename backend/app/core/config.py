@@ -1,5 +1,7 @@
 from pydantic_settings import BaseSettings
 from typing import Optional
+from pathlib import Path
+import os
 
 
 class Settings(BaseSettings):
@@ -15,6 +17,7 @@ class Settings(BaseSettings):
 
     # Database
     DATABASE_URL: str = "postgresql://user:password@localhost:5432/dermassist_db"
+    DIRECT_URL: Optional[str] = None  # For migrations (Prisma/Supabase)
     
     # Redis
     REDIS_URL: str = "redis://localhost:6379/0"
@@ -46,6 +49,7 @@ class Settings(BaseSettings):
 
     class Config:
         env_file = ".env"
+        env_file_encoding = "utf-8"  # Explicitly use UTF-8 encoding
         case_sensitive = True
 
 

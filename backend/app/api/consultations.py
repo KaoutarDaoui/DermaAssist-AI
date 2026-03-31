@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 from app.db.database import get_db
+from app.models.consultation import Consultation
 from app.core.security import get_current_user, get_doctor_role
 from app.schemas.consultation import ConsultationResponse, ConsultationCreate, ConsultationUpdate, ConsultationDetail
 from app.services.consultation_service import ConsultationService
@@ -31,15 +32,26 @@ def get_consultation(
     return ConsultationService.get_consultation(db, consultation_id, doctor_id)
 
 
-@router.get("/patients/{patient_id}/consultations", response_model=List[ConsultationResponse])
-def get_patient_consultations(
-    patient_id: str,
+@router.get("", response_model=List[ConsultationResponse], tags=["Consultations"])
+def get_all_consultations(
     current_user: dict = Depends(get_doctor_role),
     db: Session = Depends(get_db)
 ):
-    """Récupérer l'historique des consultations d'un patient."""
+    """Récupérer toutes les consultations du docteur."""
     doctor_id = current_user["user_id"]
-    return ConsultationService.get_patient_consultations(db, patient_id, doctor_id)
+    return db.query(Consultation).filter(
+        Consultation.doctor_id == doctor_id
+    ).order_by(Consultation.date.desc()).all()
+
+
+@router.get("/by-patient/{patient_id}", response_model=List[ConsultationResponse])
+def get_patient_consultations(
+    patient_id: str,
+    current_user: dict = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Récupérer l'historique des consultations d'un patient."""
+    return ConsultationService.get_patient_consultations(db, patient_id, current_user["user_id"])
 
 
 @router.patch("/{consultation_id}/notes")

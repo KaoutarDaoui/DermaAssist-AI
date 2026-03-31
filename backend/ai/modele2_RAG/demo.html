@@ -1,0 +1,1218 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DermAssist AI — Module 2 RAG Demo</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
+
+  :root {
+    --bg: #0a0e14;
+    --surface: #111720;
+    --surface2: #1a2233;
+    --border: #1e2d42;
+    --accent: #00d4ff;
+    --accent2: #00ff9d;
+    --danger: #ff4757;
+    --warn: #ffa502;
+    --text: #c8d8e8;
+    --text-dim: #5a7a9a;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 24px;
+  }
+
+  .header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 32px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logo {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+
+  .logo span { color: var(--accent2); }
+
+  .badge {
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 3px 8px;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    border-radius: 2px;
+    letter-spacing: 1px;
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    gap: 16px;
+    max-width: 1400px;
+  }
+
+  /* ── Panels ── */
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .panel-title {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    padding: 10px 16px;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .panel-body { padding: 16px; }
+
+  /* ── Module 1 Simulator ── */
+  .sim-select {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 8px 12px;
+    font-family: var(--sans);
+    font-size: 13px;
+    border-radius: 3px;
+    margin-bottom: 10px;
+    outline: none;
+    cursor: pointer;
+  }
+
+  .sim-select:focus { border-color: var(--accent); }
+
+  .conf-slider-wrap { margin-bottom: 12px; }
+
+  .conf-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 6px;
+  }
+
+  .conf-val { color: var(--accent); font-weight: 600; }
+
+  input[type=range] {
+    width: 100%;
+    -webkit-appearance: none;
+    height: 3px;
+    background: var(--surface2);
+    border-radius: 2px;
+    outline: none;
+  }
+
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px;
+    height: 14px;
+    background: var(--accent);
+    border-radius: 50%;
+    cursor: pointer;
+  }
+
+  .patient-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .field-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    margin-bottom: 4px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .field-input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 6px 10px;
+    font-family: var(--sans);
+    font-size: 13px;
+    border-radius: 3px;
+    outline: none;
+  }
+
+  .field-input:focus { border-color: var(--accent); }
+
+  .btn-analyze {
+    width: 100%;
+    background: var(--accent);
+    color: #000;
+    border: none;
+    padding: 10px;
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-analyze:hover { background: var(--accent2); }
+  .btn-analyze:disabled { background: var(--text-dim); cursor: not-allowed; }
+
+  /* ── Right panel ── */
+  .right-col { display: flex; flex-direction: column; gap: 16px; }
+
+  /* ── Confidence badge ── */
+  .conf-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--mono);
+    font-size: 12px;
+    padding: 4px 12px;
+    border-radius: 2px;
+    font-weight: 600;
+    letter-spacing: 1px;
+  }
+
+  .conf-eleve { background: rgba(0,212,255,0.15); color: var(--accent); border: 1px solid var(--accent); }
+  .conf-ambigu { background: rgba(255,165,2,0.15); color: var(--warn); border: 1px solid var(--warn); }
+  .conf-faible { background: rgba(255,71,87,0.15); color: var(--danger); border: 1px solid var(--danger); }
+
+  .urgence-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 2px;
+  }
+
+  .urgence-critique { background: rgba(255,71,87,0.2); color: var(--danger); }
+  .urgence-elevee { background: rgba(255,165,2,0.2); color: var(--warn); }
+  .urgence-moderee { background: rgba(255,200,0,0.15); color: #ffd32a; }
+  .urgence-faible { background: rgba(0,255,157,0.15); color: var(--accent2); }
+
+  /* ── Analysis box ── */
+  .analyse-box {
+    background: var(--surface2);
+    border-left: 3px solid var(--accent);
+    padding: 14px 16px;
+    font-size: 13px;
+    line-height: 1.7;
+    border-radius: 0 3px 3px 0;
+  }
+
+  /* ── Questions ── */
+  .question-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 14px;
+    margin-bottom: 10px;
+    transition: border-color 0.2s;
+  }
+
+  .question-card.answered { border-color: var(--accent2); }
+
+  .question-text {
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 10px;
+    line-height: 1.5;
+  }
+
+  .options-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .opt-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    padding: 5px 12px;
+    font-size: 12px;
+    font-family: var(--sans);
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .opt-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .opt-btn.selected { background: rgba(0,212,255,0.2); border-color: var(--accent); color: var(--accent); }
+
+  /* ── Medications ── */
+  .med-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    transition: border-color 0.2s;
+  }
+
+  .med-card.selected { border-color: var(--accent2); }
+
+  .med-checkbox {
+    width: 18px;
+    height: 18px;
+    margin-top: 2px;
+    accent-color: var(--accent2);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .med-name {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--accent);
+    font-weight: 600;
+    margin-bottom: 3px;
+  }
+
+  .med-meta {
+    font-size: 11px;
+    color: var(--text-dim);
+    line-height: 1.5;
+  }
+
+  /* ── Alerts ── */
+  .alert-card {
+    border-radius: 4px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .alert-danger { background: rgba(255,71,87,0.12); border: 1px solid rgba(255,71,87,0.4); }
+  .alert-warning { background: rgba(255,165,2,0.1); border: 1px solid rgba(255,165,2,0.35); }
+  .alert-question { background: rgba(0,212,255,0.08); border: 1px solid rgba(0,212,255,0.3); }
+
+  .alert-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+
+  .alert-med-name {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    margin-bottom: 4px;
+    letter-spacing: 1px;
+  }
+
+  .alert-question-btn {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 8px;
+  }
+
+  .q-opt {
+    background: rgba(0,212,255,0.1);
+    border: 1px solid rgba(0,212,255,0.3);
+    color: var(--accent);
+    padding: 4px 10px;
+    font-size: 11px;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .q-opt:hover { background: rgba(0,212,255,0.2); }
+
+  /* ── Step bar ── */
+  .step-bar {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin-bottom: 20px;
+  }
+
+  .step {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 1px;
+    color: var(--text-dim);
+    border-bottom: 2px solid var(--border);
+    cursor: default;
+  }
+
+  .step.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .step.done { color: var(--accent2); border-bottom-color: var(--accent2); }
+
+  .step-num {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 1px solid currentColor;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+  }
+
+  /* ── Btn submit ── */
+  .btn-submit {
+    background: transparent;
+    border: 1px solid var(--accent2);
+    color: var(--accent2);
+    padding: 8px 20px;
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 12px;
+  }
+
+  .btn-submit:hover { background: rgba(0,255,157,0.1); }
+  .btn-submit:disabled { border-color: var(--text-dim); color: var(--text-dim); cursor: not-allowed; }
+
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 16px 0;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-dim);
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 1px;
+  }
+
+  .empty-icon { font-size: 32px; margin-bottom: 12px; opacity: 0.5; }
+
+  .loading {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--accent);
+    font-family: var(--mono);
+    font-size: 12px;
+    padding: 20px;
+  }
+
+  .spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .flex-between { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+
+  .section-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  .progress-bar-wrap {
+    background: var(--surface2);
+    border-radius: 2px;
+    height: 3px;
+    margin-top: 6px;
+  }
+
+  .progress-bar {
+    height: 100%;
+    border-radius: 2px;
+    background: var(--accent);
+    transition: width 0.3s;
+  }
+
+  .affinee-banner {
+    background: rgba(0,255,157,0.08);
+    border: 1px solid rgba(0,255,157,0.25);
+    border-left: 3px solid var(--accent2);
+    padding: 14px 16px;
+    font-size: 13px;
+    line-height: 1.7;
+    border-radius: 0 4px 4px 0;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="logo">Derm<span>Assist</span> AI</div>
+    <div style="font-size:11px;color:var(--text-dim);margin-top:2px;font-family:var(--mono)">Module 2 — RAG Clinical Engine</div>
+  </div>
+  <div class="badge">DEMO</div>
+  <div style="margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--text-dim)">
+    Interface Médecin · Knowledge Base 26 pathologies
+  </div>
+</div>
+
+<div class="layout">
+
+  <!-- ── LEFT: Simulator ── -->
+  <div>
+    <div class="panel">
+      <div class="panel-title">
+        Simulateur Module 1 (CNN)
+        <span style="color:var(--text-dim);font-size:9px">entrée RAG</span>
+      </div>
+      <div class="panel-body">
+        <div class="field-label">Diagnostic CNN</div>
+        <select class="sim-select" id="condSelect"></select>
+
+        <div class="conf-slider-wrap">
+          <div class="conf-label">
+            <span>Confiance CNN</span>
+            <span class="conf-val" id="confVal">85%</span>
+          </div>
+          <input type="range" min="20" max="99" value="85" id="confSlider">
+          <div class="progress-bar-wrap">
+            <div class="progress-bar" id="confBar" style="width:85%"></div>
+          </div>
+        </div>
+
+        <hr class="divider">
+        <div class="section-label">Contexte Patient</div>
+
+        <div class="patient-grid">
+          <div>
+            <div class="field-label">Âge</div>
+            <input type="number" class="field-input" id="patAge" value="35" min="1" max="99">
+          </div>
+          <div>
+            <div class="field-label">Sexe</div>
+            <select class="field-input" id="patSexe">
+              <option value="homme">Homme</option>
+              <option value="femme">Femme</option>
+            </select>
+          </div>
+          <div>
+            <div class="field-label">Fitzpatrick</div>
+            <select class="field-input" id="patFitz">
+              <option>I</option><option>II</option><option selected>III</option>
+              <option>IV</option><option>V</option><option>VI</option>
+            </select>
+          </div>
+          <div>
+            <div class="field-label">Ville</div>
+            <select class="field-input" id="patVille">
+              <option>Alger</option><option>Oran</option><option>Constantine</option>
+              <option>Annaba</option><option>Tlemcen</option><option>Batna</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="margin-bottom:10px">
+          <div class="field-label">Grossesse (femme)</div>
+          <select class="field-input" id="patGrossesse">
+            <option value="null">Inconnue</option>
+            <option value="true">Oui</option>
+            <option value="false">Non</option>
+          </select>
+        </div>
+
+        <hr class="divider">
+        <div class="section-label" style="display:flex;justify-content:space-between;align-items:center">
+          <span>Comorbidités patient</span>
+          <span style="font-size:9px;color:var(--text-dim)">(données app mobile)</span>
+        </div>
+        <div style="font-size:11px;color:var(--text-dim);margin-bottom:10px;font-family:var(--mono)">
+          null = inconnue → question requise · true = confirmée → alerte active
+        </div>
+
+        <div class="patient-grid" style="grid-template-columns:1fr 1fr">
+          <div>
+            <div class="field-label">🫀 Insuf. cardiaque</div>
+            <select class="field-input comorb-select" id="cmInsufCard">
+              <option value="null">Inconnue</option>
+              <option value="true">Oui (confirmée)</option>
+              <option value="false">Non</option>
+            </select>
+          </div>
+          <div>
+            <div class="field-label">🫘 Insuf. rénale</div>
+            <select class="field-input comorb-select" id="cmInsufRen">
+              <option value="null">Inconnue</option>
+              <option value="true">Oui (confirmée)</option>
+              <option value="false">Non</option>
+            </select>
+          </div>
+          <div>
+            <div class="field-label">🫁 Insuf. hépatique</div>
+            <select class="field-input comorb-select" id="cmInsufHep">
+              <option value="null">Inconnue</option>
+              <option value="true">Oui (confirmée)</option>
+              <option value="false">Non</option>
+            </select>
+          </div>
+          <div>
+            <div class="field-label">🩸 Diabète</div>
+            <select class="field-input comorb-select" id="cmDiabete">
+              <option value="null">Inconnue</option>
+              <option value="true">Oui (confirmé)</option>
+              <option value="false">Non</option>
+            </select>
+          </div>
+          <div>
+            <div class="field-label">💊 Hypertension</div>
+            <select class="field-input comorb-select" id="cmHTA">
+              <option value="null">Inconnue</option>
+              <option value="true">Oui (confirmée)</option>
+              <option value="false">Non</option>
+            </select>
+          </div>
+          <div>
+            <div class="field-label">🧬 Déficit G6PD</div>
+            <select class="field-input comorb-select" id="cmG6PD">
+              <option value="null">Inconnue</option>
+              <option value="true">Oui (confirmé)</option>
+              <option value="false">Non</option>
+            </select>
+          </div>
+        </div>
+
+        <button class="btn-analyze" id="btnAnalyze" onclick="runAnalysis()">
+          ▶ Lancer analyse RAG
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── RIGHT: Results ── -->
+  <div class="right-col">
+
+    <!-- Step bar -->
+    <div class="step-bar">
+      <div class="step active" id="step1"><div class="step-num">1</div> Analyse initiale</div>
+      <div class="step" id="step2"><div class="step-num">2</div> Questions cliniques</div>
+      <div class="step" id="step3"><div class="step-num">3</div> Analyse affinée</div>
+      <div class="step" id="step4"><div class="step-num">4</div> Médicaments</div>
+      <div class="step" id="step5"><div class="step-num">5</div> Alertes</div>
+    </div>
+
+    <!-- Initial Analysis Panel -->
+    <div class="panel" id="panelAnalyse">
+      <div class="panel-title">Analyse initiale
+        <div id="badgesRow" style="display:flex;gap:8px"></div>
+      </div>
+      <div class="panel-body" id="analyseBody">
+        <div class="empty-state">
+          <div class="empty-icon">🔬</div>
+          Lancez l'analyse pour voir les résultats
+        </div>
+      </div>
+    </div>
+
+    <!-- Questions Panel -->
+    <div class="panel" id="panelQuestions" style="display:none">
+      <div class="panel-title">
+        Questions cliniques
+        <span id="qCount" style="color:var(--text-dim);font-size:9px"></span>
+      </div>
+      <div class="panel-body" id="questionsBody"></div>
+    </div>
+
+    <!-- Medications Panel -->
+    <div class="panel" id="panelMeds" style="display:none">
+      <div class="panel-title">
+        Médicaments disponibles
+        <span style="font-size:9px;color:var(--text-dim)">Cocher pour prescrire</span>
+      </div>
+      <div class="panel-body" id="medsBody"></div>
+    </div>
+
+    <!-- Alerts Panel -->
+    <div class="panel" id="panelAlerts" style="display:none">
+      <div class="panel-title" id="alertsTitle">
+        Alertes patient
+      </div>
+      <div class="panel-body" id="alertsBody"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ── Knowledge Base (inline for demo) ──────────────────────────────
+const KB_CONDITIONS = [
+  {id:"melanome",nom:"Mélanome malin",urgence:"critique",seuil:{eleve:0.80,ambigu:0.55},
+   analyse:"Le modèle détecte des critères ABCDE évocateurs d'un mélanome malin : asymétrie marquée, bordures irrégulières, polychromie, diamètre potentiellement supérieur à 6mm. Lésion à haut risque nécessitant une biopsie en urgence. Aucun traitement local avant confirmation histologique.",
+   questions:{eleve:[
+     {texte:"Depuis combien de temps cette lésion est-elle présente ?",options:["Moins de 6 mois","6 mois – 2 ans","Plus de 2 ans","Ne sait pas"]},
+     {texte:"La lésion a-t-elle changé récemment ?",options:["Oui, taille","Oui, couleur","Oui, les deux","Non, stable"]},
+     {texte:"Antécédents personnels ou familiaux de mélanome ?",options:["Oui, personnel","Oui, familial","Oui, les deux","Non"]}
+   ],ambigu:[
+     {texte:"Depuis combien de temps cette lésion est-elle présente ?",options:["Moins de 6 mois","6 mois – 2 ans","Plus de 2 ans","Ne sait pas"]},
+     {texte:"La lésion a-t-elle changé récemment ?",options:["Oui, taille","Oui, couleur","Oui, les deux","Non, stable"]},
+     {texte:"Antécédents personnels ou familiaux de mélanome ?",options:["Oui, personnel","Oui, familial","Oui, les deux","Non"]},
+     {texte:"Exposition solaire intense ou UV artificiel (cabine) ?",options:["Oui, régulière","Oui, occasionnelle","Cabines UV","Non"]},
+     {texte:"Phototype du patient ?",options:["I-II (clair)","III (intermédiaire)","IV-V (mat/foncé)","VI (très foncé)"]},
+     {texte:"D'autres lésions similaires ailleurs sur le corps ?",options:["Oui","Non","Ne sait pas"]}
+   ]},
+   medicaments:[],
+   orientation:"Biopsie exérèse urgente. Référence oncodermatologie."
+  },
+  {id:"carcinome_basocellulaire",nom:"Carcinome basocellulaire",urgence:"elevee",seuil:{eleve:0.82,ambigu:0.58},
+   analyse:"Lésion compatible avec un carcinome basocellulaire, tumeur cutanée maligne la plus fréquente. Croissance lente, risque métastatique faible mais destruction locale progressive. Exérèse chirurgicale nécessaire.",
+   questions:{eleve:[
+     {texte:"Localisation exacte de la lésion ?",options:["Visage / tête","Cou / tronc","Membres","Zone péri-orifices"]},
+     {texte:"Évolution de la taille depuis découverte ?",options:["Croissance rapide","Croissance lente","Stable","Ne sait pas"]}
+   ],ambigu:[
+     {texte:"Localisation exacte de la lésion ?",options:["Visage / tête","Cou / tronc","Membres","Zone péri-orifices"]},
+     {texte:"La lésion saigne-t-elle ou s'ulcère-t-elle ?",options:["Oui, saignement","Oui, ulcération","Les deux","Non"]},
+     {texte:"Antécédents d'exposition solaire chronique ?",options:["Oui, professionnelle","Oui, loisirs","Les deux","Non"]},
+     {texte:"Antécédents d'immunosuppression ?",options:["Oui, transplantation","Oui, médicaments","Non"]}
+   ]},
+   medicaments:[
+     {nom:"Imiquimod 5% crème",classe:"immunomodulateur topique",indication:"CBC superficiel uniquement",posologie:"5x/semaine 6 semaines",
+      alertes:[{condition:"grossesse",message:"Imiquimod : données insuffisantes grossesse — demander si enceinte",severite:"warning"}]},
+     {nom:"Vismodegib 150mg",classe:"inhibiteur hedgehog",indication:"CBC localement avancé",posologie:"150mg/j per os",
+      alertes:[
+        {condition:"femme_age_15_50",message:"Vismodegib FORMELLEMENT contre-indiqué grossesse — tératogène majeur. Contraception double obligatoire.",severite:"danger"},
+        {condition:"homme",message:"Vismodegib présent dans le sperme — préservatif obligatoire même après vasectomie.",severite:"warning"}
+      ]}
+   ],
+   orientation:"Exérèse chirurgicale. Suivi dermatologique annuel."
+  },
+  {id:"acne_vulgaire",nom:"Acné vulgaire",urgence:"faible",seuil:{eleve:0.87,ambigu:0.62},
+   analyse:"Lésions comédoniques et/ou inflammatoires compatibles avec une acné vulgaire. Évaluation du grade nécessaire (I-IV). Lésions sébacées sans gravité immédiate. Traitement selon sévérité.",
+   questions:{eleve:[
+     {texte:"Depuis combien de temps les lésions sont-elles présentes ?",options:["Moins de 6 mois","6 mois – 2 ans","Plus de 2 ans","Toujours eu"]},
+     {texte:"La patiente/le patient a-t-il déjà reçu un traitement ?",options:["Jamais traité","Traitement topique seul","Antibiotiques","Isotrétinoïne"]}
+   ],ambigu:[
+     {texte:"Depuis combien de temps les lésions sont-elles présentes ?",options:["Moins de 6 mois","6 mois – 2 ans","Plus de 2 ans","Toujours eu"]},
+     {texte:"Traitement antérieur reçu ?",options:["Jamais traité","Traitement topique seul","Antibiotiques","Isotrétinoïne"]},
+     {texte:"Localisation prédominante des lésions ?",options:["Visage seul","Visage + tronc","Tronc seul","Diffuse"]},
+     {texte:"Présence de kystes ou nodules ?",options:["Oui, nombreux","Oui, quelques-uns","Non, comédons/papules seulement"]}
+   ]},
+   medicaments:[
+     {nom:"Trétinoïne 0.025% crème",classe:"rétinoïde topique",indication:"Acné rétentionnelle",posologie:"1x/soir, 3x/sem puis quotidien",
+      alertes:[{condition:"grossesse",message:"Rétinoïde topique CONTRE-INDIQUÉ pendant la grossesse.",severite:"danger"}]},
+     {nom:"Peroxyde de benzoyle 5%",classe:"kératolytique antibactérien",indication:"Acné inflammatoire légère à modérée",posologie:"1x/jour",
+      alertes:[]},
+     {nom:"Doxycycline 100mg",classe:"antibiotique",indication:"Acné inflammatoire modérée à sévère",posologie:"100mg/j pendant 3 mois",
+      alertes:[
+        {condition:"grossesse",message:"Tétracyclines contre-indiquées après 1er trimestre — risque colorations dentaires fœtales.",severite:"danger"},
+        {condition:"age_moins_8",message:"Contre-indiqué enfant < 8 ans.",severite:"danger"}
+      ]},
+     {nom:"Isotrétinoïne 20mg",classe:"rétinoïde systémique",indication:"Acné sévère nodulokystique ou résistante",posologie:"0.5mg/kg/j",
+      alertes:[
+        {condition:"femme_age_15_50",message:"Isotrétinoïne : programme grossesse OBLIGATOIRE. Test grossesse mensuel. Contraception double.",severite:"danger"},
+        {condition:"bilan_hepatique",message:"Bilan hépatique + lipides avant et pendant traitement.",severite:"warning"}
+      ]}
+   ],
+   orientation:"Traitement ambulatoire. Suivi à 3 mois."
+  },
+  {id:"psoriasis",nom:"Psoriasis",urgence:"faible",seuil:{eleve:0.85,ambigu:0.60},
+   analyse:"Plaques érythémato-squameuses bien délimitées évocatrices de psoriasis. Pathologie inflammatoire chronique fréquente en Algérie. Évaluer l'atteinte articulaire et la qualité de vie.",
+   questions:{eleve:[
+     {texte:"Atteinte articulaire associée (psoriasis arthropathique) ?",options:["Oui, diagnostiqué","Oui, suspicion","Non","Ne sait pas"]},
+     {texte:"Surface corporelle atteinte (BSA) ?",options:["< 3% (légère)","3-10% (modérée)","> 10% (sévère)","Ne sait pas"]}
+   ],ambigu:[
+     {texte:"Atteinte articulaire associée ?",options:["Oui, diagnostiqué","Oui, suspicion","Non"]},
+     {texte:"Surface corporelle atteinte ?",options:["< 3%","3-10%","> 10%","Ne sait pas"]},
+     {texte:"Atteinte des ongles ?",options:["Oui","Non","Ne sait pas"]},
+     {texte:"Facteur déclenchant identifié ?",options:["Stress","Infection streptococcique","Médicament","Aucun identifié"]},
+     {texte:"Traitement antérieur reçu ?",options:["Jamais traité","Dermocorticoïdes","Méthotrexate","Biothérapie"]}
+   ]},
+   medicaments:[
+     {nom:"Calcipotriol + Bétaméthasone gel",classe:"vitamine D3 + corticoïde topique",indication:"Psoriasis en plaques légère à modérée",posologie:"1x/jour pendant 4 semaines",
+      alertes:[{condition:"grossesse",message:"Bétaméthasone topique fort déconseillé grossesse, surtout grandes surfaces.",severite:"warning"}]},
+     {nom:"Méthotrexate 7.5-25mg",classe:"immunosuppresseur systémique",indication:"Psoriasis modéré à sévère",posologie:"1x/semaine per os ou SC",
+      alertes:[
+        {condition:"grossesse",message:"Méthotrexate formellement CONTRE-INDIQUÉ grossesse et allaitement — tératogène et abortif.",severite:"danger"},
+        {condition:"homme",message:"Méthotrexate : contraception obligatoire homme pendant traitement et 3 mois après.",severite:"warning"}
+      ]}
+   ],
+   orientation:"Traitement topique si léger. Référence dermatologue si > 10% BSA ou arthropathique."
+  },
+  {id:"eczema_atopique",nom:"Eczéma atopique",urgence:"faible",seuil:{eleve:0.84,ambigu:0.60},
+   analyse:"Lésions eczémateuses prurigineuses compatibles avec une dermatite atopique. Pathologie très fréquente en Algérie, favorisée par la sécheresse climatique. Rechercher les facteurs déclenchants.",
+   questions:{eleve:[
+     {texte:"Antécédents atopiques personnels ou familiaux ?",options:["Asthme","Rhinite allergique","Les deux","Aucun"]},
+     {texte:"Localisation prédominante ?",options:["Plis de flexion","Visage / cou","Mains","Diffuse"]}
+   ],ambigu:[
+     {texte:"Antécédents atopiques ?",options:["Asthme","Rhinite allergique","Les deux","Aucun"]},
+     {texte:"Localisation prédominante ?",options:["Plis de flexion","Visage / cou","Mains","Diffuse"]},
+     {texte:"Facteur aggravant identifié ?",options:["Transpiration","Savons / détergents","Stress","Aucun identifié"]},
+     {texte:"Fréquence des poussées ?",options:["Continue","Plusieurs fois/an","Rare (1x/an)","Première poussée"]}
+   ]},
+   medicaments:[
+     {nom:"Tacrolimus 0.1% pommade",classe:"immunomodulateur topique (ICM)",indication:"DA modérée à sévère visage et zones sensibles",posologie:"2x/jour sur lésions actives",
+      alertes:[{condition:"grossesse",message:"Tacrolimus topique : données limitées grossesse — prudence.",severite:"warning"}]},
+     {nom:"Dupilumab 300mg SC",classe:"biothérapie anti-IL-4/IL-13",indication:"DA sévère réfractaire (adulte)",posologie:"300mg SC toutes les 2 semaines",
+      alertes:[]},
+     {nom:"Prednisolone 1mg/kg",classe:"corticoïde systémique",indication:"Poussée sévère — courte durée uniquement",posologie:"Cure courte 5-7 jours, dégression",
+      alertes:[{condition:"grossesse",message:"Corticoïdes systémiques : acceptable si nécessaire mais surveillance néonatale requise.",severite:"warning"}]}
+   ],
+   orientation:"Émollients quotidiens. Traitement topique de 1re ligne. Éviter les facteurs déclenchants."
+  },
+  {id:"leishmaniose_cutanee",nom:"Leishmaniose cutanée",urgence:"moderee",seuil:{eleve:0.80,ambigu:0.55},
+   analyse:"Lésion cutanée évocatrice de leishmaniose cutanée. Algérie = 2e foyer mondial. Ulcération typique ou nodule en cours d'évolution. Confirmation parasitologique indispensable avant traitement.",
+   questions:{eleve:[
+     {texte:"Région de résidence ou voyage récent (zone endémique) ?",options:["Région steppique (M'Sila, Biskra)","Zone nord (Tell)","Zone saharienne","Zone non endémique"]},
+     {texte:"Aspect de la lésion ?",options:["Ulcère en cratère (bouton de Biskra)","Nodule non ulcéré","Plaque infiltrée","Lésion croûteuse"]}
+   ],ambigu:[
+     {texte:"Région endémique ?",options:["Région steppique (M'Sila, Biskra)","Zone nord","Zone saharienne","Zone non endémique"]},
+     {texte:"Aspect de la lésion ?",options:["Ulcère en cratère","Nodule","Plaque infiltrée","Croûteuse"]},
+     {texte:"Durée d'évolution ?",options:["< 3 mois","3-6 mois","> 6 mois","Ne sait pas"]},
+     {texte:"Lésions multiples ?",options:["Unique","2-5 lésions","> 5 lésions"]},
+     {texte:"Tentative de traitement antérieure ?",options:["Non","Traitement local","Antimonié systémique","Ne sait pas"]}
+   ]},
+   medicaments:[
+     {nom:"Glucantime (méglumine antimoniate) IM",classe:"antimonié pentavalent",indication:"Leishmaniose cutanée localisée / diffuse",posologie:"20mg/kg/j IM × 20-28 jours",
+      alertes:[
+        {condition:"grossesse",message:"Antimoniés contre-indiqués grossesse — risque tératogène. Discuter alternative (Amphotéricine B).",severite:"danger"},
+        {condition:"cardiopathie",message:"ECG obligatoire avant traitement — risque allongement QT.",severite:"warning"}
+      ]},
+     {nom:"Fluconazole 200mg",classe:"antifongique — activité anti-leishmania",indication:"Alternative pour formes cutanées simples",posologie:"200mg/j × 6 semaines",
+      alertes:[{condition:"grossesse",message:"Fluconazole doses élevées tératogène — éviter 1er trimestre.",severite:"warning"}]},
+     {nom:"Cryothérapie locale",classe:"traitement physique",indication:"Lésion unique petite < 2cm",posologie:"Séances toutes les 2-3 semaines",alertes:[]}
+   ],
+   orientation:"Confirmation parasitologique (frottis + culture). Déclaration obligatoire en Algérie."
+  },
+  {id:"hyperpigmentation_post_inflammatoire",nom:"Hyperpigmentation post-inflammatoire",urgence:"faible",seuil:{eleve:0.88,ambigu:0.65},
+   analyse:"Macules pigmentées brunâtres compatibles avec une HPI. Très fréquente sur les phototypes III-VI prédominants en Algérie. Évolution longue mais favorable avec traitement et photoprotection stricte.",
+   questions:{eleve:[
+     {texte:"Lésion inflammatoire préexistante identifiée ?",options:["Oui, acné","Oui, eczéma","Oui, traumatisme","Non, spontanée"]},
+     {texte:"Phototype du patient ?",options:["III (mat)","IV (brun)","V (brun foncé)","VI (très foncé)"]}
+   ],ambigu:[
+     {texte:"Lésion préexistante ?",options:["Acné","Eczéma","Traumatisme","Autre","Non"]},
+     {texte:"Phototype ?",options:["III","IV","V","VI"]},
+     {texte:"Utilisation de produits dépigmentants non prescrits ?",options:["Oui (citron, marché)","Oui (crèmes non contrôlées)","Non"]},
+     {texte:"Durée des macules ?",options:["< 3 mois","3-12 mois","> 1 an"]}
+   ]},
+   medicaments:[
+     {nom:"Hydroquinone 4% crème",classe:"dépigmentant topique",indication:"HPI modérée à sévère",posologie:"1x/jour le soir, 3 mois",
+      alertes:[{condition:"grossesse",message:"Hydroquinone déconseillée pendant grossesse et allaitement.",severite:"warning"}]},
+     {nom:"Trétinoïne 0.05% crème",classe:"rétinoïde topique",indication:"HPI — potentialise les dépigmentants",posologie:"Soir, débuter 2x/semaine",
+      alertes:[
+        {condition:"grossesse",message:"Rétinoïde topique CONTRE-INDIQUÉ pendant la grossesse.",severite:"danger"},
+        {condition:"peau_foncee",message:"Risque d'irritation et HPI paradoxale sur peau foncée — débuter très progressivement.",severite:"warning"}
+      ]},
+     {nom:"Acide azélaïque 20% crème",classe:"dépigmentant naturel",indication:"Alternative à l'hydroquinone",posologie:"2x/jour",alertes:[]}
+   ],
+   orientation:"Photoprotection SPF 50+ obligatoire. Traiter la cause sous-jacente."
+  },
+];
+
+// ── Comorbidity questions & options ────────────────────────────────
+const QUESTIONS_COMORB = {
+  insuffisance_cardiaque: "Le patient a-t-il des antécédents d'insuffisance cardiaque ou de cardiopathie ?",
+  insuffisance_renale: "Le patient présente-t-il une insuffisance rénale connue ?",
+  insuffisance_hepatique: "Le patient a-t-il une maladie hépatique connue (cirrhose, hépatite) ?",
+  diabete: "Le patient est-il diabétique ?",
+  hypertension: "Le patient est-il hypertendu ?",
+  coronaropathie: "Antécédents coronariens (infarctus, angor) ?",
+  depression: "Antécédents de dépression ou troubles psychiatriques ?",
+  retinopathie: "Rétinopathie connue ?",
+  deficit_g6pd: "Déficit en G6PD testé ? (Fréquent en Algérie)",
+  porphyrie: "Antécédents de porphyrie ?",
+  allergie_penicilline: "Allergie aux pénicillines ou bêta-lactamines ?",
+  immunodepression: "Patient immunodéprimé (VIH, transplantation, chimio) ?",
+};
+const OPTIONS_COMORB = {
+  insuffisance_cardiaque: ["Oui, insuf. cardiaque","Oui, cardiopathie ischémique","Oui, trouble du rythme","Non"],
+  insuffisance_renale: ["Oui, IRC légère (DFG 30-60)","Oui, IRC sévère (DFG < 30)","Dialyse","Non"],
+  insuffisance_hepatique: ["Oui, cirrhose","Oui, hépatite chronique","Oui, autre","Non"],
+  diabete: ["Oui, type 1","Oui, type 2","Oui, équilibré","Non"],
+  hypertension: ["Oui, sous traitement","Oui, non traité","Antécédent contrôlé","Non"],
+  deficit_g6pd: ["Oui, déficit confirmé","Oui, test normal","Non, jamais testé","Ne sait pas"],
+};
+
+// ── State ──────────────────────────────────────────────────────────
+let state = {
+  condition: null,
+  confidence: 0.85,
+  patient: {},
+  confidenceLevel: null,
+  questions: [],
+  answers: {},
+  medicaments: [],
+  selectedMeds: [],
+  analysisRun: false,
+};
+
+// ── Populate condition select ───────────────────────────────────────
+const condSelect = document.getElementById('condSelect');
+KB_CONDITIONS.forEach(c => {
+  const opt = document.createElement('option');
+  opt.value = c.id;
+  opt.textContent = c.nom;
+  condSelect.appendChild(opt);
+});
+
+// ── Slider ────────────────────────────────────────────────────────
+document.getElementById('confSlider').addEventListener('input', function() {
+  const v = parseInt(this.value);
+  document.getElementById('confVal').textContent = v + '%';
+  const color = v >= 80 ? 'var(--accent)' : v >= 55 ? 'var(--warn)' : 'var(--danger)';
+  document.getElementById('confBar').style.width = v + '%';
+  document.getElementById('confBar').style.background = color;
+  document.getElementById('confVal').style.color = color;
+});
+
+// ── Helpers ───────────────────────────────────────────────────────
+function classifyConfidence(cond, conf) {
+  const s = cond.seuil;
+  if (conf >= s.eleve) return 'eleve';
+  if (conf >= s.ambigu) return 'ambigu';
+  return 'faible';
+}
+
+function buildPatientAlerts(medicaments, patient) {
+  // Mapping comorbidité → champ patient
+  const COMORB_MAP = {
+    'insuffisance_cardiaque': 'insuffisance_cardiaque',
+    'insuffisance_renale': 'insuffisance_renale',
+    'insuffisance_hepatique': 'insuffisance_hepatique',
+    'diabete': 'diabete',
+    'hypertension': 'hypertension',
+    'coronaropathie': 'coronaropathie',
+    'depression': 'depression',
+    'retinopathie': 'retinopathie',
+    'deficit_g6pd': 'deficit_g6pd',
+    'porphyrie': 'porphyrie',
+    'allergie_penicilline': 'allergie_penicilline',
+    'immunodepression': 'immunodepression',
+    'artere_periph': 'artere_periph',
+    'hypertriglyceridemie': 'hypertriglyceridemie',
+  };
+  const alerts = [];
+  for (const med of medicaments) {
+    for (const alert of (med.alertes || [])) {
+      const c = alert.condition;
+      let triggered = false;
+      if (c === 'grossesse') {
+        if (patient.grossesse === true) triggered = true;
+        else if (patient.grossesse === null && patient.sexe === 'femme' && patient.age >= 15 && patient.age <= 50) {
+          alerts.push({type:'question_requise', medicament: med.nom,
+            message:`⚕ ${med.nom} peut être contre-indiqué en cas de grossesse.`,
+            question_suggere:"La patiente est-elle enceinte ou allaite-t-elle ?",
+            options:["Oui, enceinte","Oui, allaitement","Non","Ne sait pas"],
+            severite: alert.severite});
+          continue;
+        }
+      } else if (c === 'femme_age_15_50') triggered = patient.sexe === 'femme' && patient.age >= 15 && patient.age <= 50;
+      else if (c === 'homme') triggered = patient.sexe === 'homme';
+      else if (c === 'peau_foncee') triggered = ['IV','V','VI'].includes(patient.fitzpatrick);
+      else triggered = true;
+      if (triggered) alerts.push({type:'alerte_active', medicament: med.nom, message: alert.message, severite: alert.severite});
+    }
+  }
+  return alerts;
+}
+
+function urgenceClass(u) {
+  const map = {critique:'urgence-critique',elevee:'urgence-elevee',moderee:'urgence-moderee',faible:'urgence-faible'};
+  return map[u] || 'urgence-faible';
+}
+
+function urgenceEmoji(u) {
+  const map = {critique:'🔴',elevee:'🟠',moderee:'🟡',faible:'🟢'};
+  return map[u] || '⚪';
+}
+
+function setStep(active) {
+  for (let i = 1; i <= 5; i++) {
+    const el = document.getElementById('step' + i);
+    el.className = 'step' + (i < active ? ' done' : i === active ? ' active' : '');
+  }
+}
+
+// ── MAIN: Run Analysis ─────────────────────────────────────────────
+function runAnalysis() {
+  const condId = condSelect.value;
+  const cond = KB_CONDITIONS.find(c => c.id === condId);
+  const conf = parseInt(document.getElementById('confSlider').value) / 100;
+  const age = parseInt(document.getElementById('patAge').value);
+  const sexe = document.getElementById('patSexe').value;
+  const fitz = document.getElementById('patFitz').value;
+  const ville = document.getElementById('patVille').value;
+  const gStr = document.getElementById('patGrossesse').value;
+  const grossesse = gStr === 'null' ? null : gStr === 'true';
+
+  const toVal = id => { const v = document.getElementById(id).value; return v==="null"?null:v==="true"; };
+  const patient = {age, sexe, fitzpatrick: fitz, ville, grossesse,
+    insuffisance_cardiaque: toVal('cmInsufCard'),
+    insuffisance_renale: toVal('cmInsufRen'),
+    insuffisance_hepatique: toVal('cmInsufHep'),
+    diabete: toVal('cmDiabete'),
+    hypertension: toVal('cmHTA'),
+    deficit_g6pd: toVal('cmG6PD'),
+  };
+  const cl = classifyConfidence(cond, conf);
+
+  state = {condition: cond, confidence: conf, patient, confidenceLevel: cl,
+           questions: cl === 'eleve' ? cond.questions.eleve : cond.questions.ambigu,
+           answers: {}, medicaments: cond.medicaments, selectedMeds: [], analysisRun: true};
+
+  // ── Simulate brief loading ────────────────────────────────────────
+  document.getElementById('analyseBody').innerHTML = `<div class="loading"><div class="spinner"></div> Analyse en cours — RAG pipeline...</div>`;
+  document.getElementById('panelQuestions').style.display = 'none';
+  document.getElementById('panelMeds').style.display = 'none';
+  document.getElementById('panelAlerts').style.display = 'none';
+
+  setTimeout(() => {
+    renderAnalyseInitiale(cond, cl, conf, patient);
+    setStep(1);
+  }, 700);
+}
+
+function renderAnalyseInitiale(cond, cl, conf, patient) {
+  // Badges
+  const confClass = cl === 'eleve' ? 'conf-eleve' : cl === 'ambigu' ? 'conf-ambigu' : 'conf-faible';
+  const confLabel = cl === 'eleve' ? '✓ Confiance élevée' : cl === 'ambigu' ? '⚠ Confiance ambiguë' : '✗ Confiance faible';
+  document.getElementById('badgesRow').innerHTML = `
+    <span class="conf-badge ${confClass}">${confLabel} ${Math.round(conf*100)}%</span>
+    <span class="urgence-badge ${urgenceClass(cond.urgence)}">${urgenceEmoji(cond.urgence)} ${cond.urgence}</span>
+  `;
+
+  document.getElementById('analyseBody').innerHTML = `
+    <div class="section-label">Analyse initiale CNN + RAG</div>
+    <div class="analyse-box">${cond.analyse}</div>
+    <hr class="divider">
+    <div style="font-size:12px;color:var(--text-dim);font-family:var(--mono)">
+      ${urgenceEmoji(cond.urgence)} Orientation : <span style="color:var(--text)">${cond.orientation}</span>
+    </div>
+  `;
+
+  // Show questions
+  renderQuestions();
+  setStep(2);
+}
+
+function renderQuestions() {
+  const qs = state.questions;
+  document.getElementById('qCount').textContent = `${qs.length} questions — niveau ${state.confidenceLevel}`;
+  
+  let html = '';
+  if (qs.length === 0) {
+    html = '<div class="empty-state" style="padding:20px"><div class="empty-icon">✅</div>Diagnostic à confiance élevée — aucune question supplémentaire nécessaire</div>';
+  } else {
+    qs.forEach((q, qi) => {
+      const answered = state.answers[qi] !== undefined;
+      html += `<div class="question-card ${answered ? 'answered' : ''}" id="qcard${qi}">
+        <div class="question-text">${qi+1}. ${q.texte}</div>
+        <div class="options-grid">`;
+      q.options.forEach((opt, oi) => {
+        const sel = state.answers[qi] === opt ? 'selected' : '';
+        html += `<button class="opt-btn ${sel}" onclick="selectAnswer(${qi}, '${opt.replace(/'/g,"\\'")}', this)">${opt}</button>`;
+      });
+      html += `</div></div>`;
+    });
+
+    html += `<button class="btn-submit" id="btnSubmitQ" onclick="submitQuestions()" 
+      ${Object.keys(state.answers).length < qs.length ? 'disabled' : ''}>
+      Valider les réponses →
+    </button>`;
+  }
+
+  document.getElementById('questionsBody').innerHTML = html;
+  document.getElementById('panelQuestions').style.display = 'block';
+}
+
+function selectAnswer(qi, opt, btn) {
+  state.answers[qi] = opt;
+  // Update UI
+  const card = document.getElementById('qcard' + qi);
+  card.className = 'question-card answered';
+  card.querySelectorAll('.opt-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  // Enable submit if all answered
+  const total = state.questions.length;
+  const answered = Object.keys(state.answers).length;
+  const btnQ = document.getElementById('btnSubmitQ');
+  if (btnQ) btnQ.disabled = answered < total;
+}
+
+function submitQuestions() {
+  setStep(3);
+  // Generate refined analysis
+  const answers = state.questions.map((q, i) => `${q.texte}: ${state.answers[i] || '—'}`);
+  const affinee = generateAffineeMock(state.condition, state.patient, state.confidenceLevel, answers);
+  
+  // Insert refined analysis in analyse panel
+  const ab = document.getElementById('analyseBody');
+  ab.innerHTML += `
+    <hr class="divider">
+    <div class="section-label">Analyse affinée (post-questions)</div>
+    <div class="affinee-banner">${affinee}</div>
+  `;
+
+  renderMedicaments();
+  setStep(4);
+}
+
+function generateAffineeMock(cond, patient, cl, answers) {
+  // Template-based generation (replaces Gemini call in demo)
+  const confStr = cl === 'eleve' ? `à confiance élevée (${Math.round(state.confidence*100)}%)` : 
+                  cl === 'ambigu' ? `avec confiance ambiguë (${Math.round(state.confidence*100)}%) — diagnostic différentiel à explorer` :
+                  `avec confiance faible (${Math.round(state.confidence*100)}%) — bilan complémentaire indispensable`;
+  
+  const fitzStr = ['I','II'].includes(patient.fitzpatrick) ? 'phototype clair (risque UV élevé)' :
+                  ['III','IV'].includes(patient.fitzpatrick) ? 'phototype intermédiaire' : 'phototype foncé (risque HPI)';
+
+  const personalStr = `Patient de ${patient.age} ans, ${patient.sexe}, ${fitzStr}, ${patient.ville}.`;
+  
+  const answersStr = answers.slice(0,3).map(a => `<br>• ${a}`).join('');
+  
+  return `${cond.nom} suspecté ${confStr}. ${personalStr}<br>
+Réponses cliniques recueillies :${answersStr}<br><br>
+${cond.orientation} Traitement proposé selon le profil patient ci-dessous.`;
+}
+
+function renderMedicaments() {
+  const meds = state.medicaments;
+  let html = '';
+  
+  if (meds.length === 0) {
+    html = '<div class="empty-state" style="padding:16px"><div class="empty-icon">🏥</div>Traitement chirurgical ou procédural — aucun médicament topique/systémique</div>';
+  } else {
+    html = `<div class="section-label">Sélectionner les médicaments à prescrire</div>`;
+    meds.forEach((med, mi) => {
+      html += `<div class="med-card" id="medcard${mi}">
+        <input type="checkbox" class="med-checkbox" id="medchk${mi}" onchange="toggleMed(${mi})">
+        <div style="flex:1">
+          <div class="med-name">${med.nom}</div>
+          <div class="med-meta">
+            ${med.classe} · ${med.posologie}<br>
+            <span style="color:var(--text-dim)">↳ ${med.indication}</span>
+          </div>
+        </div>
+      </div>`;
+    });
+    html += `<button class="btn-submit" id="btnValidMeds" onclick="validateMeds()" disabled>
+      Valider la prescription →
+    </button>`;
+  }
+
+  document.getElementById('medsBody').innerHTML = html;
+  document.getElementById('panelMeds').style.display = 'block';
+}
+
+function toggleMed(mi) {
+  const checked = document.getElementById('medchk' + mi).checked;
+  const card = document.getElementById('medcard' + mi);
+  card.className = 'med-card' + (checked ? ' selected' : '');
+  
+  if (checked) state.selectedMeds.push(mi);
+  else state.selectedMeds = state.selectedMeds.filter(i => i !== mi);
+  
+  document.getElementById('btnValidMeds').disabled = state.selectedMeds.length === 0;
+}
+
+function validateMeds() {
+  setStep(5);
+  const selectedMedObjects = state.selectedMeds.map(i => state.medicaments[i]);
+  const alerts = buildPatientAlerts(selectedMedObjects, state.patient);
+  renderAlerts(alerts);
+}
+
+function renderAlerts(alerts) {
+  const title = document.getElementById('alertsTitle');
+  const body = document.getElementById('alertsBody');
+  const panel = document.getElementById('panelAlerts');
+
+  const nDanger = alerts.filter(a => a.severite === 'danger').length;
+  const nWarn = alerts.filter(a => a.severite === 'warning').length;
+  const nQ = alerts.filter(a => a.type === 'question_requise').length;
+
+  title.innerHTML = `Alertes patient 
+    ${nDanger > 0 ? `<span style="color:var(--danger);font-size:10px">🔴 ${nDanger} DANGER</span>` : ''}
+    ${nWarn > 0 ? `<span style="color:var(--warn);font-size:10px">⚠ ${nWarn} WARNING</span>` : ''}
+    ${nQ > 0 ? `<span style="color:var(--accent);font-size:10px">❓ ${nQ} QUESTION</span>` : ''}
+  `;
+
+  if (alerts.length === 0) {
+    body.innerHTML = `<div class="affinee-banner" style="color:var(--accent2)">
+      ✅ Aucune alerte pour cette combinaison médicament × profil patient. Prescription validée.
+    </div>`;
+  } else {
+    let html = '';
+    alerts.forEach(a => {
+      if (a.type === 'question_requise') {
+        const opts = a.options.map(o => `<button class="q-opt" onclick="this.style.background='rgba(0,212,255,0.3)'">${o}</button>`).join('');
+        const meds_concern = a.medicaments_concernes ? a.medicaments_concernes.join(', ') : (a.medicament||'');
+        html += `<div class="alert-card alert-question">
+          <div class="alert-icon">❓</div>
+          <div style="flex:1">
+            <div class="alert-med-name">${meds_concern}</div>
+            <div style="font-weight:500;margin-bottom:6px">${a.question || a.question_suggere || ''}</div>
+            <div style="font-size:12px;color:var(--text-dim);margin-bottom:8px">${a.message}</div>
+            <div class="alert-question-btn">${opts}</div>
+          </div>
+        </div>`;
+      } else {
+        const cls = a.severite === 'danger' ? 'alert-danger' : 'alert-warning';
+        const icon = a.severite === 'danger' ? '🔴' : '⚠️';
+        html += `<div class="alert-card ${cls}">
+          <div class="alert-icon">${icon}</div>
+          <div>
+            <div class="alert-med-name">${a.medicament} · ${a.severite.toUpperCase()}</div>
+            <div>${a.message}</div>
+          </div>
+        </div>`;
+      }
+    });
+    body.innerHTML = html;
+  }
+
+  panel.style.display = 'block';
+  panel.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+</script>
+</body>
+</html>

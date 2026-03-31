@@ -1,0 +1,187 @@
+<!doctype html>
+<html>
+  <head>
+    <title>DermAssist - Quick Test</title>
+    <style>
+      body {
+        font-family: Arial;
+        margin: 50px;
+        background: #f5f5f5;
+      }
+      .container {
+        max-width: 500px;
+        margin: 0 auto;
+        background: white;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+      h1 {
+        color: #10b981;
+        text-align: center;
+      }
+      input,
+      select {
+        width: 100%;
+        padding: 10px;
+        margin: 10px 0;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 14px;
+      }
+      button {
+        width: 100%;
+        padding: 12px;
+        background: #10b981;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: bold;
+      }
+      button:hover {
+        background: #059669;
+      }
+      .result {
+        margin-top: 20px;
+        padding: 15px;
+        background: #f0f9ff;
+        border-left: 4px solid #10b981;
+        border-radius: 5px;
+        display: none;
+      }
+      .error {
+        background: #fee;
+        border-left-color: #f00;
+      }
+      .result h2 {
+        margin: 0 0 10px 0;
+        color: #10b981;
+      }
+      .result h2.error {
+        color: #f00;
+      }
+      .confidence {
+        font-size: 24px;
+        font-weight: bold;
+        color: #f59e0b;
+      }
+      .loading {
+        display: none;
+        text-align: center;
+        padding: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🏥 DermAssist CNN Test</h1>
+      <p style="text-align: center; color: #666">
+        Upload a skin lesion photo to get diagnosis
+      </p>
+
+      <form id="form">
+        <label>📸 Select Image *</label>
+        <input type="file" id="image" accept="image/*" required />
+
+        <label>👤 Age</label>
+        <input type="number" id="age" value="35" min="0" max="120" />
+
+        <label>⚥️ Sex</label>
+        <select id="sexe">
+          <option value="homme">Male</option>
+          <option value="femme">Female</option>
+        </select>
+
+        <label>🎨 Fitzpatrick (1-6)</label>
+        <input type="number" id="fitzpatrick" value="3" min="1" max="6" />
+
+        <label>📍 Location</label>
+        <input
+          type="text"
+          id="localisation"
+          value="unknown"
+          placeholder="e.g. face, arm, leg"
+        />
+
+        <label>🏙️ City</label>
+        <input
+          type="text"
+          id="ville"
+          value="Alger"
+          placeholder="Patient city"
+        />
+
+        <button type="submit">🚀 Get Diagnosis</button>
+      </form>
+
+      <div class="loading" id="loading">⏳ Processing... (1-2 seconds)</div>
+
+      <div class="result" id="result">
+        <h2 id="illness"></h2>
+        <div>Confidence: <span class="confidence" id="confidence"></span></div>
+      </div>
+    </div>
+
+    <script>
+      const API = "http://localhost:8001";
+
+      document.getElementById("form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const form = new FormData();
+        form.append("image", document.getElementById("image").files[0]);
+        form.append("age", document.getElementById("age").value);
+        form.append("sexe", document.getElementById("sexe").value);
+        form.append(
+          "fitzpatrick",
+          document.getElementById("fitzpatrick").value,
+        );
+        form.append(
+          "localisation",
+          document.getElementById("localisation").value,
+        );
+        form.append("ville", document.getElementById("ville").value);
+
+        document.getElementById("loading").style.display = "block";
+        document.getElementById("result").style.display = "none";
+
+        try {
+          console.log("Sending to:", `${API}/ai/analyze-cnn`);
+          const res = await fetch(`${API}/ai/analyze-cnn`, {
+            method: "POST",
+            body: form,
+          });
+
+          console.log("Response status:", res.status);
+
+          if (!res.ok) {
+            const errorText = await res.text();
+            console.error("Error response:", errorText);
+            throw new Error(`HTTP ${res.status}: ${errorText}`);
+          }
+
+          const data = await res.json();
+          console.log("Success:", data);
+
+          document.getElementById("illness").textContent = data.illness_name;
+          document.getElementById("confidence").textContent =
+            data.confidence_pct + "%";
+          document.getElementById("result").className = "result";
+          document.getElementById("result").style.display = "block";
+        } catch (error) {
+          console.error("Full error:", error);
+          document.getElementById("illness").textContent =
+            "❌ Error: " + error.message;
+          document.getElementById("illness").className = "error";
+          document.getElementById("result").className = "result error";
+          document.getElementById("result").style.display = "block";
+          document.getElementById("confidence").textContent = error.message;
+        } finally {
+          document.getElementById("loading").style.display = "none";
+        }
+      });
+    </script>
+  </body>
+</html>

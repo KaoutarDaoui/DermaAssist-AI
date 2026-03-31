@@ -56,10 +56,7 @@ class ConsultationService:
     def get_patient_consultations(db: Session, patient_id: str, doctor_id: str) -> list:
         """Récupérer l'historique des consultations d'un patient."""
         return db.query(Consultation).filter(
-            and_(
-                Consultation.patient_id == patient_id,
-                Consultation.doctor_id == doctor_id
-            )
+            Consultation.patient_id == patient_id
         ).order_by(Consultation.date.desc()).all()
 
     @staticmethod

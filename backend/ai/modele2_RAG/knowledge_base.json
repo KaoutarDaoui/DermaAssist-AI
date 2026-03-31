@@ -1,0 +1,3310 @@
+{
+  "version": "1.0",
+  "description": "DermaAssist Knowledge Base — 20 maladies couvrant HAM10000 + DermNet",
+  "maladies": [
+    {
+      "id": "melanome",
+      "nom": "Mélanome malin",
+      "categorie": "lesion_maligne",
+      "icd10": "C43",
+      "urgence": "critique",
+      "datasets": [
+        "HAM10000",
+        "DermNet"
+      ],
+      "seuil_confiance": {
+        "eleve": 0.8,
+        "ambigu": 0.55
+      },
+      "analyse_initiale": "Le modèle détecte des critères ABCDE évocateurs d'un mélanome malin : asymétrie marquée, bordures irrégulières, polychromie, diamètre potentiellement supérieur à 6mm. Lésion à haut risque nécessitant une biopsie en urgence. Aucun traitement local avant confirmation histologique.",
+      "questions": {
+        "confiance_elevee": [
+          {
+            "texte": "Depuis combien de temps cette lésion est-elle présente ?",
+            "options": [
+              "Moins de 6 mois",
+              "6 mois – 2 ans",
+              "Plus de 2 ans",
+              "Ne sait pas"
+            ]
+          },
+          {
+            "texte": "La lésion a-t-elle changé récemment ?",
+            "options": [
+              "Oui, taille",
+              "Oui, couleur",
+              "Oui, les deux",
+              "Non, stable"
+            ]
+          },
+          {
+            "texte": "Antécédents personnels ou familiaux de mélanome ?",
+            "options": [
+              "Oui, personnel",
+              "Oui, familial",
+              "Oui, les deux",
+              "Non"
+            ]
+          }
+        ],
+        "confiance_ambigue": [
+          {
+            "texte": "Depuis combien de temps cette lésion est-elle présente ?",
+            "options": [
+              "Moins de 6 mois",
+              "6 mois – 2 ans",
+              "Plus de 2 ans",
+              "Ne sait pas"
+            ]
+          },
+          {
+            "texte": "La lésion a-t-elle changé récemment ?",
+            "options": [
+              "Oui, taille",
+              "Oui, couleur",
+              "Oui, les deux",
+              "Non, stable"
+            ]
+          },
+          {
+            "texte": "Antécédents personnels ou familiaux de mélanome ?",
+            "options": [
+              "Oui, personnel",
+              "Oui, familial",
+              "Oui, les deux",
+              "Non"
+            ]
+          },
+          {
+            "texte": "Exposition solaire intense ou UV artificiel (cabine) ?",
+            "options": [
+              "Oui, régulière",
+              "Oui, occasionnelle",
+              "Cabines UV",
+              "Non"
+            ]
+          },
+          {
+            "texte": "Phototype du patient ?",
+            "options": [
+              "I-II (clair)",
+              "III (intermédiaire)",
+              "IV-V (mat/foncé)",
+              "VI (très foncé)"
+            ]
+          },
+          {
+            "texte": "D'autres lésions similaires ailleurs sur le corps ?",
+            "options": [
+              "Oui",
+              "Non",
+              "Ne sait pas"
+            ]
+          }
+        ]
+      },
+      "analyse_affinee_template": "Mélanome suspecté {confiance}. Évolution {evolution}, contexte {antecedents}. Référence urgente en dermatologie/chirurgie pour dermoscopie et biopsie exérèse. Délai maximum recommandé : 2 semaines.",
+      "medicaments": [],
+      "orientation": "Biopsie exérèse urgente. Référence oncodermatologie.",
+      "contre_indications_patient": [],
+      "alertes_medicament": [],
+      "antecedents_a_verifier": []
+    },
+    {
+      "id": "carcinome_basocellulaire",
+      "nom": "Carcinome basocellulaire",
+      "categorie": "lesion_maligne",
+      "icd10": "C44",
+      "urgence": "elevee",
+      "datasets": [
+        "HAM10000",
+        "DermNet"
+      ],
+      "seuil_confiance": {
+        "eleve": 0.82,
+        "ambigu": 0.58
+      },
+      "analyse_initiale": "Lésion compatible avec un carcinome basocellulaire, tumeur cutanée maligne la plus fréquente. Croissance lente, risque métastatique faible mais destruction locale progressive. Exérèse chirurgicale nécessaire.",
+      "questions": {
+        "confiance_elevee": [
+          {
+            "texte": "Localisation exacte de la lésion ?",
+            "options": [
+              "Visage / tête",
+              "Cou / tronc",
+              "Membres",
+              "Zone péri-orifices"
+            ]
+          },
+          {
+            "texte": "Évolution de la taille depuis découverte ?",
+            "options": [
+              "Croissance rapide",
+              "Croissance lente",
+              "Stable",
+              "Ne sait pas"
+            ]
+          }
+        ],
+        "confiance_ambigue": [
+          {
+            "texte": "Localisation exacte de la lésion ?",
+            "options": [
+              "Visage / tête",
+              "Cou / tronc",
+              "Membres",
+              "Zone péri-orifices"
+            ]
+          },
+          {
+            "texte": "Évolution de la taille depuis découverte ?",
+            "options": [
+              "Croissance rapide",
+              "Croissance lente",
+              "Stable",
+              "Ne sait pas"
+            ]
+          },
+          {
+            "texte": "La lésion saigne-t-elle ou s'ulcère-t-elle ?",
+            "options": [
+              "Oui, saignement",
+              "Oui, ulcération",
+              "Les deux",
+              "Non"
+            ]
+          },
+          {
+            "texte": "Antécédents d'exposition solaire chronique ?",
+            "options": [
+              "Oui, professionnelle",
+              "Oui, loisirs",
+              "Oui, les deux",
+              "Non"
+            ]
+          },
+          {
+            "texte": "Antécédents d'immunosuppression ?",
+            "options": [
+              "Oui, transplantation",
+              "Oui, médicaments",
+              "Non"
+            ]
+          }
+        ]
+      },
+      "analyse_affinee_template": "Carcinome basocellulaire {type} suspecté. Localisation {localisation}. Exérèse chirurgicale avec marges recommandée. Délai non urgent mais dans les 3 mois.",
+      "medicaments": [
+        {
+          "nom": "Imiquimod 5% crème",
+          "classe": "immunomodulateur topique",
+          "indication": "CBC superficiel uniquement, si chirurgie contre-indiquée",
+          "posologie": "5x/semaine pendant 6 semaines",
+          "alertes": [
+            {
+              "condition": "grossesse",
+              "message": "Imiquimod : données insuffisantes grossesse — demander si enceinte",
+              "severite": "warning"
+            }
+          ]
+        },
+        {
+          "nom": "Vismodegib 150mg",
+          "classe": "inhibiteur hedgehog",
+          "indication": "CBC localement avancé ou métastatique",
+          "posologie": "150mg/j per os",
+          "alertes": [
+            {
+              "condition": "femme_age_15_50",
+              "message": "Vismodegib FORMELLEMENT contre-indiqué grossesse — tératogène majeur. Contraception double obligatoire 24 mois après arrêt.",
+              "severite": "danger"
+            },
+            {
+              "condition": "homme",
+              "message": "Vismodegib présent dans le sperme — préservatif obligatoire même après vasectomie.",
+              "severite": "warning"
+            }
+          ]
+        }
+      ],
+      "orientation": "Exérèse chirurgicale. Suivi dermatologique annuel.",
+      "contre_indications_patient": [
+        "grossesse"
+      ],
+      "alertes_medicament": [],
+      "antecedents_a_verifier": [
+        "grossesse"
+      ]
+    },
+    {
+      "id": "carcinome_spinocellulaire",
+      "nom": "Carcinome spinocellulaire",
+      "categorie": "lesion_maligne",
+      "icd10": "C44.9",
+      "urgence": "elevee",
+      "datasets": [
+        "HAM10000",
+        "DermNet"
+      ],
+      "seuil_confiance": {
+        "eleve": 0.8,
+        "ambigu": 0.55
+      },
+      "analyse_initiale": "Lésion évocatrice d'un carcinome spinocellulaire (épidermoïde). Potentiel métastatique supérieur au basocellulaire. Exérèse chirurgicale urgente recommandée, surtout si localisation à risque (lèvre, oreille, zone génitale).",
+      "questions": {
+        "confiance_elevee": [
+          {
+            "texte": "Localisation de la lésion ?",
+            "options": [
+              "Visage / lèvre",
+              "Oreille",
+              "Zone génitale",
+              "Autre"
+            ]
+          },
+          {
+            "texte": "Présence de kératose actinique préexistante ?",
+            "options": [
+              "Oui",
+              "Non",
+              "Ne sait pas"
+            ]
+          }
+        ],
+        "confiance_ambigue": [
+          {
+            "texte": "Localisation de la lésion ?",
+            "options": [
+              "Visage / lèvre",
+              "Oreille",
+              "Zone génitale",
+              "Autre"
+            ]
+          },
+          {
+            "texte": "Présence de kératose actinique préexistante ?",
+            "options": [
+              "Oui",
+              "Non",
+              "Ne sait pas"
+            ]
+          },
+          {
+            "texte": "La lésion est-elle indurée à la palpation ?",
+            "options": [
+              "Oui, très indurée",
+              "Légèrement",
+              "Non",
+              "Non examinée"
+            ]
+          },
+          {
+            "texte": "Adénopathies régionales palpables ?",
+            "options": [
+              "Oui",
+              "Non",
+              "Non examinées"
+            ]
+          },
+          {
+            "texte": "Statut immunitaire du patient ?",
+            "options": [
+              "Immunocompétent",
+              "VIH+",
+              "Transplanté",
+              "Autre immunosuppression"
+            ]
+          }
+        ]
+      },
+      "analyse_affinee_template": "Carcinome spinocellulaire suspecté, localisation {localisation}. Risque métastatique {risque}. Exérèse chirurgicale urgente avec marges larges. Bilan ganglionnaire si localisation à risque.",
+      "medicaments": [],
+      "orientation": "Exérèse chirurgicale urgente. Bilan d'extension si nécessaire.",
+      "contre_indications_patient": [],
+      "alertes_medicament": [],
+      "antecedents_a_verifier": [
+        "immunodepression"
+      ]
+    },
+    {
+      "id": "naevus_melanocytaire",
+      "nom": "Nævus mélanocytaire bénin",
+      "categorie": "lesion_benigne",
+      "icd10": "D22",
+      "urgence": "faible",
+      "datasets": [
+        "HAM10000",
+        "DermNet"
+      ],
+      "seuil_confiance": {
+        "eleve": 0.88,
+        "ambigu": 0.65
+      },
+      "analyse_initiale": "Lésion compatible avec un nævus mélanocytaire bénin. Critères dermoscopiques rassurants. Surveillance annuelle recommandée. Exérèse si changement ou demande esthétique.",
+      "questions": {
+        "confiance_elevee": [
+          {
+            "texte": "Y a-t-il eu un changement récent ?",
+            "options": [
+              "Non, stable depuis des années",
+              "Légère modification",
+              "Changement notable",
+              "Apparu récemment"
+            ]
+          }
+        ],
+        "confiance_ambigue": [
+          {
+            "texte": "Y a-t-il eu un changement récent ?",
+            "options": [
+              "Non, stable depuis des années",
+              "Légère modification",
+              "Changement notable",
+              "Apparu récemment"
+            ]
+          },
+          {
+            "texte": "Nombre total de nævus sur le corps ?",
+            "options": [
+              "Moins de 20",
+              "20 à 50",
+              "Plus de 50",
+              "Ne sait pas"
+            ]
+          },
+          {
+            "texte": "Antécédents familiaux de mélanome ?",
+            "options": [
+              "Oui",
+              "Non",
+              "Ne sait pas"
+            ]
+          }
+        ]
+      },
+      "analyse_affinee_template": "Nævus bénin, {changement}. Surveillance dermatoscopique {frequence} recommandée.",
+      "medicaments": [],
+      "orientation": "Surveillance annuelle. Exérèse si doute ou évolution.",
+      "contre_indications_patient": [],
+      "alertes_medicament": [],
+      "antecedents_a_verifier": []
+    },
+    {
+      "id": "keratose_actinique",
+      "nom": "Kératose actinique",
+      "categorie": "lesion_precancereuse",
+      "icd10": "L57.0",
+      "urgence": "moderee",
+      "datasets": [
+        "HAM10000",
+        "DermNet"
+      ],
+      "seuil_confiance": {
+        "eleve": 0.85,
+        "ambigu": 0.6
+      },
+      "analyse_initiale": "Lésion kératosique compatible avec une kératose actinique, lésion précancéreuse liée à l'exposition UV chronique. Risque de transformation en carcinome spinocellulaire (1-5%/an). Traitement recommandé.",
+      "questions": {
+        "confiance_elevee": [
+          {
+            "texte": "Nombre de lésions similaires ?",
+            "options": [
+              "Lésion unique",
+              "2 à 5 lésions",
+              "Plus de 5 lésions",
+              "Champ entier"
+            ]
+          },
+          {
+            "texte": "Antécédents de traitement pour kératose actinique ?",
+            "options": [
+              "Non, jamais",
+              "Cryothérapie",
+              "Crème topique",
+              "Autre"
+            ]
+          }
+        ],
+        "confiance_ambigue": [
+          {
+            "texte": "Nombre de lésions similaires ?",
+            "options": [
+              "Lésion unique",
+              "2 à 5 lésions",
+              "Plus de 5 lésions",
+              "Champ entier"
+            ]
+          },
+          {
+            "texte": "Antécédents de traitement pour kératose actinique ?",
+            "options": [
+              "Non, jamais",
+              "Cryothérapie",
+              "Crème topique",
+              "Autre"
+            ]
+          },
+          {
+            "texte": "Exposition solaire professionnelle ou loisirs ?",
+            "options": [
+              "Professionnelle (agriculteur, marin...)",
+              "Loisirs intenses",
+              "Les deux",
+              "Modérée"
+            ]
+          },
+          {
+            "texte": "La lésion est-elle douloureuse ou prurigineuse ?",
+            "options": [
+              "Oui, douleur",
+              "Oui, prurit",
+              "Les deux",
+              "Non"
+            ]
+          }
+        ]
+      },
+      "analyse_affinee_template": "Kératose actinique {nombre}, contexte d'exposition {exposition}. Traitement de champ recommandé si lésions multiples. Photoprotection stricte obligatoire.",
+      "medicaments": [
+        {
+          "nom": "Fluorouracile 5% crème (Efudix)",
+          "classe": "antimitotique topique",
+          "indication": "Kératoses actiniques multiples, champ de cancérisation",
+          "posologie": "2x/jour pendant 3-4 semaines",
+          "alertes": [
+            {
+              "condition": "grossesse",
+              "message": "5-FU topique contre-indiqué grossesse et allaitement.",
+              "severite": "danger"
+            },
+            {
+              "condition": "femme_age_15_50",
+              "message": "Demander si enceinte ou allaitement avant prescription 5-FU.",
+              "severite": "warning"
+            }
+          ]
+        },
+        {
+          "nom": "Imiquimod 3.75% crème",
+          "classe": "immunomodulateur topique",
+          "indication": "Kératoses actiniques du visage et du cuir chevelu",
+          "posologie": "1x/jour pendant 2 semaines, pause 2 semaines, répéter",
+          "alertes": [
+            {
+              "condition": "grossesse",
+              "message": "Données insuffisantes — éviter si possible pendant grossesse.",
+              "severite": "warning"
+            }
+          ]
+        },
+        {
+          "nom": "Diclofénac 3% gel (Solaraze)",
+          "classe": "AINS topique",
+          "indication": "Kératoses actiniques légères à modérées",
+          "posologie": "2x/jour pendant 60-90 jours",
+          "alertes": [
+            {
+              "condition": "insuffisance_renale",
+              "message": "AINS topique : surveillance rénale si IR.",
+              "severite": "warning"
+            },
+            {
+              "condition": "grossesse_t3",
+              "message": "AINS contre-indiqué au 3e trimestre.",
+              "severite": "danger"
+            }
+          ]
+        }
+      ],
+      "orientation": "Traitement local. Suivi dermatologique 6 mois.",
+      "contre_indications_patient": [
+        "grossesse"
+      ],
+      "alertes_medicament": [],
+      "antecedents_a_verifier": [
+        "grossesse",
+        "insuffisance_renale"
+      ]
+    },
+    {
+      "id": "acne_vulgaire",
+      "nom": "Acné vulgaire",
+      "categorie": "sebacee",
+      "icd10": "L70.0",
+      "urgence": "faible",
+      "datasets": [
+        "DermNet"
+      ],
+      "seuil_confiance": {
+        "eleve": 0.87,
+        "ambigu": 0.62
+      },
+      "analyse_initiale": "Lésions comédoniques et/ou inflammatoires compatibles avec une acné vulgaire. Évaluation du grade nécessaire pour adapter le traitement. Prise en charge topique en première intention.",
+      "questions": {
+        "confiance_elevee": [
+          {
+            "texte": "Depuis combien de temps les lésions sont-elles présentes ?",
+            "options": [
+              "Moins de 3 mois",
+              "3 à 12 mois",
+              "Plus d'un an",
+              "Récurrentes"
+            ]
+          },
+          {
+            "texte": "La patiente/le patient a-t-il déjà reçu un traitement ?",
+            "options": [
+              "Non, jamais",
+              "Topique OTC (pharmacie)",
+              "Antibiotiques oraux",
+              "Isotrétinoïne"
+            ]
+          }
+        ],
+        "confiance_ambigue": [
+          {
+            "texte": "Depuis combien de temps les lésions sont-elles présentes ?",
+            "options": [
+              "Moins de 3 mois",
+              "3 à 12 mois",
+              "Plus d'un an",
+              "Récurrentes"
+            ]
+          },
+          {
+            "texte": "La patiente/le patient a-t-il déjà reçu un traitement ?",
+            "options": [
+              "Non, jamais",
+              "Topique OTC (pharmacie)",
+              "Antibiotiques oraux",
+              "Isotrétinoïne"
+            ]
+          },
+          {
+            "texte": "Type de lésions prédominantes ?",
+            "options": [
+              "Comédons (points noirs/blancs)",
+              "Papules/pustules",
+              "Nodules/kystes",
+              "Mixte"
+            ]
+          },
+          {
+            "texte": "Localisation principale ?",
+            "options": [
+              "Visage seul",
+              "Dos/tronc",
+              "Visage + tronc",
+              "Autre"
+            ]
+          }
+        ]
+      },
+      "analyse_affinee_template": "Acné {grade}, évoluant depuis {duree}, {traitement_anterieur}. {recommandation_ligne}.",
+      "medicaments": [
+        {
+          "nom": "Trétinoïne 0.025% crème",
+          "classe": "rétinoïde topique",
+          "indication": "Acné comédonienne et mixte",
+          "posologie": "Application le soir, éviter soleil",
+          "alertes": [
+            {
+              "condition": "grossesse",
+              "message": "Rétinoïdes topiques CONTRE-INDIQUÉS pendant la grossesse. Tératogène. Demander si enceinte.",
+              "severite": "danger"
+            },
+            {
+              "condition": "femme_age_15_45",
+              "message": "Patient de sexe féminin en âge de procréer — vérifier absence de grossesse avant prescription rétinoïde.",
+              "severite": "warning"
+            }
+          ]
+        },
+        {
+          "nom": "Peroxyde de benzoyle 5%",
+          "classe": "antibactérien topique",
+          "indication": "Acné inflammatoire légère à modérée",
+          "posologie": "1x/jour le matin",
+          "alertes": [
+            {
+              "condition": "peau_noire_phototype_5_6",
+              "message": "Risque d'hyperpigmentation post-inflammatoire sur phototypes foncés — débuter à 2.5% et surveiller.",
+              "severite": "warning"
+            }
+          ]
+        },
+        {
+          "nom": "Doxycycline 100mg",
+          "classe": "antibiotique oral (cycline)",
+          "indication": "Acné inflammatoire modérée à sévère",
+          "posologie": "100mg/j pendant 3 mois maximum",
+          "alertes": [
+            {
+              "condition": "grossesse",
+              "message": "Doxycycline CONTRE-INDIQUÉE grossesse et enfant < 8 ans. Coloration des dents. Demander si enceinte.",
+              "severite": "danger"
+            },
+            {
+              "condition": "femme_age_15_45",
+              "message": "Patiente en âge de procréer — demander si enceinte avant doxycycline.",
+              "severite": "warning"
+            },
+            {
+              "condition": "age_moins_8_ans",
+              "message": "Cyclines contre-indiquées avant 8 ans.",
+              "severite": "danger"
+            },
+            {
+              "condition": "insuffisance_hepatique",
+              "message": "Doxycycline : hépatotoxicité potentielle — surveillance hépatique si traitement prolongé.",
+              "severite": "warning"
+            },
+            {
+              "condition": "insuffisance_renale",
+              "message": "Doxycycline : pas d'ajustement posologique majeur, mais surveillance recommandée en IRC sévère.",
+              "severite": "warning"
+            }
+          ]
+        },
+        {
+          "nom": "Isotrétinoïne 20mg",
+          "classe": "rétinoïde oral",
+          "indication": "Acné sévère nodulokystique ou résistante",
+          "posologie": "0.5 à 1mg/kg/j, cure de 6 mois",
+          "alertes": [
+            {
+              "condition": "femme_age_15_50",
+              "message": "ALERTE TÉRATOGÉNICITÉ MAJEURE : Isotrétinoïne formellement contre-indiquée sans contraception efficace confirmée. Test de grossesse négatif obligatoire. Protocole de prévention grossesse (PPP) requis. 2 contraceptions simultanées.",
+              "severite": "danger"
+            },
+            {
+              "condition": "depression",
+              "message": "Surveiller état psychologique — lien possible avec dépression et idées suicidaires.",
+              "severite": "warning"
+            },
+            {
+              "condition": "hypertriglyceridemie",
+              "message": "Bilan lipidique avant et pendant traitement — risque de triglycéridémie.",
+              "severite": "warning"
+            }
+          ]
+        }
+      ],
+      "orientation": "Suivi à 6 semaines. Bilan hépatique si antibiotique oral.",
+      "contre_indications_patient": [
+        "grossesse",
+        "allaitement"
+      ],
+      "alertes_medicament": [],
+      "antecedents_a_verifier": [
+        "grossesse",
+        "allaitement",
+        "insuffisance_hepatique",
+        "insuffisance_renale",
+        "depression",
+        "hypertriglyceridemie"
+      ]
+    },
+    {
+      "id": "rosacee",
+      "nom": "Rosacée",
+      "categorie": "sebacee",
+      "icd10": "L71",
+      "urgence": "faible",
+      "datasets": [
+        "DermNet"
+      ],
+      "seuil_confiance": {
+        "eleve": 0.85,
+        "ambigu": 0.6
+      },
+      "analyse_initiale": "Aspect compatible avec une rosacée. Érythrose centrofaciale chronique avec possibles papulo-pustules. Facteurs déclenchants à identifier. Traitement adapté au sous-type.",
+      "questions": {
+        "confiance_elevee": [
+          {
+            "texte": "Sous-type clinique prédominant ?",
+            "options": [
+              "Érythrose/flush (rouge persistant)",
+              "Papulo-pustuleux",
+              "Rhinophyma (nez rouge épaissi)",
+              "Oculaire (yeux irrités)"
+            ]
+          },
+          {
+            "texte": "Facteurs déclenchants identifiés ?",
+            "options": [
+              "Soleil / chaleur",
+              "Alcool / épices",
+              "Stress",
+              "Plusieurs / inconnus"
+            ]
+          }
+        ],
+        "confiance_ambigue": [
+          {
+            "texte": "Sous-type clinique prédominant ?",
+            "options": [
+              "Érythrose/flush (rouge persistant)",
+              "Papulo-pustuleux",
+              "Rhinophyma (nez rouge épaissi)",
+              "Oculaire (yeux irrités)"
+            ]
+          },
+          {
+            "texte": "Facteurs déclenchants identifiés ?",
+            "options": [
+              "Soleil / chaleur",
+              "Alcool / épices",
+              "Stress",
+              "Plusieurs / inconnus"
+            ]
+          },
+          {
+            "texte": "Atteinte oculaire associée ?",
+            "options": [
+              "Oui, sécheresse/irritation",
+              "Oui, blépharite",
+              "Non"
+            ]
+          },
+          {
+            "texte": "Traitements antérieurs ?",
+            "options": [
+              "Aucun",
+              "Topiques (métronidazole...)",
+              "Antibiotiques oraux",
+              "Laser"
+            ]
+          }
+        ]
+      },
+      "analyse_affinee_template": "Rosacée {sous_type}, {facteurs}. {ligne_traitement}.",
+      "medicaments": [
+        {
+          "nom": "Métronidazole 0.75% gel",
+          "classe": "antibactérien / anti-inflammatoire topique",
+          "indication": "Rosacée papulo-pustuleuse",
+          "posologie": "2x/jour",
+          "alertes": [
+            {
+              "condition": "grossesse_t1",
+              "message": "Éviter métronidazole topique au 1er trimestre — données limitées.",
+              "severite": "warning"
+            }
+          ]
+        },
+        {
+          "nom": "Acide azélaïque 15% gel",
+          "classe": "acide dicarboxylique topique",
+          "indication": "Rosacée papulo-pustuleuse",
+          "posologie": "2x/jour",
+          "alertes": []
+        },
+        {
+          "nom": "Doxycycline 40mg LP",
+          "classe": "antibiotique oral sous-antimicrobien",
+          "indication": "Rosacée papulo-pustuleuse modérée à sévère",
+          "posologie": "40mg/j (dose anti-inflammatoire)",
+          "alertes": [
+            {
+              "condition": "grossesse",
+              "message": "Doxycycline contre-indiquée pendant la grossesse.",
+              "severite": "danger"
+            },
+            {
+              "condition": "femme_age_15_45",
+              "message": "Demander si enceinte avant prescription doxycycline.",
+              "severite": "warning"
+            },
+            {
+              "condition": "insuffisance_hepatique",
+              "message": "Doxycycline : hépatotoxicité possible — bilan hépatique si antécédents.",
+              "severite": "warning"
+            }
+          ]
+        }
+      ],
+      "orientation": "Photoprotection stricte. Suivi 3 mois.",
+      "contre_indications_patient": [
+        "grossesse"
+      ],
+      "alertes_medicament": [],
+      "antecedents_a_verifier": [
+        "grossesse",
+        "insuffisance_hepatique"
+      ]
+    },
+    {
+      "id": "eczema_atopique",
+      "nom": "Dermatite atopique (eczéma)",
+      "categorie": "inflammatoire_auto_immune",
+      "icd10": "L20",
+      "urgence": "faible",
+      "datasets": [
+        "HAM10000",
+        "DermNet"
+      ],
+      "seuil_confiance": {
+        "eleve": 0.85,
+        "ambigu": 0.6
+      },
+      "analyse_initiale": "Lésions eczémateuses compatibles avec une dermatite atopique. Plaques érythémato-squameuses, prurigineuses, topographie caractéristique. Évaluation de la sévérité (SCORAD) nécessaire.",
+      "questions": {
+        "confiance_elevee": [
+          {
+            "texte": "Sévérité du prurit (0 = aucun, 10 = insupportable) ?",
+            "options": [
+              "0-3 (léger)",
+              "4-6 (modéré)",
+              "7-9 (sévère)",
+              "10 (insupportable)"
+            ]
+          },
+          {
+            "texte": "Antécédents atopiques personnels ou familiaux ?",
+            "options": [
+              "Asthme",
+              "Rhinite allergique",
+              "Les deux",
+              "Aucun connu"
+            ]
+          }
+        ],
+        "confiance_ambigue": [
+          {
+            "texte": "Sévérité du prurit (0 = aucun, 10 = insupportable) ?",
+            "options": [
+              "0-3 (léger)",
+              "4-6 (modéré)",
+              "7-9 (sévère)",
+              "10 (insupportable)"
+            ]
+          },
+          {
+            "texte": "Antécédents atopiques personnels ou familiaux ?",
+            "options": [
+              "Asthme",
+              "Rhinite allergique",
+              "Les deux",
+              "Aucun connu"
+            ]
+          },
+          {
+            "texte": "Localisation des lésions ?",
+            "options": [
+              "Plis (coudes, genoux)",
+              "Visage / cou",
+              "Mains / poignets",
+              "Diffuse"
+            ]
+          },
+          {
+            "texte": "Signes de surinfection (croûtes jaunes, suintement) ?",
+            "options": [
+              "Oui",
+              "Non"
+            ]
+          },
+          {
+            "texte": "Facteurs déclenchants identifiés ?",
+            "options": [
+              "Stress",
+              "Alimentaires",
+              "Environnementaux",
+              "Inconnus"
+            ]
+          }
+        ]
+      },
+      "analyse_affinee_template": "Dermatite atopique {severite}, localisation {localisation}. {surinfection}. {traitement_recommande}.",
+      "medicaments": [
+        {
+          "nom": "Dermocorticoïde (Bétaméthasone 0.05%)",
+          "classe": "corticostéroïde topique classe III",
+          "indication": "Poussées modérées à sévères",
+          "posologie": "1x/jour en poussée, maximum 4 semaines",
+          "alertes": [
+            {
+              "condition": "visage_plis",
+              "message": "Éviter dermocorticoïdes puissants sur visage et plis — utiliser classe I ou II.",
+              "severite": "warning"
+            },
+            {
+              "condition": "nourrisson_moins_2_ans",
+              "message": "Corticoïdes classe III contre-indiqués < 2 ans. Utiliser hydrocortisone 1% uniquement.",
+              "severite": "danger"
+            }
+          ]
+        },
+        {
+          "nom": "Tacrolimus 0.1% pommade (Protopic)",
+          "classe": "inhibiteur de calcineurine topique",
+          "indication": "Dermatite atopique modérée à sévère, entretien ou zones sensibles",
+          "posologie": "2x/jour en poussée, puis 2x/semaine entretien",
+          "alertes": [
+            {
+              "condition": "moins_2_ans",
+              "message": "Tacrolimus 0.1% contre-indiqué < 2 ans. Utiliser 0.03% à partir de 2 ans.",
+              "severite": "danger"
+            },
+            {
+              "condition": "grossesse",
+              "message": "Données insuffisantes grossesse — préférer dermocorticoïdes.",
+              "severite": "warning"
+            }
+          ]
+        },
+        {
+          "nom": "Dupilumab (Dupixent) 300mg SC",
+          "classe": "anticorps monoclonal anti-IL4/IL13",
+          "indication": "Dermatite atopique sévère de l'adulte réfractaire",
+          "posologie": "300mg SC toutes les 2 semaines (après dose de charge 600mg)",
+          "alertes": [
+            {
+              "condition": "grossesse",
+              "message": "Dupilumab : données limitées grossesse — discussion bénéfice/risque nécessaire.",
+              "severite": "warning"
+            }
+          ]
+        }
+      ],
+      "orientation": "Émolliants quotidiens. Suivi selon sévérité.",
+      "contre_indications_patient": [],
+      "alertes_medicament": [],
+      "antecedents_a_verifier": [
+        "grossesse",
+        "insuffisance_renale"
+      ]
+    },
+    {
+      "id": "psoriasis",
+      "nom": "Psoriasis",
+      "categorie": "inflammatoire_auto_immune",
+      "icd10": "L40",
+      "urgence": "faible",
+      "datasets": [
+        "HAM10000",
+        "DermNet"
+      ],
+      "seuil_confiance": {
+        "eleve": 0.87,
+        "ambigu": 0.62
+      },
+      "analyse_initiale": "Plaques érythémato-squameuses bien délimitées compatibles avec un psoriasis. Évaluation de la surface corporelle atteinte (BSA) et de l'impact sur la qualité de vie (DLQI) nécessaire pour orienter le traitement.",
+      "questions": {
+        "confiance_elevee": [
+          {
+            "texte": "Étendue estimée des lésions ?",
+            "options": [
+              "Légère (< 3% BSA)",
+              "Modérée (3-10% BSA)",
+              "Sévère (> 10% BSA)",
+              "Ne sait pas"
+            ]
+          },
+          {
+            "texte": "Localisation des lésions ?",
+            "options": [
+              "Cuir chevelu",
+              "Corps (tronc/membres)",
+              "Mains / pieds",
+              "Ongles / plis / visage"
+            ]
+          }
+        ],
+        "confiance_ambigue": [
+          {
+            "texte": "Étendue estimée des lésions ?",
+            "options": [
+              "Légère (< 3% BSA)",
+              "Modérée (3-10% BSA)",
+              "Sévère (> 10% BSA)",
+              "Ne sait pas"
+            ]
+          },
+          {
+            "texte": "Localisation des lésions ?",
+            "options": [
+              "Cuir chevelu",
+              "Corps (tronc/membres)",
+              "Mains / pieds",
+              "Ongles / plis / visage"
+            ]
+          },
+          {
+            "texte": "Douleurs articulaires associées ?",
+            "options": [
+              "Oui, articulaires",
+              "Oui, rachidiennes",
+              "Les deux",
+              "Non"
+            ]
+          },
+          {
+            "texte": "Antécédents familiaux de psoriasis ?",
+            "options": [
+              "Oui",
+              "Non",
+              "Ne sait pas"
+            ]
+          },
+          {
+            "texte": "Facteurs déclenchants connus ?",
+            "options": [
+              "Stress",
+              "Médicaments (bêtabloquants, lithium...)",
+              "Infection",
+              "Inconnus"
+            ]
+          }
+        ]
+      },
+      "analyse_affinee_template": "Psoriasis {type} {severite}, {localisation}. {arthrite}. {orientation_traitement}.",
+      "medicaments": [
+        {
+          "nom": "Calcipotriol + Bétaméthasone gel (Taclonex/Daivobet)",
+          "classe": "analogue vitamine D3 + corticoïde topique",
+          "indication": "Psoriasis en plaques léger à modéré",
+          "posologie": "1x/jour, maximum 4 semaines",
+          "alertes": [
+            {
+              "condition": "visage_plis",
+              "message": "Ne pas utiliser sur visage ou plis — utiliser corticoïde seul de classe inférieure.",
+              "severite": "warning"
+            },
+            {
+              "condition": "surface_superieure_30_pourcent",
+              "message": "Ne pas dépasser 30% de la surface corporelle — risque d'hypercalcémie avec calcipotriol.",
+              "severite": "warning"
+            }
+          ]
+        },
+        {
+          "nom": "Méthotrexate 15-25mg",
+          "classe": "immunosuppresseur systémique",
+          "indication": "Psoriasis modéré à sévère",
+          "posologie": "15-25mg/semaine per os ou SC",
+          "alertes": [
+            {
+              "condition": "grossesse",
+              "message": "MÉTHOTREXATE FORMELLEMENT CONTRE-INDIQUÉ — tératogène et abortif. Arrêt 3 mois avant conception (homme ET femme).",
+              "severite": "danger"
+            },
+            {
+              "condition": "femme_age_15_50",
+              "message": "Contraception obligatoire sous méthotrexate. Demander si enceinte.",
+              "severite": "danger"
+            },
+            {
+              "condition": "alcool",
+              "message": "Alcool contre-indiqué sous méthotrexate — risque hépatotoxicité majoré.",
+              "severite": "warning"
+            },
+            {
+              "condition": "insuffisance_renale",
+              "message": "Ajustement posologique obligatoire si insuffisance rénale.",
+              "severite": "warning"
+            },
+            {
+              "condition": "insuffisance_cardiaque",
+              "message": "Méthotrexate : rétention hydrosodée et interactions avec les diurétiques cardiaques — surveillance cardio.",
+              "severite": "warning"
+            },
+            {
+              "condition": "insuffisance_hepatique",
+              "message": "Méthotrexate CONTRE-INDIQUÉ en insuffisance hépatique — hépatotoxicité majeure cumulée.",
+              "severite": "danger"
+            },
+            {
+              "condition": "diabete",
+              "message": "Méthotrexate peut perturber le suivi glycémique — prévoir surveillance rapprochée.",
+              "severite": "warning"
+            }
+          ]
+        }
+      ],
+      "orientation": "Photothérapie UVB si modéré. Bilan biologique avant systémique.",
+      "contre_indications_patient": [
+        "grossesse",
+        "insuffisance_hepatique",
+        "insuffisance_renale_severe"
+      ],
+      "alertes_medicament": [],
+      "antecedents_a_verifier": [
+        "grossesse",
+        "insuffisance_hepatique",
+        "insuffisance_renale",
+        "insuffisance_cardiaque",
+        "diabete"
+      ]
+    },
+    {
+      "id": "lichen_plan",
+      "nom": "Lichen plan",
+      "categorie": "inflammatoire_auto_immune",
+      "icd10": "L43",
+      "urgence": "faible",
+      "datasets": [
+        "DermNet"
+      ],
+      "seuil_confiance": {
+        "eleve": 0.8,
+        "ambigu": 0.55
+      },
+      "analyse_initiale": "Papules violacées polygonales prurigineuses compatibles avec un lichen plan. Rechercher atteinte muqueuse buccale et génitale associée. Éliminer une hépatite C (association connue).",
+      "questions": {
+        "confiance_elevee": [
+          {
+            "texte": "Atteinte muqueuse buccale ou génitale ?",
+            "options": [
+              "Oui, buccale",
+              "Oui, génitale",
+              "Les deux",
+              "Non"
+            ]
+          },
+          {
+            "texte": "Prise médicamenteuse récente (bêtabloquants, IEC, AINS, antipaludéens) ?",
+            "options": [
+              "Oui",
+              "Non",
+              "Ne sait pas"
+            ]
+          }
+        ],
+        "confiance_ambigue": [
+          {
+            "texte": "Atteinte muqueuse buccale ou génitale ?",
+            "options": [
+              "Oui, buccale",
+              "Oui, génitale",
+              "Les deux",
+              "Non"
+            ]
+          },
+          {
+            "texte": "Prise médicamenteuse récente (bêtabloquants, IEC, AINS, antipaludéens) ?",
+            "options": [
+              "Oui",
+              "Non",
+              "Ne sait pas"
+            ]
+          },
+          {
+            "texte": "Bilan hépatite C réalisé ?",
+            "options": [
+              "Oui, négatif",
+              "Oui, positif",
+              "Non, à faire"
+            ]
+          },
+          {
+            "texte": "Intensité du prurit ?",
+            "options": [
+              "Absent",
+              "Léger",
+              "Modéré",
+              "Sévère"
+            ]
+          }
+        ]
+      },
+      "analyse_affinee_template": "Lichen plan {forme}, {muqueuse}. Bilan hépatique et sérologie VHC recommandés. {medicament_inducteur}.",
+      "medicaments": [
+        {
+          "nom": "Dermocorticoïde classe III (Bétaméthasone 0.05%)",
+          "classe": "corticostéroïde topique",
+          "indication": "Lichen plan cutané",
+          "posologie": "1x/jour en poussée",
+          "alertes": [
+            {
+              "condition": "muqueuse",
+              "message": "Pour l'atteinte muqueuse buccale : utiliser gels gingivaux corticoïdes (Buccobet) non systémiques.",
+              "severite": "warning"
+            }
+          ]
+        },
+        {
+          "nom": "Prednisone 0.5mg/kg/j",
+          "classe": "corticostéroïde systémique",
+          "indication": "Lichen plan sévère ou érosif",
+          "posologie": "0.5mg/kg/j pendant 4-6 semaines, décroissance progressive",
+          "alertes": [
+            {
+              "condition": "diabete",
+              "message": "Corticoïdes systémiques : déséquilibre glycémique probable — surveiller glycémie.",
+              "severite": "warning"
+            },
+            {
+              "condition": "hypertension",
+              "message": "Corticoïdes : risque de poussée tensionnelle — surveiller PA.",
+              "severite": "warning"
+            },
+            {
+              "condition": "grossesse",
+              "message": "Corticoïdes systémiques : utilisation possible si bénéfice > risque — discuter avec obstétricien.",
+              "severite": "warning"
+            },
+            {
+              "condition": "insuffisance_cardiaque",
+              "message": "Corticoïdes systémiques : rétention hydrosodée — risque de décompensation cardiaque. Surveiller poids et œdèmes.",
+              "severite": "danger"
+            },
+            {
+              "condition": "insuffisance_hepatique",
+              "message": "Prednisone métabolisée par le foie — accumulation possible en insuffisance hépatique.",
+              "severite": "warning"
+            },
+            {
+              "condition": "insuffisance_renale",
+              "message": "Corticoïdes : rétention sodée aggravant l'IRC — surveillance tensionnelle et pondérale.",
+              "severite": "warning"
+            }
+          ]
+        }
+      ],
+      "orientation": "Bilan hépatite C obligatoire. Suivi muqueuses.",
+      "contre_indications_patient": [],
+      "alertes_medicament": [],
+      "antecedents_a_verifier": [
+        "grossesse",
+        "diabete",
+        "hypertension",
+        "insuffisance_cardiaque",
+        "insuffisance_hepatique",
+        "insuffisance_renale"
+      ]
+    },
+    {
+      "id": "teigne",
+      "nom": "Teigne (Tinea capitis)",
+      "categorie": "infection_fongique",
+      "icd10": "B35.0",
+      "urgence": "moderee",
+      "datasets": [
+        "DermNet"
+      ],
+      "seuil_confiance": {
+        "eleve": 0.83,
+        "ambigu": 0.58
+      },
+      "analyse_initiale": "Lésions alopéciques squameuses du cuir chevelu compatibles avec une teigne. Fréquente chez l'enfant. Traitement systémique obligatoire (les antifongiques topiques seuls sont insuffisants). Éviction scolaire non obligatoire mais traitement de l'entourage recommandé.",
+      "questions": {
+        "confiance_elevee": [
+          {
+            "texte": "Âge du patient ?",
+            "options": [
+              "Moins de 5 ans",
+              "5 à 15 ans",
+              "15 à 40 ans",
+              "Plus de 40 ans"
+            ]
+          },
+          {
+            "texte": "Contact avec des animaux (chats, chiens, bovins) ?",
+            "options": [
+              "Oui, animaux domestiques",
+              "Oui, animaux de ferme",
+              "Non"
+            ]
+          }
+        ],
+        "confiance_ambigue": [
+          {
+            "texte": "Âge du patient ?",
+            "options": [
+              "Moins de 5 ans",
+              "5 à 15 ans",
+              "15 à 40 ans",
+              "Plus de 40 ans"
+            ]
+          },
+          {
+            "texte": "Contact avec des animaux (chats, chiens, bovins) ?",
+            "options": [
+              "Oui, animaux domestiques",
+              "Oui, animaux de ferme",
+              "Non"
+            ]
+          },
+          {
+            "texte": "Type de lésion prédominante ?",
+            "options": [
+              "Plaques squameuses sèches",
+              "Kérion (abcès inflammatoire)",
+              "Teigne favique (croûtes)",
+              "Alopécie diffuse"
+            ]
+          },
+          {
+            "texte": "Cas similaires dans l'entourage (famille, école) ?",
+            "options": [
+              "Oui",
+              "Non",
+              "Ne sait pas"
+            ]
+          }
+        ]
+      },
+      "analyse_affinee_template": "Teigne du cuir chevelu, {type}, chez {age}. Traitement systémique {molecule} obligatoire. {entourage}.",
+      "medicaments": [
+        {
+          "nom": "Griséofulvine 500mg",
+          "classe": "antifongique oral",
+          "indication": "Teigne du cuir chevelu (1ère ligne enfant)",
+          "posologie": "10-20mg/kg/j pendant 6-8 semaines avec repas gras",
+          "alertes": [
+            {
+              "condition": "grossesse",
+              "message": "Griséofulvine CONTRE-INDIQUÉE grossesse — tératogène. Contraception obligatoire 1 mois après arrêt.",
+              "severite": "danger"
+            },
+            {
+              "condition": "porphyrie",
+              "message": "Griséofulvine contre-indiquée en cas de porphyrie.",
+              "severite": "danger"
+            }
+          ]
+        },
+        {
+          "nom": "Terbinafine 250mg",
+          "classe": "antifongique oral (allylamine)",
+          "indication": "Teigne à Trichophyton (adulte et enfant > 12 ans)",
+          "posologie": "250mg/j (adulte) pendant 4 semaines",
+          "alertes": [
+            {
+              "condition": "grossesse",
+              "message": "Terbinafine : éviter pendant grossesse — données insuffisantes.",
+              "severite": "warning"
+            },
+            {
+              "condition": "insuffisance_hepatique",
+              "message": "Terbinafine contre-indiquée en cas d'insuffisance hépatique — hépatotoxicité possible.",
+              "severite": "danger"
+            }
+          ]
+        }
+      ],
+      "orientation": "Examen mycologique avant traitement si possible. Traiter l'entourage.",
+      "contre_indications_patient": [
+        "grossesse",
+        "porphyrie"
+      ],
+      "alertes_medicament": [],
+      "antecedents_a_verifier": [
+        "grossesse",
+        "porphyrie",
+        "insuffisance_hepatique"
+      ]
+    },
+    {
+      "id": "dermatomycose",
+      "nom": "Dermatomycose (Tinea corporis / pedis / unguium)",
+      "categorie": "infection_fongique",
+      "icd10": "B35",
+      "urgence": "faible",
+      "datasets": [
+        "DermNet"
+      ],
+      "seuil_confiance": {
+        "eleve": 0.86,
+        "ambigu": 0.62
+      },
+      "analyse_initiale": "Lésions annulaires à bordure active, ou onychomycose, compatibles avec une dermatomycose. Traitement topique en première intention pour les atteintes cutanées limitées. Traitement systémique si onyxis ou atteinte étendue.",
+      "questions": {
+        "confiance_elevee": [
+          {
+            "texte": "Localisation de l'atteinte ?",
+            "options": [
+              "Corps (Tinea corporis)",
+              "Pieds (Tinea pedis)",
+              "Ongles (onychomycose)",
+              "Aine (Tinea cruris)"
+            ]
+          },
+          {
+            "texte": "Étendue des lésions ?",
+            "options": [
+              "Limitée (1-2 plaques)",
+              "Modérée",
+              "Étendue",
+              "Ongles atteints"
+            ]
+          }
+        ],
+        "confiance_ambigue": [
+          {
+            "texte": "Localisation de l'atteinte ?",
+            "options": [
+              "Corps (Tinea corporis)",
+              "Pieds (Tinea pedis)",
+              "Ongles (onychomycose)",
+              "Aine (Tinea cruris)"
+            ]
+          },
+          {
+            "texte": "Étendue des lésions ?",
+            "options": [
+              "Limitée (1-2 plaques)",
+              "Modérée",
+              "Étendue",
+              "Ongles atteints"
+            ]
+          },
+          {
+            "texte": "Diabète ou immunodépression associée ?",
+            "options": [
+              "Diabète",
+              "Immunodépression",
+              "Les deux",
+              "Aucun"
+            ]
+          },
+          {
+            "texte": "Traitement topique déjà essayé ?",
+            "options": [
+              "Non",
+              "Oui, insuffisant",
+              "Oui, efficace puis rechute"
+            ]
+          }
+        ]
+      },
+      "analyse_affinee_template": "Dermatomycose {localisation}, {etendue}. {traitement_recommande}. {terrain}.",
+      "medicaments": [
+        {
+          "nom": "Kétoconazole 2% crème",
+          "classe": "antifongique topique azolé",
+          "indication": "Dermatomycoses cutanées limitées",
+          "posologie": "1-2x/jour pendant 2-4 semaines",
+          "alertes": []
+        },
+        {
+          "nom": "Terbinafine 1% crème",
+          "classe": "antifongique topique allylamine",
+          "indication": "Tinea pedis, corporis, cruris",
+          "posologie": "1x/jour pendant 1-2 semaines",
+          "alertes": []
+        },
+        {
+          "nom": "Terbinafine 250mg oral",
+          "classe": "antifongique oral",
+          "indication": "Onychomycose, atteinte étendue",
+          "posologie": "250mg/j — 6 semaines (mains), 12 semaines (pieds)",
+          "alertes": [
+            {
+              "condition": "insuffisance_hepatique",
+              "message": "Terbinafine orale contre-indiquée si insuffisance hépatique.",
+              "severite": "danger"
+            },
+            {
+              "condition": "grossesse",
+              "message": "Éviter terbinafine orale pendant grossesse.",
+              "severite": "warning"
+            }
+          ]
+        }
+      ],
+      "orientation": "Mycologie si doute. Traiter facteurs favorisants (macération, diabète).",
+      "contre_indications_patient": [],
+      "alertes_medicament": [],
+      "antecedents_a_verifier": [
+        "insuffisance_hepatique",
+        "grossesse"
+      ]
+    },
+    {
+      "id": "impetigo",
+      "nom": "Impétigo",
+      "categorie": "infection_bacterienne",
+      "icd10": "L01",
+      "urgence": "moderee",
+      "datasets": [
+        "DermNet"
+      ],
+      "seuil_confiance": {
+        "eleve": 0.87,
+        "ambigu": 0.63
+      },
+      "analyse_initiale": "Lésions croûteuses mellicriques ou bulleuses compatibles avec un impétigo. Infection bactérienne superficielle (Staphylococcus aureus ou Streptocoque). Très contagieux. Traitement antibiotique local ou systémique selon étendue.",
+      "questions": {
+        "confiance_elevee": [
+          {
+            "texte": "Étendue des lésions ?",
+            "options": [
+              "Localisée (< 3 lésions)",
+              "Modérée (3-6 lésions)",
+              "Étendue (> 6 lésions)",
+              "Bulleuse diffuse"
+            ]
+          },
+          {
+            "texte": "Cas similaires dans l'entourage ?",
+            "options": [
+              "Oui (famille)",
+              "Oui (école/crèche)",
+              "Non",
+              "Ne sait pas"
+            ]
+          }
+        ],
+        "confiance_ambigue": [
+          {
+            "texte": "Étendue des lésions ?",
+            "options": [
+              "Localisée (< 3 lésions)",
+              "Modérée (3-6 lésions)",
+              "Étendue (> 6 lésions)",
+              "Bulleuse diffuse"
+            ]
+          },
+          {
+            "texte": "Cas similaires dans l'entourage ?",
+            "options": [
+              "Oui (famille)",
+              "Oui (école/crèche)",
+              "Non",
+              "Ne sait pas"
+            ]
+          },
+          {
+            "texte": "Âge du patient ?",
+            "options": [
+              "Nourrisson < 2 ans",
+              "Enfant 2-15 ans",
+              "Adulte",
+              "Personne âgée"
+            ]
+          },
+          {
+            "texte": "Lésion primitive identifiée (varicelle, eczéma, plaie) ?",
+            "options": [
+              "Oui, varicelle",
+              "Oui, eczéma surinfecté",
+              "Oui, plaie",
+              "Non, primitif"
+            ]
+          }
+        ]
+      },
+      "analyse_affinee_template": "Impétigo {type} {etendue}. {contagiosite}. {traitement}. Éviction scolaire recommandée 48h après début traitement efficace.",
+      "medicaments": [
+        {
+          "nom": "Acide fusidique 2% crème",
+          "classe": "antibiotique topique",
+          "indication": "Impétigo localisé (< 5 lésions)",
+          "posologie": "3x/jour pendant 5-7 jours",
+          "alertes": []
+        },
+        {
+          "nom": "Mupirocine 2% pommade",
+          "classe": "antibiotique topique",
+          "indication": "Impétigo localisé, décolonisation SARM",
+          "posologie": "3x/jour pendant 5 jours",
+          "alertes": []
+        },
+        {
+          "nom": "Amoxicilline-acide clavulanique 1g",
+          "classe": "antibiotique oral (pénicilline + inhibiteur β-lactamase)",
+          "indication": "Impétigo étendu ou résistant topique",
+          "posologie": "1g x2/j (adulte) pendant 7 jours",
+          "alertes": [
+            {
+              "condition": "allergie_penicilline",
+              "message": "Allergie aux pénicillines — utiliser clarithromycine ou céfalexine à la place.",
+              "severite": "danger"
+            },
+            {
+              "condition": "insuffisance_renale",
+              "message": "Amoxicilline-clavulanate : réduire la posologie si DFG < 30 ml/min — risque d'accumulation.",
+              "severite": "warning"
+            },
+            {
+              "condition": "insuffisance_hepatique",
+              "message": "Clavulanate : hépatotoxicité rare mais documentée — surveiller si atteinte hépatique préexistante.",
+              "severite": "warning"
+            }
+          ]
+        }
+      ],
+      "orientation": "Hygiène stricte des mains. Éviction scolaire 48h.",
+      "contre_indications_patient": [],
+      "alertes_medicament": [],
+      "antecedents_a_verifier": [
+        "allergie_penicilline",
+        "insuffisance_renale",
+        "insuffisance_hepatique"
+      ]
+    },
+    {
+      "id": "furoncle_cellulite",
+      "nom": "Furoncle / Cellulite infectieuse",
+      "categorie": "infection_bacterienne",
+      "icd10": "L02",
+      "urgence": "moderee",
+      "datasets": [
+        "DermNet"
+      ],
+      "seuil_confiance": {
+        "eleve": 0.84,
+        "ambigu": 0.6
+      },
+      "analyse_initiale": "Lésion inflammatoire profonde compatible avec un furoncle ou une cellulite infectieuse. Évaluer signes de gravité (fièvre, extension rapide, zone à risque). Drainage chirurgical si abcès fluctuant.",
+      "questions": {
+        "confiance_elevee": [
+          {
+            "texte": "Présence de fièvre ou frissons ?",
+            "options": [
+              "Oui, fièvre > 38.5°C",
+              "Fièvre légère",
+              "Non"
+            ]
+          },
+          {
+            "texte": "Localisation ?",
+            "options": [
+              "Visage / lèvre sup. / nez",
+              "Membre",
+              "Tronc",
+              "Zone périnéale"
+            ]
+          }
+        ],
+        "confiance_ambigue": [
+          {
+            "texte": "Présence de fièvre ou frissons ?",
+            "options": [
+              "Oui, fièvre > 38.5°C",
+              "Fièvre légère",
+              "Non"
+            ]
+          },
+          {
+            "texte": "Localisation ?",
+            "options": [
+              "Visage / lèvre sup. / nez",
+              "Membre",
+              "Tronc",
+              "Zone périnéale"
+            ]
+          },
+          {
+            "texte": "Extension rapide des rougeurs ?",
+            "options": [
+              "Oui, progression rapide",
+              "Stable",
+              "Régression"
+            ]
+          },
+          {
+            "texte": "Diabète ou immunodépression ?",
+            "options": [
+              "Diabète",
+              "Immunodépression",
+              "Les deux",
+              "Aucun"
+            ]
+          },
+          {
+            "texte": "Abcès fluctuant à la palpation ?",
+            "options": [
+              "Oui, fluctuant",
+              "Non, induré",
+              "Non examiné"
+            ]
+          }
+        ]
+      },
+      "analyse_affinee_template": "Furoncle/cellulite {localisation}, {gravite}. {drainage}. {antibiotherapie}.",
+      "medicaments": [
+        {
+          "nom": "Céfalexine 500mg",
+          "classe": "antibiotique oral (céphalosporine 1ère génération)",
+          "indication": "Cellulite non compliquée, furoncle",
+          "posologie": "500mg x4/j pendant 7 jours",
+          "alertes": [
+            {
+              "condition": "allergie_penicilline_severe",
+              "message": "Allergie sévère aux β-lactamines — risque faible de cross-réactivité mais préférer clindamycine.",
+              "severite": "warning"
+            },
+            {
+              "condition": "insuffisance_renale",
+              "message": "Céfalexine : ajustement posologique obligatoire si DFG < 30 ml/min.",
+              "severite": "warning"
+            }
+          ]
+        },
+        {
+          "nom": "Clindamycine 300mg",
+          "classe": "antibiotique oral (lincosamide)",
+          "indication": "Furoncle/cellulite, allergie pénicilline ou suspicion SARM",
+          "posologie": "300mg x3/j pendant 7-10 jours",
+          "alertes": [
+            {
+              "condition": "colite",
+              "message": "Clindamycine : risque de colite pseudomembraneuse à C. difficile — surveiller diarrhées.",
+              "severite": "warning"
+            },
+            {
+              "condition": "insuffisance_hepatique",
+              "message": "Clindamycine : métabolisme hépatique — réduire posologie en cas d'insuffisance hépatique.",
+              "severite": "warning"
+            },
+            {
+              "condition": "insuffisance_cardiaque",
+              "message": "Clindamycine IV peut induire des troubles du rythme — ECG de surveillance recommandé.",
+              "severite": "warning"
+            }
+          ]
+        }
+      ],
+      "orientation": "Hospitalisation si signes de sepsis ou localisation faciale. Drainage si fluctuant.",
+      "contre_indications_patient": [],
+      "alertes_medicament": [],
+      "antecedents_a_verifier": [
+        "insuffisance_renale",
+        "insuffisance_hepatique",
+        "insuffisance_cardiaque"
+      ]
+    },
+    {
+      "id": "herpes_zoster",
+      "nom": "Zona (Herpes zoster)",
+      "categorie": "infection_virale",
+      "icd10": "B02",
+      "urgence": "moderee",
+      "datasets": [
+        "DermNet"
+      ],
+      "seuil_confiance": {
+        "eleve": 0.88,
+        "ambigu": 0.65
+      },
+      "analyse_initiale": "Éruption vésiculeuse unilatérale métamérique compatible avec un zona. Réactivation du VZV. Traitement antiviral en urgence si < 72h du début de l'éruption, ou si zona ophtalmique/otique.",
+      "questions": {
+        "confiance_elevee": [
+          {
+            "texte": "Depuis combien de temps l'éruption est-elle apparue ?",
+            "options": [
+              "Moins de 24h",
+              "24 à 72h",
+              "3 à 7 jours",
+              "Plus de 7 jours"
+            ]
+          },
+          {
+            "texte": "Localisation du dermatome atteint ?",
+            "options": [
+              "Ophtalmique (V1) — urgence",
+              "Facial / otique (Ramsay Hunt)",
+              "Thoracique / lombaire",
+              "Membre"
+            ]
+          }
+        ],
+        "confiance_ambigue": [
+          {
+            "texte": "Depuis combien de temps l'éruption est-elle apparue ?",
+            "options": [
+              "Moins de 24h",
+              "24 à 72h",
+              "3 à 7 jours",
+              "Plus de 7 jours"
+            ]
+          },
+          {
+            "texte": "Localisation du dermatome atteint ?",
+            "options": [
+              "Ophtalmique (V1) — urgence",
+              "Facial / otique (Ramsay Hunt)",
+              "Thoracique / lombaire",
+              "Membre"
+            ]
+          },
+          {
+            "texte": "Intensité de la douleur (0-10) ?",
+            "options": [
+              "0-3 (légère)",
+              "4-6 (modérée)",
+              "7-9 (sévère)",
+              "10 (insupportable)"
+            ]
+          },
+          {
+            "texte": "Statut immunitaire du patient ?",
+            "options": [
+              "Immunocompétent",
+              "VIH+",
+              "Chimiothérapie en cours",
+              "Corticoïdes au long cours"
+            ]
+          },
+          {
+            "texte": "Âge du patient ?",
+            "options": [
+              "Moins de 50 ans",
+              "50 à 70 ans",
+              "Plus de 70 ans"
+            ]
+          }
+        ]
+      },
+      "analyse_affinee_template": "Zona {dermatome}, J{jour_eruption}. {urgence_ophtalmo}. Antiviral {indication}. Prévention névralgie post-zostérienne {age}.",
+      "medicaments": [
+        {
+          "nom": "Valaciclovir 1000mg",
+          "classe": "antiviral (prodrogue aciclovir)",
+          "indication": "Zona, traitement curatif dans les 72h",
+          "posologie": "1000mg x3/j pendant 7 jours",
+          "alertes": [
+            {
+              "condition": "insuffisance_renale",
+              "message": "Valaciclovir : ajustement posologique obligatoire si IRC — risque de neurotoxicité.",
+              "severite": "danger"
+            },
+            {
+              "condition": "grossesse",
+              "message": "Aciclovir/Valaciclovir : utilisation possible si bénéfice > risque. Discuter avec obstétricien.",
+              "severite": "warning"
+            }
+          ]
+        },
+        {
+          "nom": "Prégabaline 75mg",
+          "classe": "antiépileptique (douleur neuropathique)",
+          "indication": "Douleurs zona sévères / névralgie post-zostérienne",
+          "posologie": "75mg x2/j, titration progressive",
+          "alertes": [
+            {
+              "condition": "insuffisance_renale",
+              "message": "Prégabaline : réduction posologique si clairance < 60ml/min.",
+              "severite": "warning"
+            },
+            {
+              "condition": "grossesse",
+              "message": "Prégabaline contre-indiquée grossesse.",
+              "severite": "danger"
+            },
+            {
+              "condition": "personne_agee",
+              "message": "Risque de somnolence et chutes chez la personne âgée — débuter à dose faible.",
+              "severite": "warning"
+            }
+          ]
+        }
+      ],
+      "orientation": "Zona ophtalmique = urgence ophtalmologique. Vaccination VZV si > 65 ans non vacciné.",
+      "contre_indications_patient": [],
+      "alertes_medicament": [],
+      "antecedents_a_verifier": [
+        "insuffisance_renale",
+        "immunodepression"
+      ]
+    },
+    {
+      "id": "verrues",
+      "nom": "Verrues (Verruca vulgaris / plantaris)",
+      "categorie": "infection_virale",
+      "icd10": "B07",
+      "urgence": "faible",
+      "datasets": [
+        "DermNet"
+      ],
+      "seuil_confiance": {
+        "eleve": 0.9,
+        "ambigu": 0.68
+      },
+      "analyse_initiale": "Lésions hyperkératosiques compatibles avec des verrues à HPV. Évolution souvent spontanément résolutive (60-70% à 2 ans). Traitement si douleur, extension ou demande du patient.",
+      "questions": {
+        "confiance_elevee": [
+          {
+            "texte": "Localisation et nombre de verrues ?",
+            "options": [
+              "1 à 3 verrues vulgaires",
+              "Verrues plantaires (mosaïque)",
+              "Verrues péri-unguéales",
+              "Verrues multiples > 10"
+            ]
+          }
+        ],
+        "confiance_ambigue": [
+          {
+            "texte": "Localisation et nombre de verrues ?",
+            "options": [
+              "1 à 3 verrues vulgaires",
+              "Verrues plantaires (mosaïque)",
+              "Verrues péri-unguéales",
+              "Verrues multiples > 10"
+            ]
+          },
+          {
+            "texte": "Durée d'évolution ?",
+            "options": [
+              "Moins de 6 mois",
+              "6 mois à 2 ans",
+              "Plus de 2 ans"
+            ]
+          },
+          {
+            "texte": "Traitements déjà essayés ?",
+            "options": [
+              "Aucun",
+              "Acide salicylique en pharmacie",
+              "Cryothérapie",
+              "Plusieurs échecs"
+            ]
+          },
+          {
+            "texte": "Immunodépression ?",
+            "options": [
+              "Oui",
+              "Non"
+            ]
+          }
+        ]
+      },
+      "analyse_affinee_template": "Verrues {localisation}, {nombre}, {duree}. {traitement_recommande}.",
+      "medicaments": [
+        {
+          "nom": "Acide salicylique 12-40% (Duofilm, Verrugon)",
+          "classe": "kératolytique topique",
+          "indication": "Verrues communes et plantaires",
+          "posologie": "Application quotidienne après limage, occlusion la nuit",
+          "alertes": [
+            {
+              "condition": "diabete",
+              "message": "Acide salicylique contre-indiqué sur pied diabétique — risque d'ulcération.",
+              "severite": "danger"
+            },
+            {
+              "condition": "artere_periph",
+              "message": "Éviter sur membres en cas d'artériopathie oblitérante.",
+              "severite": "warning"
+            }
+          ]
+        }
+      ],
+      "orientation": "Cryothérapie si échec topique. Résolution spontanée fréquente.",
+      "contre_indications_patient": [],
+      "alertes_medicament": [],
+      "antecedents_a_verifier": [
+        "diabete",
+        "artere_periph"
+      ]
+    },
+    {
+      "id": "urticaire",
+      "nom": "Urticaire aiguë",
+      "categorie": "allergique_immunologique",
+      "icd10": "L50",
+      "urgence": "moderee",
+      "datasets": [
+        "DermNet"
+      ],
+      "seuil_confiance": {
+        "eleve": 0.89,
+        "ambigu": 0.65
+      },
+      "analyse_initiale": "Plaques urticariennes érythémato-oedémateuses, fugaces, prurigineuses, compatibles avec une urticaire aiguë. Rechercher systématiquement signes d'anaphylaxie associés (dyspnée, hypotension, angioedème laryngé).",
+      "questions": {
+        "confiance_elevee": [
+          {
+            "texte": "Signes de gravité associés ?",
+            "options": [
+              "Angioedème laryngé (voix rauque, dyspnée)",
+              "Hypotension / malaise",
+              "Angioedème facial sans dyspnée",
+              "Aucun — urticaire isolée"
+            ]
+          },
+          {
+            "texte": "Facteur déclenchant identifié ?",
+            "options": [
+              "Médicament (AINS, antibiotique...)",
+              "Aliment",
+              "Piqûre d'insecte",
+              "Inconnu"
+            ]
+          }
+        ],
+        "confiance_ambigue": [
+          {
+            "texte": "Signes de gravité associés ?",
+            "options": [
+              "Angioedème laryngé (voix rauque, dyspnée)",
+              "Hypotension / malaise",
+              "Angioedème facial sans dyspnée",
+              "Aucun — urticaire isolée"
+            ]
+          },
+          {
+            "texte": "Facteur déclenchant identifié ?",
+            "options": [
+              "Médicament (AINS, antibiotique...)",
+              "Aliment",
+              "Piqûre d'insecte",
+              "Inconnu"
+            ]
+          },
+          {
+            "texte": "Durée des plaques individuelles ?",
+            "options": [
+              "< 24h (typique urticaire)",
+              "24-48h",
+              "> 48h (évoquer urticaire vasculitique)"
+            ]
+          },
+          {
+            "texte": "Antécédents d'urticaire ou d'allergie connue ?",
+            "options": [
+              "Oui, urticaire récurrente",
+              "Oui, allergie diagnostiquée",
+              "Non"
+            ]
+          }
+        ]
+      },
+      "analyse_affinee_template": "Urticaire aiguë {gravite}. {facteur}. {traitement}. {bilan_allergologique}.",
+      "medicaments": [
+        {
+          "nom": "Cétirizine 10mg",
+          "classe": "antihistaminique H1 non sédatif",
+          "indication": "Urticaire aiguë sans signe de gravité",
+          "posologie": "10mg/j (adulte), 5mg/j (enfant 6-12 ans)",
+          "alertes": [
+            {
+              "condition": "insuffisance_renale",
+              "message": "Réduire posologie cétirizine si insuffisance rénale : 5mg/j si DFG 10-30.",
+              "severite": "warning"
+            }
+          ]
+        },
+        {
+          "nom": "Adrénaline 0.3mg IM (EpiPen)",
+          "classe": "sympathomimétique — traitement anaphylaxie",
+          "indication": "URGENCE : anaphylaxie, angioedème laryngé",
+          "posologie": "0.3mg IM face antéro-latérale cuisse, répéter si besoin à 5 min",
+          "alertes": [
+            {
+              "condition": "coronaropathie",
+              "message": "Adrénaline : risque d'ischémie myocardique — mais en anaphylaxie le bénéfice prime toujours. Administrer quand même.",
+              "severite": "warning"
+            }
+          ]
+        }
+      ],
+      "orientation": "Signes anaphylaxie = urgences immédiates. Bilan allergologique à distance.",
+      "contre_indications_patient": [],
+      "alertes_medicament": [],
+      "antecedents_a_verifier": [
+        "insuffisance_renale",
+        "coronaropathie"
+      ]
+    },
+    {
+      "id": "pemphigoide_bulleuse",
+      "nom": "Pemphigoïde bulleuse",
+      "categorie": "inflammatoire_auto_immune",
+      "icd10": "L12.0",
+      "urgence": "elevee",
+      "datasets": [
+        "DermNet"
+      ],
+      "seuil_confiance": {
+        "eleve": 0.78,
+        "ambigu": 0.52
+      },
+      "analyse_initiale": "Bulles tendues sur base érythémateuse, compatibles avec une pemphigoïde bulleuse. Maladie auto-immune de la jonction dermo-épidermique. Fréquente chez le sujet âgé. Biopsie pour immunofluorescence directe nécessaire.",
+      "questions": {
+        "confiance_elevee": [
+          {
+            "texte": "Âge du patient ?",
+            "options": [
+              "Moins de 60 ans",
+              "60 à 80 ans",
+              "Plus de 80 ans"
+            ]
+          },
+          {
+            "texte": "Atteinte muqueuse buccale ?",
+            "options": [
+              "Oui",
+              "Non"
+            ]
+          }
+        ],
+        "confiance_ambigue": [
+          {
+            "texte": "Âge du patient ?",
+            "options": [
+              "Moins de 60 ans",
+              "60 à 80 ans",
+              "Plus de 80 ans"
+            ]
+          },
+          {
+            "texte": "Atteinte muqueuse buccale ?",
+            "options": [
+              "Oui",
+              "Non"
+            ]
+          },
+          {
+            "texte": "Prise médicamenteuse récente (diurétiques, gliptines, neuroleptiques) ?",
+            "options": [
+              "Oui — gliptines (antidiabétiques)",
+              "Oui — autre médicament",
+              "Non"
+            ]
+          },
+          {
+            "texte": "Étendue des bulles ?",
+            "options": [
+              "Localisée (< 10 bulles)",
+              "Modérée",
+              "Étendue (> 30 bulles)"
+            ]
+          },
+          {
+            "texte": "Prurit précédant les bulles ?",
+            "options": [
+              "Oui, prurit intense préalable",
+              "Non, bulles d'emblée"
+            ]
+          }
+        ]
+      },
+      "analyse_affinee_template": "Pemphigoïde bulleuse suspectée, {etendue}. Biopsie + IFD urgente. {medicament_inducteur}. {corticotherapie}.",
+      "medicaments": [
+        {
+          "nom": "Propionate de clobétasol 0.05% crème (Dermoval)",
+          "classe": "dermocorticoïde très puissant classe IV",
+          "indication": "Pemphigoïde bulleuse — traitement de référence en France",
+          "posologie": "20-40g/j corps entier, décroissance progressive sur 12 mois",
+          "alertes": [
+            {
+              "condition": "diabete",
+              "message": "Clobétasol : absorption systémique significative — déséquilibre glycémique possible.",
+              "severite": "warning"
+            },
+            {
+              "condition": "hypertension",
+              "message": "Absorption systémique : surveiller pression artérielle.",
+              "severite": "warning"
+            },
+            {
+              "condition": "insuffisance_cardiaque",
+              "message": "Rétention hydrosodée possible — surveiller poids et oedèmes.",
+              "severite": "warning"
+            }
+          ]
+        }
+      ],
+      "orientation": "Biopsie IFD obligatoire. Hospitalisation si étendu. Suivi mensuel.",
+      "contre_indications_patient": [],
+      "alertes_medicament": [],
+      "antecedents_a_verifier": [
+        "diabete",
+        "hypertension",
+        "insuffisance_cardiaque"
+      ]
+    },
+    {
+      "id": "vitiligo",
+      "nom": "Vitiligo",
+      "categorie": "pigmentation",
+      "icd10": "L80",
+      "urgence": "faible",
+      "datasets": [
+        "HAM10000",
+        "DermNet"
+      ],
+      "seuil_confiance": {
+        "eleve": 0.92,
+        "ambigu": 0.7
+      },
+      "analyse_initiale": "Macules achromiques bien délimitées compatibles avec un vitiligo. Maladie auto-immune de destruction des mélanocytes. Évaluer l'étendue (BSA), le retentissement psychologique et l'activité de la maladie.",
+      "questions": {
+        "confiance_elevee": [
+          {
+            "texte": "Étendue et évolution des lésions ?",
+            "options": [
+              "Stable depuis > 1 an",
+              "Extension progressive",
+              "Apparu récemment (< 6 mois)",
+              "Fluctuant"
+            ]
+          },
+          {
+            "texte": "Maladies auto-immunes associées connues ?",
+            "options": [
+              "Thyroïdite",
+              "Diabète type 1",
+              "Plusieurs",
+              "Aucune connue"
+            ]
+          }
+        ],
+        "confiance_ambigue": [
+          {
+            "texte": "Étendue et évolution des lésions ?",
+            "options": [
+              "Stable depuis > 1 an",
+              "Extension progressive",
+              "Apparu récemment (< 6 mois)",
+              "Fluctuant"
+            ]
+          },
+          {
+            "texte": "Maladies auto-immunes associées connues ?",
+            "options": [
+              "Thyroïdite",
+              "Diabète type 1",
+              "Plusieurs",
+              "Aucune connue"
+            ]
+          },
+          {
+            "texte": "Localisation des macules ?",
+            "options": [
+              "Visage / péri-orificiel",
+              "Mains / poignets",
+              "Corps diffus",
+              "Zones de frottement (Koebner)"
+            ]
+          },
+          {
+            "texte": "Impact psychologique du vitiligo ?",
+            "options": [
+              "Très important",
+              "Modéré",
+              "Faible",
+              "Aucun"
+            ]
+          }
+        ]
+      },
+      "analyse_affinee_template": "Vitiligo {type}, {etendue}, {activite}. Bilan thyroïdien recommandé. {traitement_adapte}.",
+      "medicaments": [
+        {
+          "nom": "Tacrolimus 0.1% pommade (Protopic)",
+          "classe": "inhibiteur de calcineurine topique",
+          "indication": "Vitiligo visage et zones sensibles",
+          "posologie": "2x/jour + photothérapie NB-UVB",
+          "alertes": [
+            {
+              "condition": "grossesse",
+              "message": "Données insuffisantes grossesse.",
+              "severite": "warning"
+            }
+          ]
+        },
+        {
+          "nom": "Ruxolitinib 1.5% crème (Opzelura)",
+          "classe": "inhibiteur JAK topique",
+          "indication": "Vitiligo non segmentaire de l'adulte",
+          "posologie": "2x/jour sur zones dépigmentées (max 10% BSA)",
+          "alertes": [
+            {
+              "condition": "grossesse",
+              "message": "Ruxolitinib crème : déconseillé grossesse et allaitement.",
+              "severite": "warning"
+            },
+            {
+              "condition": "infection_active",
+              "message": "Inhibiteurs JAK : ne pas initier si infection active en cours.",
+              "severite": "warning"
+            }
+          ]
+        }
+      ],
+      "orientation": "Bilan thyroïdien (TSH, anticorps). Photothérapie NB-UVB si étendu.",
+      "contre_indications_patient": [],
+      "alertes_medicament": [],
+      "antecedents_a_verifier": [
+        "grossesse"
+      ]
+    },
+    {
+      "id": "dermatofibrome",
+      "nom": "Dermatofibrome",
+      "categorie": "lesion_benigne",
+      "icd10": "D23",
+      "urgence": "faible",
+      "datasets": [
+        "HAM10000",
+        "DermNet"
+      ],
+      "seuil_confiance": {
+        "eleve": 0.88,
+        "ambigu": 0.65
+      },
+      "analyse_initiale": "Nodule dermique ferme, légèrement pigmenté, à dépression centrale caractéristique (signe de Fitzpatrick positif). Compatible avec un dermatofibrome bénin. Aucun traitement nécessaire sauf gêne ou doute diagnostique.",
+      "questions": {
+        "confiance_elevee": [
+          {
+            "texte": "La lésion a-t-elle changé récemment ?",
+            "options": [
+              "Non, stable depuis des années",
+              "Légère modification de taille",
+              "Changement de couleur",
+              "Apparu récemment"
+            ]
+          }
+        ],
+        "confiance_ambigue": [
+          {
+            "texte": "La lésion a-t-elle changé récemment ?",
+            "options": [
+              "Non, stable depuis des années",
+              "Légère modification de taille",
+              "Changement de couleur",
+              "Apparu récemment"
+            ]
+          },
+          {
+            "texte": "Antécédent de traumatisme ou piqûre à cet endroit ?",
+            "options": [
+              "Oui",
+              "Non",
+              "Ne sait pas"
+            ]
+          },
+          {
+            "texte": "La lésion est-elle gênante (douleur, frottement) ?",
+            "options": [
+              "Oui, douloureuse",
+              "Oui, frottement vêtements",
+              "Non"
+            ]
+          },
+          {
+            "texte": "Nombre de lésions similaires ?",
+            "options": [
+              "Unique",
+              "2 à 5",
+              "Nombreuses (> 5 — évoquer syndrome)"
+            ]
+          }
+        ]
+      },
+      "analyse_affinee_template": "Dermatofibrome bénin, {evolution}. {traitement}.",
+      "medicaments": [],
+      "orientation": "Surveillance simple. Exérèse si doute ou gêne fonctionnelle.",
+      "contre_indications_patient": [],
+      "alertes_medicament": [],
+      "antecedents_a_verifier": []
+    },
+    {
+      "id": "leishmaniose_cutanee",
+      "nom": "Leishmaniose cutanée (Bouton d'Orient)",
+      "categorie": "infection_parasitaire",
+      "icd10": "B55.1",
+      "urgence": "moderee",
+      "contexte_geographique": "Algérie — endémique",
+      "zones_endemiques_algerie": [
+        "Biskra",
+        "M'Sila",
+        "Djelfa",
+        "Batna",
+        "Khenchela",
+        "El Oued",
+        "Ouargla"
+      ],
+      "agent_pathogene": "Leishmania major / Leishmania infantum",
+      "vecteur": "Phlébotome (Phlebotomus papatasi) — actif au coucher du soleil",
+      "datasets": [
+        "DermNet"
+      ],
+      "seuil_confiance": {
+        "eleve": 0.8,
+        "ambigu": 0.55
+      },
+      "analyse_initiale": "Ulcération indolore à bordure surélevée et infiltrée (aspect volcanique ou en cratère), compatible avec une leishmaniose cutanée — appelée localement 'bouton de Biskra' ou 'bouton d'Orient'. Maladie endémique dans les wilayas du centre et du sud algérien. Confirmation parasitologique (frottis ou PCR sur biopsie du bord) recommandée avant traitement systémique.",
+      "questions": {
+        "confiance_elevee": [
+          {
+            "texte": "Wilaya de résidence ou de séjour récent ?",
+            "options": [
+              "Biskra / Batna / Khenchela",
+              "M'Sila / Djelfa",
+              "El Oued / Ouargla / Sud",
+              "Nord du pays / ville"
+            ]
+          },
+          {
+            "texte": "Depuis combien de temps la lésion est-elle présente ?",
+            "options": [
+              "Moins d'1 mois",
+              "1 à 3 mois",
+              "3 à 6 mois",
+              "Plus de 6 mois"
+            ]
+          },
+          {
+            "texte": "La lésion est-elle douloureuse ?",
+            "options": [
+              "Non, totalement indolore",
+              "Légèrement sensible",
+              "Oui, douloureuse"
+            ]
+          }
+        ],
+        "confiance_ambigue": [
+          {
+            "texte": "Wilaya de résidence ou de séjour récent ?",
+            "options": [
+              "Biskra / Batna / Khenchela",
+              "M'Sila / Djelfa",
+              "El Oued / Ouargla / Sud",
+              "Nord du pays / ville"
+            ]
+          },
+          {
+            "texte": "Depuis combien de temps la lésion est-elle présente ?",
+            "options": [
+              "Moins d'1 mois",
+              "1 à 3 mois",
+              "3 à 6 mois",
+              "Plus de 6 mois"
+            ]
+          },
+          {
+            "texte": "La lésion est-elle douloureuse ?",
+            "options": [
+              "Non, totalement indolore",
+              "Légèrement sensible",
+              "Oui, douloureuse"
+            ]
+          },
+          {
+            "texte": "Nombre et localisation des lésions ?",
+            "options": [
+              "Unique, zones exposées (visage, mains)",
+              "Multiple, zones exposées",
+              "Unique, zone couverte",
+              "Multiple, diffuse"
+            ]
+          },
+          {
+            "texte": "Notion de piqûres nocturnes (phlébotomes) en zone rurale ?",
+            "options": [
+              "Oui, fréquentes",
+              "Oui, occasionnelles",
+              "Non / Ne sait pas"
+            ]
+          },
+          {
+            "texte": "Cas similaires dans l'entourage ou le voisinage ?",
+            "options": [
+              "Oui",
+              "Non",
+              "Ne sait pas"
+            ]
+          },
+          {
+            "texte": "Adénopathie satellite palpable ?",
+            "options": [
+              "Oui",
+              "Non"
+            ]
+          }
+        ]
+      },
+      "analyse_affinee_template": "Leishmaniose cutanée probable, {localisation_geographique}. Lésion {description} depuis {duree}. Confirmation parasitologique nécessaire. {traitement_adapte}. Déclaration obligatoire en Algérie.",
+      "medicaments": [
+        {
+          "nom": "Glucantime (Méglumine antimoniate) IM",
+          "classe": "antimonié pentavalent — référence en Algérie",
+          "indication": "Leishmaniose cutanée confirmée",
+          "posologie": "20mg/kg/j IM pendant 20 jours (protocole MSPRH Algérie)",
+          "alertes": [
+            {
+              "condition": "grossesse",
+              "message": "Glucantime CONTRE-INDIQUÉ pendant la grossesse — toxicité fœtale.",
+              "severite": "danger"
+            },
+            {
+              "condition": "insuffisance_cardiaque",
+              "message": "Cardiotoxicité (allongement QT) — ECG avant et pendant traitement.",
+              "severite": "danger"
+            },
+            {
+              "condition": "insuffisance_renale",
+              "message": "Réduire doses et surveiller créatinine sous Glucantime.",
+              "severite": "warning"
+            },
+            {
+              "condition": "insuffisance_hepatique",
+              "message": "Hépatotoxicité possible — bilan hépatique avant traitement.",
+              "severite": "warning"
+            }
+          ]
+        },
+        {
+          "nom": "Fluconazole 200mg oral",
+          "classe": "antifongique azolé (activité leishmanicide modérée)",
+          "indication": "Alternative orale pour lésion unique simple, L. major",
+          "posologie": "200mg/j pendant 6 semaines",
+          "alertes": [
+            {
+              "condition": "grossesse",
+              "message": "Fluconazole doses élevées : risque tératogène au 1er trimestre.",
+              "severite": "warning"
+            }
+          ]
+        },
+        {
+          "nom": "Cryothérapie (azote liquide)",
+          "classe": "traitement physique local",
+          "indication": "Lésion unique, petite taille, forme sèche",
+          "posologie": "Séances répétées toutes les 2-3 semaines",
+          "alertes": []
+        }
+      ],
+      "orientation": "Déclaration obligatoire à la DSP. Confirmation parasitologique avant Glucantime. Bilan cardiaque et rénal pré-thérapeutique.",
+      "contre_indications_patient": [
+        "grossesse",
+        "insuffisance_cardiaque_severe"
+      ],
+      "alertes_medicament": [],
+      "note_algerie": "Maladie à déclaration obligatoire en Algérie (arrêté 1994). Pic saisonnier : été-automne. Programme national de lutte coordonné par l'INSP. Endémique dans les wilayas steppiques et sahariennes.",
+      "antecedents_a_verifier": [
+        "grossesse",
+        "insuffisance_cardiaque",
+        "insuffisance_renale",
+        "insuffisance_hepatique"
+      ]
+    },
+    {
+      "id": "gale",
+      "nom": "Gale (Scabiose)",
+      "categorie": "infection_parasitaire",
+      "icd10": "B86",
+      "urgence": "moderee",
+      "contexte_geographique": "Algérie — fréquente en collectivités",
+      "datasets": [
+        "DermNet"
+      ],
+      "seuil_confiance": {
+        "eleve": 0.85,
+        "ambigu": 0.6
+      },
+      "analyse_initiale": "Prurit intense à recrudescence nocturne, lésions de grattage et sillons scabieux aux zones caractéristiques (espaces interdigitaux, poignets, ombilic, région génitale), compatible avec une gale. Très contagieuse — traitement simultané de l'entourage obligatoire.",
+      "questions": {
+        "confiance_elevee": [
+          {
+            "texte": "Le prurit est-il plus intense la nuit ?",
+            "options": [
+              "Oui, surtout nocturne",
+              "Non, constant",
+              "Variable"
+            ]
+          },
+          {
+            "texte": "D'autres personnes dans le foyer ont-elles le même prurit ?",
+            "options": [
+              "Oui, plusieurs personnes",
+              "Oui, une personne",
+              "Non",
+              "Ne sait pas"
+            ]
+          },
+          {
+            "texte": "Localisation principale du prurit ?",
+            "options": [
+              "Mains / espaces interdigitaux",
+              "Poignets / avant-bras",
+              "Région génitale / abdomen",
+              "Diffuse"
+            ]
+          }
+        ],
+        "confiance_ambigue": [
+          {
+            "texte": "Le prurit est-il plus intense la nuit ?",
+            "options": [
+              "Oui, surtout nocturne",
+              "Non, constant",
+              "Variable"
+            ]
+          },
+          {
+            "texte": "D'autres personnes dans le foyer ont-elles le même prurit ?",
+            "options": [
+              "Oui, plusieurs personnes",
+              "Oui, une personne",
+              "Non",
+              "Ne sait pas"
+            ]
+          },
+          {
+            "texte": "Localisation principale du prurit ?",
+            "options": [
+              "Mains / espaces interdigitaux",
+              "Poignets / avant-bras",
+              "Région génitale / abdomen",
+              "Diffuse"
+            ]
+          },
+          {
+            "texte": "Contexte de vie récent ?",
+            "options": [
+              "Hospitalisation récente",
+              "Retour de voyage / camp",
+              "Collectivité (internat, prison)",
+              "Domicile sans contact identifié"
+            ]
+          },
+          {
+            "texte": "Le patient est-il immunodéprimé ?",
+            "options": [
+              "Oui",
+              "Non"
+            ]
+          },
+          {
+            "texte": "Signes de surinfection ou croûtes épaisses ?",
+            "options": [
+              "Oui, gale norvégienne suspectée",
+              "Oui, impétiginisation",
+              "Non"
+            ]
+          }
+        ]
+      },
+      "analyse_affinee_template": "Gale {forme}, contexte {contexte}. Traitement simultané de tout le foyer obligatoire. {surinfection}. Décontamination linge et literie.",
+      "medicaments": [
+        {
+          "nom": "Benzoate de benzyle 25% lotion",
+          "classe": "scabicide topique — disponible en Algérie",
+          "indication": "Gale commune — 1ère ligne disponible localement",
+          "posologie": "Application corps entier (sauf visage) après bain, laisser 24h, répéter J8",
+          "alertes": [
+            {
+              "condition": "nourrisson_moins_2_ans",
+              "message": "Diluer à 12.5% chez le nourrisson. Ne pas appliquer sur le visage.",
+              "severite": "warning"
+            },
+            {
+              "condition": "grossesse",
+              "message": "Benzoate de benzyle : éviter au 1er trimestre. Préférer perméthrine si disponible.",
+              "severite": "warning"
+            },
+            {
+              "condition": "peau_lesee",
+              "message": "Irritant sur peau lésée ou excoriée — surveiller la tolérance.",
+              "severite": "warning"
+            }
+          ]
+        },
+        {
+          "nom": "Ivermectine 200µg/kg oral (Stromectol)",
+          "classe": "antiparasitaire systémique",
+          "indication": "Gale commune ou norvégienne, traitement de masse, échec topique",
+          "posologie": "200µg/kg dose unique, répéter à J15",
+          "alertes": [
+            {
+              "condition": "grossesse",
+              "message": "Ivermectine CONTRE-INDIQUÉE pendant la grossesse.",
+              "severite": "danger"
+            },
+            {
+              "condition": "allaitement",
+              "message": "Éviter ivermectine pendant l'allaitement.",
+              "severite": "warning"
+            },
+            {
+              "condition": "moins_15kg",
+              "message": "Ivermectine non recommandée si poids < 15kg.",
+              "severite": "danger"
+            },
+            {
+              "condition": "insuffisance_hepatique",
+              "message": "Ivermectine : prudence en insuffisance hépatique sévère — pas de donnée suffisante.",
+              "severite": "warning"
+            },
+            {
+              "condition": "insuffisance_renale",
+              "message": "Ivermectine : données limitées en IRC sévère — surveiller.",
+              "severite": "warning"
+            }
+          ]
+        },
+        {
+          "nom": "Perméthrine 5% crème",
+          "classe": "scabicide topique (pyréthrinoïde)",
+          "indication": "Gale commune — alternative si disponible",
+          "posologie": "Application corps entier 8-14h, rincer, répéter J8",
+          "alertes": [
+            {
+              "condition": "nourrisson_moins_2_mois",
+              "message": "Perméthrine non recommandée avant 2 mois.",
+              "severite": "warning"
+            }
+          ]
+        }
+      ],
+      "orientation": "Traiter TOUT le foyer le même jour. Décontamination vêtements et literie (60°C ou sac hermétique 72h).",
+      "contre_indications_patient": [
+        "grossesse"
+      ],
+      "alertes_medicament": [],
+      "note_algerie": "Recrudescence fréquente dans les collectivités algériennes (internats, prisons, familles nombreuses). Benzoate de benzyle largement disponible en pharmacie algérienne. Le prurit peut persister 2-4 semaines après traitement efficace.",
+      "antecedents_a_verifier": [
+        "grossesse",
+        "insuffisance_hepatique",
+        "insuffisance_renale"
+      ]
+    },
+    {
+      "id": "pityriasis_versicolor",
+      "nom": "Pityriasis versicolor",
+      "categorie": "infection_fongique",
+      "icd10": "B36.0",
+      "urgence": "faible",
+      "contexte_geographique": "Algérie — très fréquent, climat chaud",
+      "datasets": [
+        "DermNet"
+      ],
+      "seuil_confiance": {
+        "eleve": 0.92,
+        "ambigu": 0.7
+      },
+      "analyse_initiale": "Macules hypopigmentées ou hyperpigmentées finement squameuses du tronc, compatibles avec un pityriasis versicolor (Malassezia furfur). Très fréquent en Algérie du fait du climat chaud et humide. Affection bénigne, non contagieuse, récidivante. La dépigmentation persiste plusieurs mois après guérison mycologique — prévenir le patient.",
+      "questions": {
+        "confiance_elevee": [
+          {
+            "texte": "Aspect des lésions ?",
+            "options": [
+              "Macules hypopigmentées (plus claires)",
+              "Macules hyperpigmentées (plus foncées)",
+              "Macules rosées / érythémateuses",
+              "Mixte"
+            ]
+          },
+          {
+            "texte": "Saison d'apparition ou d'aggravation ?",
+            "options": [
+              "Été / après exposition soleil",
+              "Toute l'année",
+              "Après transpiration intense",
+              "Hiver"
+            ]
+          }
+        ],
+        "confiance_ambigue": [
+          {
+            "texte": "Aspect des lésions ?",
+            "options": [
+              "Macules hypopigmentées (plus claires)",
+              "Macules hyperpigmentées (plus foncées)",
+              "Macules rosées / érythémateuses",
+              "Mixte"
+            ]
+          },
+          {
+            "texte": "Saison d'apparition ou d'aggravation ?",
+            "options": [
+              "Été / après exposition soleil",
+              "Toute l'année",
+              "Après transpiration intense",
+              "Hiver"
+            ]
+          },
+          {
+            "texte": "Localisation des lésions ?",
+            "options": [
+              "Tronc / dos / épaules",
+              "Cou / visage",
+              "Membres",
+              "Diffuse"
+            ]
+          },
+          {
+            "texte": "Récidives fréquentes ?",
+            "options": [
+              "Oui, chaque été",
+              "Oui, fréquentes",
+              "Première fois",
+              "Ne sait pas"
+            ]
+          },
+          {
+            "texte": "Prurit associé ?",
+            "options": [
+              "Non (typique pityriasis)",
+              "Léger prurit",
+              "Prurit intense (remettre le diagnostic en question)"
+            ]
+          }
+        ]
+      },
+      "analyse_affinee_template": "Pityriasis versicolor {aspect}, {localisation}. Traitement antifongique topique suffisant. Prévenir le patient que la dépigmentation met 2 à 6 mois à disparaître après guérison.",
+      "medicaments": [
+        {
+          "nom": "Kétoconazole 2% shampooing (Kétoderm)",
+          "classe": "antifongique azolé topique",
+          "indication": "Pityriasis versicolor étendu — application en lotion sur la peau",
+          "posologie": "Appliquer sur peau sèche, laisser 5 min, rincer. 1x/jour x5 jours. Entretien 1x/mois en été.",
+          "alertes": []
+        },
+        {
+          "nom": "Séléniure de soufre 2.5% (Selsun)",
+          "classe": "antifongique topique",
+          "indication": "Pityriasis versicolor",
+          "posologie": "Appliquer 10 min avant douche, 1x/jour x7 jours",
+          "alertes": [
+            {
+              "condition": "visage",
+              "message": "Éviter contact avec yeux et muqueuses.",
+              "severite": "warning"
+            }
+          ]
+        },
+        {
+          "nom": "Fluconazole 300mg oral dose unique",
+          "classe": "antifongique azolé systémique",
+          "indication": "Pityriasis versicolor étendu ou récidivant, échec topique",
+          "posologie": "300mg dose unique, répéter à J7 si nécessaire",
+          "alertes": [
+            {
+              "condition": "grossesse",
+              "message": "Fluconazole oral : éviter au 1er trimestre.",
+              "severite": "warning"
+            },
+            {
+              "condition": "insuffisance_hepatique",
+              "message": "Fluconazole : hépatotoxicité — contre-indiqué en insuffisance hépatique sévère.",
+              "severite": "danger"
+            },
+            {
+              "condition": "insuffisance_renale",
+              "message": "Fluconazole : réduire à 150mg si DFG < 50 ml/min.",
+              "severite": "warning"
+            },
+            {
+              "condition": "insuffisance_cardiaque",
+              "message": "Fluconazole : allongement QT possible — ECG si cardiopathie sous-jacente.",
+              "severite": "warning"
+            }
+          ]
+        }
+      ],
+      "orientation": "Traitement préventif estival si récidives fréquentes. Expliquer la persistance de la dépigmentation (2-6 mois).",
+      "contre_indications_patient": [],
+      "alertes_medicament": [],
+      "note_algerie": "Très prévalent en été dans tout le Maghreb. La forme hypopigmentée est souvent confondue avec le vitiligo — distinguer par squames fines au grattage et fluorescence jaune-vert à la lampe de Wood.",
+      "antecedents_a_verifier": [
+        "grossesse",
+        "insuffisance_hepatique",
+        "insuffisance_renale",
+        "insuffisance_cardiaque"
+      ]
+    },
+    {
+      "id": "prurigo_actinique",
+      "nom": "Photodermatose / Prurigo actinique",
+      "categorie": "photodermatose",
+      "icd10": "L56.4",
+      "urgence": "faible",
+      "contexte_geographique": "Algérie — ensoleillement intense, phototypes III-V",
+      "datasets": [
+        "DermNet"
+      ],
+      "seuil_confiance": {
+        "eleve": 0.8,
+        "ambigu": 0.55
+      },
+      "analyse_initiale": "Lésions prurigineuses sur zones photo-exposées compatibles avec une photodermatose. Fréquente en Algérie du fait de l'ensoleillement intense (indice UV 11-12+ en été). Distinguer l'éruption polymorphe à la lumière (EPL, la plus fréquente), la lucite estivale bénigne, et le prurigo actinique chronique. Éliminer une cause médicamenteuse photosensibilisante.",
+      "questions": {
+        "confiance_elevee": [
+          {
+            "texte": "Les lésions apparaissent-elles sur les zones exposées au soleil ?",
+            "options": [
+              "Oui, strictement photo-exposées",
+              "Oui, mais débordent légèrement",
+              "Non, zones couvertes aussi"
+            ]
+          },
+          {
+            "texte": "Délai d'apparition après exposition solaire ?",
+            "options": [
+              "Quelques heures (lucite estivale bénigne)",
+              "24-48h (éruption polymorphe à la lumière)",
+              "Chronique / permanent",
+              "Variable"
+            ]
+          },
+          {
+            "texte": "Médicaments photosensibilisants en cours ?",
+            "options": [
+              "Oui — antibiotiques (cyclines, quinolones)",
+              "Oui — diurétiques thiazidiques",
+              "Oui — autre",
+              "Non"
+            ]
+          }
+        ],
+        "confiance_ambigue": [
+          {
+            "texte": "Les lésions apparaissent-elles sur les zones exposées au soleil ?",
+            "options": [
+              "Oui, strictement photo-exposées",
+              "Oui, mais débordent légèrement",
+              "Non, zones couvertes aussi"
+            ]
+          },
+          {
+            "texte": "Délai d'apparition après exposition solaire ?",
+            "options": [
+              "Quelques heures (lucite estivale bénigne)",
+              "24-48h (éruption polymorphe à la lumière)",
+              "Chronique / permanent",
+              "Variable"
+            ]
+          },
+          {
+            "texte": "Médicaments photosensibilisants en cours ?",
+            "options": [
+              "Oui — antibiotiques (cyclines, quinolones)",
+              "Oui — diurétiques thiazidiques",
+              "Oui — autre",
+              "Non"
+            ]
+          },
+          {
+            "texte": "Saison d'apparition ?",
+            "options": [
+              "Printemps / début été (premier soleil)",
+              "Été uniquement",
+              "Toute l'année",
+              "Aggravation estivale"
+            ]
+          },
+          {
+            "texte": "Morphologie des lésions ?",
+            "options": [
+              "Vésicules / papules (EPL)",
+              "Plaques eczématiformes",
+              "Nodules / prurigo chronique",
+              "Érythème diffus"
+            ]
+          },
+          {
+            "texte": "Le patient utilise-t-il une photoprotection ?",
+            "options": [
+              "Oui, crème solaire SPF 50+",
+              "Oui, mais insuffisante",
+              "Non",
+              "Vêtements couvrants uniquement"
+            ]
+          }
+        ]
+      },
+      "analyse_affinee_template": "Photodermatose {type}, {declencheur}. {medicament_photosensibilisant}. Photoprotection stricte indispensable. {traitement_crise}.",
+      "medicaments": [
+        {
+          "nom": "Écran solaire minéral SPF 50+",
+          "classe": "photoprotection externe — mesure de base",
+          "indication": "Toutes photodermatoses — traitement préventif de fond",
+          "posologie": "Application 30 min avant exposition, renouveler toutes les 2h",
+          "alertes": []
+        },
+        {
+          "nom": "Hydroxychloroquine 200mg (Plaquenil)",
+          "classe": "antipaludéen — photoprotecteur interne",
+          "indication": "Éruption polymorphe à la lumière modérée à sévère",
+          "posologie": "200-400mg/j pendant la saison d'exposition",
+          "alertes": [
+            {
+              "condition": "retinopathie",
+              "message": "Bilan ophtalmologique annuel obligatoire — risque de maculopathie.",
+              "severite": "warning"
+            },
+            {
+              "condition": "deficit_g6pd",
+              "message": "Déficit en G6PD FRÉQUENT EN ALGÉRIE — dépistage obligatoire avant antipaludéens. Risque d'anémie hémolytique.",
+              "severite": "danger"
+            },
+            {
+              "condition": "insuffisance_renale",
+              "message": "Réduire posologie si insuffisance rénale.",
+              "severite": "warning"
+            }
+          ]
+        },
+        {
+          "nom": "Dermocorticoïde classe II (Désonide 0.05%)",
+          "classe": "corticostéroïde topique",
+          "indication": "Traitement de la crise de photodermatose",
+          "posologie": "2x/jour sur lésions pendant 5-7 jours",
+          "alertes": [
+            {
+              "condition": "visage",
+              "message": "Limiter l'utilisation sur visage à 5-7 jours maximum.",
+              "severite": "warning"
+            }
+          ]
+        }
+      ],
+      "orientation": "Éliminer un lupus si photodermatose atypique. Photothérapie de désensibilisation UV en prévention si récidivant.",
+      "contre_indications_patient": [],
+      "alertes_medicament": [],
+      "note_algerie": "Indice UV extrême en été (11-12+ dans le Sud algérien). Phototypes III-V majoritaires. Fréquence élevée de déficit en G6PD dans la population algérienne — interroger systématiquement avant antipaludéens.",
+      "antecedents_a_verifier": [
+        "retinopathie",
+        "deficit_g6pd",
+        "insuffisance_renale"
+      ]
+    },
+    {
+      "id": "dermite_contact",
+      "nom": "Dermite de contact (allergique et irritative)",
+      "categorie": "allergique_immunologique",
+      "icd10": "L23",
+      "urgence": "faible",
+      "contexte_geographique": "Algérie — henné noir (PPD), nickel, cosmétiques traditionnels",
+      "datasets": [
+        "DermNet"
+      ],
+      "seuil_confiance": {
+        "eleve": 0.84,
+        "ambigu": 0.6
+      },
+      "analyse_initiale": "Lésions eczématiformes en rapport topographique étroit avec un contact, compatibles avec une dermite de contact. En Algérie, allergènes fréquents : henné noir (PPD — tatouages temporaires), bijoux fantaisie (nickel), cosmétiques traditionnels (kohl, rhassoul), détergents. Tests épicutanés (patch tests) pour confirmation.",
+      "questions": {
+        "confiance_elevee": [
+          {
+            "texte": "Topographie des lésions en rapport avec un contact ?",
+            "options": [
+              "Oui, bijou / bracelet / ceinture",
+              "Oui, zone de cosmétique / maquillage",
+              "Oui, zone professionnelle",
+              "Non, pas de lien évident"
+            ]
+          },
+          {
+            "texte": "Utilisation récente de henné ou cosmétiques traditionnels ?",
+            "options": [
+              "Oui, henné noir (tatouage temporaire)",
+              "Oui, henné naturel / kohl",
+              "Oui, autre cosmétique",
+              "Non"
+            ]
+          }
+        ],
+        "confiance_ambigue": [
+          {
+            "texte": "Topographie des lésions en rapport avec un contact ?",
+            "options": [
+              "Oui, bijou / bracelet / ceinture",
+              "Oui, zone de cosmétique / maquillage",
+              "Oui, zone professionnelle",
+              "Non, pas de lien évident"
+            ]
+          },
+          {
+            "texte": "Utilisation récente de henné ou cosmétiques traditionnels ?",
+            "options": [
+              "Oui, henné noir (tatouage temporaire)",
+              "Oui, henné naturel / kohl",
+              "Oui, autre cosmétique",
+              "Non"
+            ]
+          },
+          {
+            "texte": "Délai d'apparition après contact ?",
+            "options": [
+              "Immédiat (< 1h) — irritatif",
+              "24-72h — allergique (type IV)",
+              "Plus d'une semaine",
+              "Variable"
+            ]
+          },
+          {
+            "texte": "Contexte professionnel exposant ?",
+            "options": [
+              "Coiffeur / esthéticienne",
+              "Santé (latex, désinfectants)",
+              "BTP (ciment, résines)",
+              "Aucun"
+            ]
+          },
+          {
+            "texte": "Antécédents d'allergie cutanée connue ?",
+            "options": [
+              "Oui, nickel",
+              "Oui, PPD (teinture / henné)",
+              "Oui, autre",
+              "Non"
+            ]
+          }
+        ]
+      },
+      "analyse_affinee_template": "Dermite de contact {type}, {allergene_probable}. Éviction de l'allergène obligatoire. {patch_test}. {traitement_local}.",
+      "medicaments": [
+        {
+          "nom": "Dermocorticoïde classe III (Bétaméthasone 0.05%)",
+          "classe": "corticostéroïde topique",
+          "indication": "Dermite de contact aiguë",
+          "posologie": "1-2x/jour pendant 7-14 jours",
+          "alertes": [
+            {
+              "condition": "visage",
+              "message": "Éviter corticoïdes puissants sur visage — utiliser classe I (hydrocortisone 1%).",
+              "severite": "warning"
+            }
+          ]
+        }
+      ],
+      "orientation": "Éviction allergène — mesure principale. Patch tests à distance. Déclaration maladie professionnelle si applicable.",
+      "contre_indications_patient": [],
+      "alertes_medicament": [],
+      "note_algerie": "Allergie au PPD du henné noir très fréquente en Algérie — tatouages temporaires très répandus. Risque de sensibilisation croisée avec sulfamides et anesthésiques locaux. Le kohl traditionnel peut contenir du plomb — interroger systématiquement.",
+      "antecedents_a_verifier": [
+        "grossesse"
+      ]
+    },
+    {
+      "id": "hyperpigmentation_post_inflammatoire",
+      "nom": "Hyperpigmentation post-inflammatoire (HPI)",
+      "categorie": "pigmentation",
+      "icd10": "L81.0",
+      "urgence": "faible",
+      "contexte_geographique": "Algérie — phototypes III-VI, très fréquente",
+      "datasets": [
+        "DermNet"
+      ],
+      "seuil_confiance": {
+        "eleve": 0.88,
+        "ambigu": 0.65
+      },
+      "analyse_initiale": "Macules pigmentées brunâtres apparues suite à une inflammation cutanée préexistante, compatibles avec une hyperpigmentation post-inflammatoire. Très fréquente sur les phototypes III-VI prédominants en Algérie. Évolution longue mais favorable avec traitement et photoprotection stricte.",
+      "questions": {
+        "confiance_elevee": [
+          {
+            "texte": "Lésion inflammatoire préexistante identifiée ?",
+            "options": [
+              "Oui, acné",
+              "Oui, eczéma / dermatite",
+              "Oui, traumatisme / piqûre",
+              "Oui, autre inflammation",
+              "Non, apparition spontanée"
+            ]
+          },
+          {
+            "texte": "Phototype du patient ?",
+            "options": [
+              "III (mat, bronzage facile)",
+              "IV (brun)",
+              "V (brun foncé)",
+              "VI (très foncé)"
+            ]
+          }
+        ],
+        "confiance_ambigue": [
+          {
+            "texte": "Lésion inflammatoire préexistante identifiée ?",
+            "options": [
+              "Oui, acné",
+              "Oui, eczéma / dermatite",
+              "Oui, traumatisme / piqûre",
+              "Oui, autre inflammation",
+              "Non, apparition spontanée"
+            ]
+          },
+          {
+            "texte": "Phototype du patient ?",
+            "options": [
+              "III (mat, bronzage facile)",
+              "IV (brun)",
+              "V (brun foncé)",
+              "VI (très foncé)"
+            ]
+          },
+          {
+            "texte": "Exposition solaire sans protection ?",
+            "options": [
+              "Oui, fréquente",
+              "Modérée",
+              "Non, photoprotection utilisée"
+            ]
+          },
+          {
+            "texte": "Utilisation de produits dépigmentants non prescrits ?",
+            "options": [
+              "Oui (citron, produits de marché)",
+              "Oui (crèmes non contrôlées)",
+              "Non"
+            ]
+          },
+          {
+            "texte": "Durée des macules ?",
+            "options": [
+              "Moins de 3 mois",
+              "3 à 12 mois",
+              "Plus d'un an"
+            ]
+          }
+        ]
+      },
+      "analyse_affinee_template": "Hyperpigmentation post-inflammatoire sur phototype {phototype}, suite à {cause}. Traitement dépigmentant topique + photoprotection stricte. Durée de traitement 3-6 mois.",
+      "medicaments": [
+        {
+          "nom": "Hydroquinone 4% crème",
+          "classe": "dépigmentant topique",
+          "indication": "HPI modérée à sévère",
+          "posologie": "1x/jour le soir pendant 3 mois, pause 1 mois",
+          "alertes": [
+            {
+              "condition": "grossesse",
+              "message": "Hydroquinone déconseillée pendant grossesse et allaitement.",
+              "severite": "warning"
+            },
+            {
+              "condition": "utilisation_prolongee",
+              "message": "Ne pas utiliser plus de 6 mois consécutifs — risque d'ochronose paradoxale.",
+              "severite": "warning"
+            }
+          ]
+        },
+        {
+          "nom": "Acide azélaïque 20% crème",
+          "classe": "dépigmentant topique naturel",
+          "indication": "HPI légère à modérée, alternative à l'hydroquinone",
+          "posologie": "2x/jour",
+          "alertes": []
+        },
+        {
+          "nom": "Trétinoïne 0.05% crème",
+          "classe": "rétinoïde topique — potentialise les dépigmentants",
+          "indication": "HPI — en association avec dépigmentant",
+          "posologie": "Application le soir, débuter 2x/semaine",
+          "alertes": [
+            {
+              "condition": "grossesse",
+              "message": "Rétinoïde topique CONTRE-INDIQUÉ pendant la grossesse.",
+              "severite": "danger"
+            },
+            {
+              "condition": "peau_foncee",
+              "message": "Risque d'irritation et HPI paradoxale sur peau foncée — débuter très progressivement.",
+              "severite": "warning"
+            }
+          ]
+        }
+      ],
+      "orientation": "Photoprotection SPF 50+ obligatoire. Traiter la cause inflammatoire sous-jacente. Déconseiller produits non prescrits.",
+      "contre_indications_patient": [
+        "grossesse"
+      ],
+      "alertes_medicament": [],
+      "note_algerie": "Problème dermatologique très fréquent en Algérie. Usage répandu de crèmes dépigmentantes non contrôlées pouvant contenir du mercure ou des corticoïdes puissants — interroger systématiquement sur ces produits au cours de la consultation.",
+      "antecedents_a_verifier": [
+        "grossesse"
+      ]
+    }
+  ]
+}

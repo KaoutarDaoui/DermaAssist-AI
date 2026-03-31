@@ -3,10 +3,19 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from app.core.config import settings
 from app.db.database import Base, engine
-from app.api import auth, patients, consultations, images, ai, advice, checkins
 
-# Créer les tables de la base de données
-Base.metadata.create_all(bind=engine)
+# Import all models to register them with SQLAlchemy
+from app.models.user import User
+from app.models.patient import Patient
+from app.models.doctor import Doctor
+from app.models.consultation import Consultation
+from app.models.skin_image import SkinImage
+from app.models.ai_result import AIResult
+from app.models.patient_advice import PatientAdvice
+from app.models.checkin import CheckIn
+from app.models.rag_analysis import AIAnalysis, ClinicalQuestion, Treatment, Alert, KnowledgeChunk
+
+from app.api import auth, patients, consultations, images, ai, advice, checkins, skin_images, analysis
 
 # Initialiser l'application FastAPI
 app = FastAPI(
@@ -18,10 +27,16 @@ app = FastAPI(
     openapi_url="/openapi.json"
 )
 
+# Create database tables on startup
+@app.on_event("startup")
+async def startup_event():
+    """Create database tables on application startup."""
+    Base.metadata.create_all(bind=engine)
+
 # Middleware CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.CORS_ORIGINS,
+    allow_origins=["*"],  # Allow all origins for development
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -47,6 +62,8 @@ app.include_router(images.router)
 app.include_router(ai.router)
 app.include_router(advice.router)
 app.include_router(checkins.router)
+app.include_router(skin_images.router)
+app.include_router(analysis.router)
 
 # Health check endpoint
 @app.get("/health")

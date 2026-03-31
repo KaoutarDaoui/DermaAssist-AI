@@ -1,0 +1,237 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ────────────────────────────────────
+// Core Models
+// ────────────────────────────────────
+
+model User {
+  id        Int       @id @default(autoincrement())
+  email     String    @unique
+  password  String
+  fullName  String
+  role      String    @default("user") // "doctor", "patient", "admin"
+  
+  // Relationships
+  doctor    Doctor?
+  patient   Patient?
+  
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Doctor {
+  id        Int       @id @default(autoincrement())
+  userId    Int       @unique
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  license   String
+  specialty String?
+  clinic    String?
+  
+  // Relationships
+  consultations Consultation[]
+  
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Patient {
+  id           Int       @id @default(autoincrement())
+  userId       Int       @unique
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  age          Int
+  sexe         String    // "M" or "F"
+  fitzpatrick  Int       // 1-6
+  ville        String    // Algerian wilaya
+  
+  // Medical conditions
+  grossesse    Boolean   @default(false)
+  deficit_g6pd Boolean   @default(false)
+  hypertension Boolean   @default(false)
+  diabete      Boolean   @default(false)
+  insuf_hepatique Boolean @default(false)
+  insuf_renale Boolean   @default(false)
+  insuf_cardiaque Boolean @default(false)
+  
+  // Relationships
+  consultations Consultation[]
+  skinImages    SkinImage[]
+  analyses      AIAnalysis[]
+  checkIns      CheckIn[]
+  
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+// ────────────────────────────────────
+// Consultation & Image Models
+// ────────────────────────────────────
+
+model Consultation {
+  id           Int       @id @default(autoincrement())
+  patientId    Int
+  patient      Patient   @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  
+  doctorId     Int
+  doctor       Doctor    @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  
+  notes        String    @db.Text
+  diagnosis    String?
+  
+  // Relationships
+  skinImages   SkinImage[]
+  aiAnalysis   AIAnalysis[]
+  
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model SkinImage {
+  id             Int       @id @default(autoincrement())
+  consultationId Int
+  consultation   Consultation @relation(fields: [consultationId], references: [id], onDelete: Cascade)
+  
+  patientId      Int
+  patient        Patient   @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  
+  imageUrl       String    @db.Text
+  metadata       String?   @db.Text
+  
+  // Relationships
+  aiResult       AIResult?
+  
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+// ────────────────────────────────────
+// RAG Analysis Models (Module 2)
+// ────────────────────────────────────
+
+model AIAnalysis {
+  id           Int       @id @default(autoincrement())
+  patientId    Int
+  patient      Patient   @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  
+  consultationId Int?
+  consultation   Consultation? @relation(fields: [consultationId], references: [id], onDelete: SetNull)
+  
+  // Diagnosis info
+  disease      String    // "acne_vulgaire"
+  diseaseLabel String    // "Acné vulgaire"
+  confidence   Float     // 0.0 - 1.0
+  
+  // Relationships
+  clinicalQuestions ClinicalQuestion[]
+  treatments   Treatment[]
+  alerts       Alert[]
+  patientAdvice PatientAdvice[]
+  
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model ClinicalQuestion {
+  id           Int       @id @default(autoincrement())
+  analysisId   Int
+  analysis     AIAnalysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+  
+  question     String    @db.Text
+  order        Int       // question order (1, 2, 3...)
+  
+  createdAt DateTime  @default(now())
+}
+
+model Treatment {
+  id           Int       @id @default(autoincrement())
+  analysisId   Int
+  analysis     AIAnalysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+  
+  name         String    // "Isotrétinoïne", "Benzoyl Peroxide"
+  description  String    @db.Text
+  dosage       String?   // "0.5-1mg/kg"
+  duration     String?   // "16-20 weeks"
+  sideEffects  String?   @db.Text
+  
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Alert {
+  id           Int       @id @default(autoincrement())
+  analysisId   Int
+  analysis     AIAnalysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+  
+  type         String    // "CONTRAINDICATION", "WARNING", "CAUTION", "INTERACTION"
+  message      String    @db.Text
+  severity     String    // "HIGH", "MEDIUM", "LOW"
+  
+  createdAt DateTime  @default(now())
+}
+
+model PatientAdvice {
+  id           Int       @id @default(autoincrement())
+  analysisId   Int
+  analysis     AIAnalysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+  
+  advice       String    @db.Text
+  category     String    // "lifestyle", "prevention", "follow_up"
+  
+  createdAt DateTime  @default(now())
+}
+
+// ────────────────────────────────────
+// Follow-up Models
+// ────────────────────────────────────
+
+model CheckIn {
+  id         Int       @id @default(autoincrement())
+  patientId  Int
+  patient    Patient   @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  
+  score      Int       // 1-10
+  notes      String    @db.Text
+  
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model AIResult {
+  id          Int       @id @default(autoincrement())
+  skinImageId Int       @unique
+  skinImage   SkinImage @relation(fields: [skinImageId], references: [id], onDelete: Cascade)
+  
+  disease     String
+  confidence  Float
+  metadata    String?   @db.Text
+  
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+// ────────────────────────────────────
+// Vector Database Model (pgvector)
+// ────────────────────────────────────
+
+model KnowledgeChunk {
+  id        Int       @id @default(autoincrement())
+  disease   String    // "acne_vulgaire"
+  content   String    @db.Text
+  embedding Float[]   // Vector (pgvector)
+  
+  createdAt DateTime  @default(now())
+  
+  @@index([disease])
+}
