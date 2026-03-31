@@ -85,6 +85,7 @@ web-build/
 # AI local artifacts
 backend/ai/chroma_store/
 backend/ai/Modele1_CNN/__pycache__/
+backend/ai/modele3_COMP/__pycache__/
 backend/ai/Modele1_CNN/*.csv
 backend/ai/Modele1_CNN/*.png
 backend/ai/Modele1_CNN/model_traced.pt
