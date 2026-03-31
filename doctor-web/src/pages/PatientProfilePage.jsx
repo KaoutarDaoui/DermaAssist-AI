@@ -2,18 +2,16 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import NavBar from "../components/NavBar";
 import Sidebar from "../components/Sidebar";
-import axios from "axios";
 import toast from "react-hot-toast";
 import { ArrowLeft, Plus } from "lucide-react";
-
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+import { patients, ai } from "../services/api";
 
 export default function PatientProfilePage() {
   const { patientId } = useParams();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [patient, setPatient] = useState(null);
-  const [consultations, setConsultations] = useState([]);
+  const [consultationsList, setConsultationsList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [consultationsLoading, setConsultationsLoading] = useState(false);
 
@@ -59,20 +57,31 @@ export default function PatientProfilePage() {
       try {
         setLoading(true);
         // Load patient info
-        const patientResponse = await axios.get(
-          `${API_URL}/patients/${patientId}`
-        );
+        const patientResponse = await patients.get(patientId);
         setPatient(patientResponse.data);
 
-        // Load consultations
+        // Load AI results history
         setConsultationsLoading(true);
-        const consultationsResponse = await axios.get(
-          `${API_URL}/consultations/patients/${patientId}/consultations`
-        );
-        setConsultations(consultationsResponse.data || []);
+        const aiResultsResponse = await ai.getPatientHistory(patientId);
+        console.log("AI Results Response:", aiResultsResponse);
+        const aiResultsData = Array.isArray(aiResultsResponse.data)
+          ? aiResultsResponse.data
+          : Array.isArray(aiResultsResponse)
+          ? aiResultsResponse
+          : [];
+        setConsultationsList(aiResultsData);
       } catch (error) {
         console.error("Error loading data:", error);
-        toast.error("Failed to load patient details or consultations");
+        console.error("Error details:", {
+          status: error.response?.status,
+          message: error.response?.data?.detail || error.message,
+          data: error.response?.data,
+        });
+        toast.error(
+          error.response?.data?.detail ||
+            error.message ||
+            "Failed to load patient details or AI results"
+        );
       } finally {
         setLoading(false);
         setConsultationsLoading(false);
@@ -198,14 +207,14 @@ export default function PatientProfilePage() {
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-bold text-gray-900">
-                  Historique des Consultations
+                  Historique des Analyses
                 </h2>
                 <button
                   onClick={handleAddConsultation}
                   className="flex items-center gap-2 bg-[#0F6E56] text-white px-4 py-2 rounded-lg font-semibold hover:bg-[#0d5a47] transition-colors"
                 >
                   <Plus size={18} />
-                  Ajouter une Consultation
+                  Ajouter une Analyse
                 </button>
               </div>
 
@@ -216,63 +225,108 @@ export default function PatientProfilePage() {
                       <div className="absolute inset-0 border-4 border-slate-200 border-t-[#0F6E56] rounded-full animate-spin"></div>
                     </div>
                     <p className="text-slate-600 font-medium text-sm">
-                      Chargement des consultations...
+                      Chargement des analyses...
                     </p>
                   </div>
                 </div>
-              ) : consultations.length > 0 ? (
-                <div className="overflow-x-auto">
-                  <table className="min-w-full text-sm">
-                    <thead className="bg-gray-50 border-b border-gray-200">
-                      <tr className="text-left text-xs tracking-widest uppercase font-bold text-[#0F6E56]/70">
-                        <th className="px-6 py-4">ID Consultation</th>
-                        <th className="px-6 py-4">Date</th>
-                        <th className="px-6 py-4">Statut</th>
-                        <th className="px-6 py-4">Notes</th>
-                        <th className="px-6 py-4">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100">
-                      {consultations.map((consultation, idx) => (
-                        <tr
-                          key={consultation.id || idx}
-                          className="bg-white hover:bg-gray-50 transition-colors"
+              ) : consultationsList.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {consultationsList.map((result, idx) => (
+                    <div
+                      key={result.id || idx}
+                      className="bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-sm border border-gray-200 hover:shadow-lg hover:border-[#0F6E56]/30 transition-all p-6 flex flex-col"
+                    >
+                      {/* Header with Analysis Number */}
+                      <div className="flex items-start justify-between mb-4">
+                        <div>
+                          <p className="text-xs text-gray-500 uppercase tracking-widest font-semibold mb-1">
+                            Analyse
+                          </p>
+                          <h3 className="text-2xl font-bold text-[#0F6E56]">
+                            #{idx + 1}
+                          </h3>
+                        </div>
+                      </div>
+
+                      {/* Date Section */}
+                      <div className="mb-5 pb-5 border-b border-gray-200">
+                        <p className="text-xs text-gray-500 uppercase tracking-widest font-semibold mb-2">
+                          Date
+                        </p>
+                        <p className="text-sm font-semibold text-gray-800">
+                          {result.generated_at
+                            ? new Date(result.generated_at).toLocaleDateString(
+                                "fr-FR",
+                                {
+                                  weekday: "long",
+                                  year: "numeric",
+                                  month: "long",
+                                  day: "numeric",
+                                }
+                              )
+                            : "Date non disponible"}
+                        </p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          {result.generated_at
+                            ? new Date(result.generated_at).toLocaleTimeString(
+                                "fr-FR",
+                                {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                }
+                              )
+                            : ""}
+                        </p>
+                      </div>
+
+                      {/* Diagnosis Preview */}
+                      {result.diagnosis && (
+                        <div className="mb-4 pb-4 border-b border-gray-200">
+                          <p className="text-xs text-gray-500 uppercase tracking-widest font-semibold mb-2">
+                            Diagnostic
+                          </p>
+                          <p className="text-sm font-semibold text-gray-800">
+                            {result.diagnosis}
+                          </p>
+                          {result.confidence && (
+                            <p className="text-xs text-gray-600 mt-1">
+                              Confiance: {result.confidence.percentage || result.confidence.score || "—"}%
+                            </p>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Action Button */}
+                      <div className="mt-auto">
+                        <button
+                          onClick={() =>
+                            navigate(`/consultations/${result.id}`, {
+                              state: {
+                                patientId,
+                                consultationId: result.consultation_id,
+                              },
+                            })
+                          }
+                          className="w-full bg-[#0F6E56] hover:bg-[#0d5a47] text-white font-semibold py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2"
                         >
-                          <td className="px-6 py-4 align-top text-gray-800 font-bold">
-                            #{consultation.consultation_id || consultation.id}
-                          </td>
-                          <td className="px-6 py-4 align-top text-gray-600">
-                            {consultation.created_at
-                              ? new Date(
-                                  consultation.created_at
-                                ).toLocaleDateString("fr-FR")
-                              : "—"}
-                          </td>
-                          <td className="px-6 py-4 align-top">
-                            <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-semibold border border-blue-200 uppercase tracking-wider">
-                              <span className="w-2 h-2 bg-blue-600 rounded-full"></span>
-                              {consultation.status || "Complétée"}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 align-top text-gray-600 max-w-xs truncate">
-                            {consultation.notes || "—"}
-                          </td>
-                          <td className="px-6 py-4 align-top">
-                            <button
-                              onClick={() =>
-                                navigate(
-                                  `/consultations/${consultation.id}`
-                                )
-                              }
-                              className="text-[#0F6E56] hover:text-[#0d5a47] font-semibold text-sm hover:underline transition-colors"
-                            >
-                              Voir Détails
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M9 5l7 7-7 7"
+                            />
+                          </svg>
+                          Voir Détails
+                        </button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center py-12 text-center">

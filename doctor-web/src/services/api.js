@@ -51,7 +51,7 @@ export const consultations = {
   create: (patientId) => apiClient.post('/consultations', { patient_id: patientId }),
   get: (consultationId) => apiClient.get(`/consultations/${consultationId}`),
   getPatientHistory: (patientId) =>
-    apiClient.get(`/consultations/patients/${patientId}/consultations`),
+    apiClient.get(`/consultations/by-patient/${patientId}`),
   updateNotes: (consultationId, notes) =>
     apiClient.patch(`/consultations/${consultationId}/notes`, { notes }),
 }
@@ -72,6 +72,12 @@ export const ai = {
     apiClient.post(`/ai/analyze/${consultationId}`),
   getResult: (consultationId) =>
     apiClient.get(`/ai/result/${consultationId}`),
+  getResultByConsultation: (patientId, consultationId) =>
+    apiClient.get(
+      `/patients/${patientId}/consultations/${consultationId}/ai-results`
+    ),
+  getPatientHistory: (patientId) =>
+    apiClient.get(`/patients/${patientId}/ai-results-history`),
   getEnvSnapshot: (city) =>
     apiClient.get('/ai/env-snapshot', { params: { city } }),
 }

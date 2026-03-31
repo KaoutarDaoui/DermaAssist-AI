@@ -659,3 +659,84 @@ async def create_ai_result(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to create AI result: {str(e)}"
         )
+
+
+@router.get("/{patient_id}/consultations/{consultation_id}/ai-results")
+def get_ai_results_by_consultation(
+    patient_id: str,
+    consultation_id: int,
+    db: Session = Depends(get_db)
+):
+    """Récupérer les résultats AI d'une consultation donnée."""
+    try:
+        # Get AI result for this consultation
+        ai_result = db.query(AIResult).filter(
+            AIResult.consultation_id == consultation_id,
+            AIResult.patient_id == patient_id
+        ).first()
+        
+        if not ai_result:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="AI results not found for this consultation"
+            )
+        
+        return {
+            "id": str(ai_result.id),
+            "patient_id": str(ai_result.patient_id),
+            "consultation_id": ai_result.consultation_id,
+            "skin_image_id": str(ai_result.skin_image_id) if ai_result.skin_image_id else None,
+            "diagnosis": ai_result.diagnosis,
+            "confidence": ai_result.confidence,
+            "suggested_questions": ai_result.suggested_questions or [],
+            "treatment_options": ai_result.treatment_options or [],
+            "env_snapshot": ai_result.env_snapshot or {},
+            "generated_at": ai_result.generated_at.isoformat() if ai_result.generated_at else None,
+            "updated_at": ai_result.updated_at.isoformat() if ai_result.updated_at else None,
+        }
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        import traceback
+        print(f"Error retrieving AI results: {e}")
+        print(traceback.format_exc())
+        
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to retrieve AI results: {str(e)}"
+        )
+
+
+@router.get("/{patient_id}/ai-results-history")
+def get_patient_ai_results(
+    patient_id: str,
+    db: Session = Depends(get_db)
+):
+    """Récupérer l'historique des résultats AI d'un patient."""
+    try:
+        ai_results = db.query(AIResult).filter(
+            AIResult.patient_id == patient_id
+        ).order_by(AIResult.generated_at.asc()).all()
+        
+        return [
+            {
+                "id": str(result.id),
+                "patient_id": str(result.patient_id),
+                "consultation_id": result.consultation_id,
+                "diagnosis": result.diagnosis,
+                "confidence": result.confidence,
+                "generated_at": result.generated_at.isoformat() if result.generated_at else None,
+            }
+            for result in ai_results
+        ]
+    
+    except Exception as e:
+        import traceback
+        print(f"Error retrieving patient AI results history: {e}")
+        print(traceback.format_exc())
+        
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to retrieve AI results history: {str(e)}"
+        )
