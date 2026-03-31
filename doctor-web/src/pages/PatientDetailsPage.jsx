@@ -277,7 +277,7 @@ export default function PatientDetailsPage() {
       setCustomTreatments([]);
       setNewTreatmentDraft(EMPTY_TREATMENT_DRAFT);
       setShowAnalysis(true);
-      toast.success("Module 1 analysis completed and saved!");
+      toast.success("Analyse effectuée et enregistrée!");
     } catch (error) {
       console.error("Error during analysis:", error);
 
@@ -335,7 +335,9 @@ export default function PatientDetailsPage() {
               <div className="relative w-12 h-12">
                 <div className="absolute inset-0 border-4 border-slate-200 border-t-[#0F6E56] rounded-full animate-spin"></div>
               </div>
-              <p className="text-slate-600 font-medium text-sm">Chargement en cours...</p>
+              <p className="text-slate-600 font-medium text-sm">
+                Chargement en cours...
+              </p>
             </div>
           </div>
         </div>
@@ -365,52 +367,50 @@ export default function PatientDetailsPage() {
             {patient && (
               <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 hover:shadow-md transition-shadow">
                 {/* Top Section */}
-                <div className="grid grid-cols-2 gap-8 mb-8">
-                  <div className="space-y-2">
-                    <h1 className="text-4xl font-bold text-gray-900">
-                      {patient.user?.full_name || "Patient"}
-                    </h1>
-                    <p className="text-[#0F6E56] font-medium text-sm">
-                      {patient.user?.email}
-                    </p>
-                  </div>
-                  <div className="text-right space-y-4">
-                    <div className="inline-block ml-auto">
-                      <p className="text-xs text-gray-500 uppercase tracking-wider mb-1 font-semibold">
-                        Téléphone
-                      </p>
-                      <p className="text-2xl font-bold text-gray-900">
-                        {patient.phone || "—"}
-                      </p>
-                    </div>
-                    <div className="inline-block ml-auto">
-                      <p className="text-xs text-gray-500 uppercase tracking-wider mb-1 font-semibold">
-                        Ville
-                      </p>
-                      <p className="text-lg font-semibold text-gray-700">
-                        {patient.city || "—"}
-                      </p>
-                    </div>
-                  </div>
+                <div className="mb-8">
+                  <h1 className="text-4xl font-bold text-gray-900 mb-1">
+                    {patient.user?.full_name || "Patient"}
+                  </h1>
+                  <p className="text-[#0F6E56] font-medium text-sm">
+                    {patient.user?.email}
+                  </p>
                 </div>
 
                 {/* Divider */}
                 <div className="h-px bg-gray-200 mb-8"></div>
 
                 {/* Info Grid */}
-                <div className="grid grid-cols-3 gap-6">
+                <div className="grid grid-cols-5 gap-4">
+                  <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                    <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-2">
+                      Téléphone
+                    </p>
+                    <p className="text-sm font-bold text-gray-900">
+                      {patient.phone || "—"}
+                    </p>
+                  </div>
+
+                  <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                    <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-2">
+                      Ville
+                    </p>
+                    <p className="text-sm font-semibold text-gray-700">
+                      {patient.city || "—"}
+                    </p>
+                  </div>
+
                   <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                     <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-2">
                       Type Fitzpatrick
                     </p>
-                    <p className="text-lg font-bold text-[#0F6E56]">
+                    <p className="text-sm font-bold text-[#0F6E56]">
                       {patient.fitzpatrick_type?.replace("TYPE_", "Type ")}
                     </p>
                   </div>
 
                   <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                     <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-2">
-                      Antécédents Médicaux
+                      Antécédents
                     </p>
                     <p className="text-sm text-gray-700 font-medium">
                       {patient.medical_history || "Aucun"}
@@ -510,7 +510,7 @@ export default function PatientDetailsPage() {
                         Démarrer l'Analyse
                       </button>
                       <p className="text-xs text-gray-500 text-center">
-                        Lance le Module 1 CNN et enregistre les résultats
+                        Analyse l'image pour détecter les maladies de peau
                       </p>
                     </div>
                   )}
@@ -525,67 +525,102 @@ export default function PatientDetailsPage() {
                   )}
                 </div>
               </div>
+
+              {/* Right: Information Panel */}
+              <div className="col-span-1">
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 h-full flex flex-col">
+                  <h3 className="text-lg font-bold text-gray-900 mb-4">À Propos</h3>
+                  
+                  <div className="space-y-4 flex-1">
+                    <div>
+                      <p className="text-sm font-semibold text-[#0F6E56] mb-2">Étape 1: Télécharger</p>
+                      <p className="text-xs text-gray-600">Sélectionnez une image dermato claire de la zone affectée.</p>
+                    </div>
+
+                    <div className="h-px bg-gray-200"></div>
+
+                    <div>
+                      <p className="text-sm font-semibold text-[#0F6E56] mb-2">Étape 2: Analyser</p>
+                      <p className="text-xs text-gray-600">Lancez l'analyse pour identifier les maladies de peau avec score de confiance.</p>
+                    </div>
+
+                    <div className="h-px bg-gray-200"></div>
+
+                    <div>
+                      <p className="text-sm font-semibold text-[#0F6E56] mb-2">Étape 3: Résultats</p>
+                      <p className="text-xs text-gray-600">Recevez le diagnostic, alternatives et recommandations cliniques détaillées.</p>
+                    </div>
+
+                    <div className="h-px bg-gray-200"></div>
+
+                    <div>
+                      <p className="text-sm font-semibold text-[#0F6E56] mb-2">Étape 4: Questions</p>
+                      <p className="text-xs text-gray-600">Répondez à des questions cliniques pour affiner le diagnostic.</p>
+                    </div>
+                  </div>
+
+                  <div className="mt-6 p-3 bg-[#0F6E56]/5 border border-[#0F6E56]/20 rounded-lg">
+                    <p className="text-xs text-gray-600 text-center">
+                      Cet outil assiste le diagnostic. Une validation clinique est recommandée.
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            {/* Module 1 Results - Enhanced */}
+            {/* Analyse Results */}
             {showAnalysis && analysisResults && (
               <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
                 {/* Illness Name - Cards with gradient */}
                 <div className="grid grid-cols-2 gap-6">
-                  <div className="bg-gradient-to-br from-[#0F6E56] via-emerald-500 to-teal-500 rounded-2xl shadow-xl p-8 text-white transform hover:scale-105 transition-transform duration-300">
-                    <p className="text-xs uppercase tracking-widest font-bold opacity-90 mb-3">
-                      🦠 Diagnostic
+                  <div className="bg-[#0F6E56] rounded-xl shadow-sm border border-gray-200 p-5 text-white">
+                    <p className="text-xs uppercase tracking-widest font-bold opacity-90 mb-2">
+                      Diagnostic
                     </p>
-                    <p className="text-4xl font-black leading-tight mb-4 drop-shadow-lg">
+                    <p className="text-2xl font-bold leading-tight drop-shadow-lg">
                       {displayedIllness}
                     </p>
-                    <div className="h-1 w-20 bg-white/40 rounded-full"></div>
                   </div>
 
-                  {/* Confidence Score - Radial */}
-                  <div className="bg-white rounded-2xl shadow-xl p-8 border border-emerald-100">
-                    <p className="text-xs text-gray-500 uppercase tracking-widest font-bold mb-4">
-                      📊 Score de Confiance
+                  {/* Confidence Score */}
+                  <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+                    <p className="text-xs text-gray-500 uppercase tracking-widest font-bold mb-3">
+                      Score de Confiance
                     </p>
-                    <div className="flex items-center justify-between gap-6">
-                      <div className="flex-1">
-                        <span className="text-5xl font-black bg-gradient-to-r from-[#0F6E56] to-emerald-500 bg-clip-text text-transparent">
-                          {displayedConfidence}%
-                        </span>
-                        <div className="w-full h-2 bg-gradient-to-r from-red-300 via-yellow-300 to-green-300 rounded-full mt-4 overflow-hidden shadow-sm">
-                          <div
-                            className="h-full bg-gradient-to-r from-red-500 via-yellow-500 to-green-500 shadow-lg"
-                            style={{
-                              width: `${displayedConfidence}%`,
-                            }}
-                          ></div>
-                        </div>
+                    <div className="space-y-2">
+                      <span className="text-3xl font-bold text-[#0F6E56]">
+                        {displayedConfidence}%
+                      </span>
+                      <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-[#0F6E56]"
+                          style={{
+                            width: `${displayedConfidence}%`,
+                          }}
+                        ></div>
                       </div>
                     </div>
                   </div>
                 </div>
 
                 {/* Top Alternatives */}
-                <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
-                    <span className="w-8 h-8 bg-gradient-to-br from-orange-100 to-amber-100 rounded-lg flex items-center justify-center text-lg">
-                      🔍
-                    </span>
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                  <h3 className="text-lg font-bold text-gray-900 mb-4">
                     Diagnostics Alternatifs
                   </h3>
 
                   {analysisResults.top_alternatives?.length > 0 ? (
-                    <div className="space-y-3">
+                    <div className="space-y-2">
                       {analysisResults.top_alternatives.map((item, idx) => (
                         <div
                           key={idx}
-                          className="group flex items-center gap-4 p-4 bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl border border-amber-200/50 hover:border-orange-300 hover:shadow-md transition-all"
+                          className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors"
                         >
-                          <div className="w-8 h-8 bg-gradient-to-br from-orange-400 to-amber-500 text-white rounded-full flex items-center justify-center font-bold text-sm group-hover:scale-110 transition-transform">
+                          <div className="w-6 h-6 bg-[#0F6E56] text-white rounded-full flex items-center justify-center font-bold text-xs flex-shrink-0">
                             {idx + 1}
                           </div>
-                          <div className="flex-1">
-                            <p className="font-semibold text-gray-800">
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-gray-800 text-sm">
                               {typeof item === "string"
                                 ? item
                                 : item.name ||
@@ -595,11 +630,12 @@ export default function PatientDetailsPage() {
                                   "Inconnu"}
                             </p>
                           </div>
-                          {typeof item === "object" && item.confidence != null && (
-                            <span className="text-xs font-bold px-3 py-1.5 bg-white rounded-full text-orange-600 border border-orange-200">
-                              {Math.round(item.confidence * 100)}%
-                            </span>
-                          )}
+                          {typeof item === "object" &&
+                            item.confidence != null && (
+                              <span className="text-xs font-bold px-2.5 py-1 bg-white rounded-full text-[#0F6E56] border border-gray-200 flex-shrink-0">
+                                {Math.round(item.confidence * 100)}%
+                              </span>
+                            )}
                         </div>
                       ))}
                     </div>
@@ -611,43 +647,37 @@ export default function PatientDetailsPage() {
                 </div>
 
                 {/* Advanced Analysis Button */}
-                <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
-                  <button
-                    onClick={handleAdvancedAnalysis}
-                    disabled={advancedAnalyzing}
-                    className="w-full bg-gradient-to-r from-[#0F6E56] to-emerald-500 text-white py-4 rounded-xl font-bold uppercase tracking-wider text-lg hover:shadow-2xl hover:shadow-emerald-500/30 hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 transition-all duration-200 flex items-center justify-center gap-3"
-                  >
-                    <span className="text-xl">🏥</span>
-                    {advancedAnalyzing
-                      ? "Analyse Avancée en cours..."
-                      : "Lancer l'Analyse Avancée (Module 2 - RAG)"}
-                  </button>
-                </div>
+                <button
+                  onClick={handleAdvancedAnalysis}
+                  disabled={advancedAnalyzing}
+                  className="w-full bg-[#0F6E56] text-white py-3 rounded-lg font-bold uppercase tracking-wider hover:bg-[#0d5a47] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  {advancedAnalyzing
+                    ? "Analyse Détaillée en cours..."
+                    : "Lancer l'Analyse Détaillée"}
+                </button>
 
                 {advancedResults && (
                   <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
                     {/* Advanced Analysis Summary */}
-                    <div className="bg-gradient-to-br from-white via-emerald-50 to-white rounded-2xl shadow-xl border border-emerald-100 p-8 space-y-6">
-                      <h3 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
-                        <span className="w-8 h-8 bg-gradient-to-br from-emerald-100 to-teal-100 rounded-lg flex items-center justify-center">
-                          🏥
-                        </span>
-                        Analyse Avancée - Résultats RAG
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 space-y-6">
+                      <h3 className="text-xl font-bold text-gray-900">
+                        Recommandations Cliniques
                       </h3>
 
                       {/* Key Metrics Grid */}
                       <div className="grid grid-cols-3 gap-4">
                         {[
                           {
-                            label: "⚠️ Urgence",
+                            label: "Urgence",
                             value: advancedResults.urgence,
                           },
                           {
-                            label: "🎯 Confiance",
+                            label: "Confiance",
                             value: advancedResults.confidence_level,
                           },
                           {
-                            label: "🧭 Orientation",
+                            label: "Orientation",
                             value: advancedResults.orientation,
                           },
                         ].map((metric, idx) => (
@@ -667,9 +697,9 @@ export default function PatientDetailsPage() {
 
                       {/* Initial Analysis */}
                       {advancedResults.analyse_initiale && (
-                        <div className="bg-gradient-to-br from-blue-50 to-cyan-50 border border-blue-200/50 rounded-xl p-6">
-                          <p className="text-xs text-blue-600 uppercase tracking-widest font-bold mb-3">
-                            📋 Analyse Clinique Initiale
+                        <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
+                          <p className="text-xs text-gray-600 uppercase tracking-widest font-bold mb-3">
+                            Analyse Clinique Initiale
                           </p>
                           <p className="text-sm text-gray-700 leading-relaxed text-justify">
                             {toDisplayText(advancedResults.analyse_initiale)}
@@ -680,11 +710,11 @@ export default function PatientDetailsPage() {
 
                     {/* Clinical Questions Section */}
                     {clinicalQuestions.length > 0 && (
-                      <div className="rounded-2xl border border-[#0F6E56]/20 bg-gradient-to-br from-white via-emerald-50 to-white overflow-hidden shadow-lg">
-                        <div className="px-8 py-5 border-b border-[#0F6E56]/10 bg-gradient-to-r from-[#0F6E56] to-emerald-500">
+                      <div className="rounded-xl border border-gray-200 bg-white overflow-hidden shadow-sm">
+                        <div className="px-8 py-4 border-b border-gray-200 bg-[#0F6E56]">
                           <div className="flex items-center justify-between gap-3">
-                            <p className="text-xs tracking-widest uppercase font-bold text-white flex items-center gap-2">
-                              <span>❓</span> Questions Cliniques
+                            <p className="text-xs tracking-widest uppercase font-bold text-white">
+                              Questions Cliniques
                             </p>
                             <p className="text-xs tracking-widest uppercase font-semibold text-white/80">
                               {clinicalQuestions.length} questions • Niveau{" "}
@@ -754,11 +784,11 @@ export default function PatientDetailsPage() {
                     )}
 
                     {/* Treatments Section */}
-                    <div className="rounded-2xl border border-[#0F6E56]/20 bg-white overflow-hidden shadow-lg">
-                      <div className="px-8 py-5 border-b border-[#0F6E56]/10 bg-gradient-to-r from-[#0F6E56] to-emerald-500">
+                    <div className="rounded-xl border border-gray-200 bg-white overflow-hidden shadow-sm">
+                      <div className="px-8 py-4 border-b border-gray-200 bg-[#0F6E56]">
                         <div className="flex items-center justify-between gap-3">
-                          <p className="text-xs tracking-widest uppercase font-bold text-white flex items-center gap-2">
-                            <span>💊</span> Traitements Proposés
+                          <p className="text-xs tracking-widest uppercase font-bold text-white">
+                            Traitements Proposés
                           </p>
                           <p className="text-xs tracking-widest uppercase font-semibold text-white/80">
                             {selectedTreatmentCount}/{allTreatmentRows.length}{" "}
