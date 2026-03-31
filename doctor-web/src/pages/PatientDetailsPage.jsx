@@ -1193,9 +1193,10 @@ export default function PatientDetailsPage() {
 
             {/* Validate Button */}
             <div className="mt-12 flex justify-end">
-              <button 
+              <button
                 onClick={handleValidateAndSave}
-                className="px-8 py-3 bg-[#0F6E56] text-white font-bold uppercase tracking-wider rounded-lg hover:bg-[#0d5a47] transition-colors shadow-sm">
+                className="px-8 py-3 bg-[#0F6E56] text-white font-bold uppercase tracking-wider rounded-lg hover:bg-[#0d5a47] transition-colors shadow-sm"
+              >
                 Valider et Enregistrer
               </button>
             </div>

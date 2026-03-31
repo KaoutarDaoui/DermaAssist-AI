@@ -4,7 +4,7 @@ from app.db.database import get_db
 from app.models.patient import Patient
 from app.models.skin_image import SkinImage
 from app.models.ai_result import AIResult
-from app.models.consultation import Consultation
+from app.models.consultation import Consultation, ConsultationStatus
 from datetime import datetime
 from typing import Optional, List, Dict, Any
 from pydantic import BaseModel
@@ -544,7 +544,7 @@ async def create_ai_result(
     
     And links to:
     - patient_id
-    - consultation_id (if provided)
+    - consultation_id (created automatically if not provided)
     - skin_image_id (if provided)
     """
     try:
@@ -556,16 +556,37 @@ async def create_ai_result(
                 detail="Patient not found"
             )
         
-        # Verify consultation if provided
+        # Create or use provided consultation_id
+        consultation_id = None
+        
         if request.consultation_id:
+            # Verify provided consultation exists
+            try:
+                consultation_id = int(request.consultation_id)
+            except (ValueError, TypeError):
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="consultation_id must be an integer"
+                )
+            
             consultation = db.query(Consultation).filter(
-                Consultation.id == request.consultation_id
+                Consultation.consultation_id == consultation_id
             ).first()
             if not consultation:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
                     detail="Consultation not found"
                 )
+        else:
+            # Auto-create consultation 
+            new_consultation = Consultation(
+                patient_id=patient_id,
+                doctor_id=None,  # No doctor needed
+                status=ConsultationStatus.AI_DONE
+            )
+            db.add(new_consultation)
+            db.flush()  # Get the ID without committing yet
+            consultation_id = new_consultation.consultation_id
         
         # Verify skin image if provided
         if request.skin_image_id:
@@ -580,7 +601,7 @@ async def create_ai_result(
         
         # Create AI result record
         ai_result = AIResult(
-            consultation_id=request.consultation_id,
+            consultation_id=consultation_id,
             patient_id=patient_id,
             skin_image_id=request.skin_image_id,
             diagnosis=request.diagnosis,
@@ -613,9 +634,11 @@ async def create_ai_result(
             "status": "success",
             "message": "AI results saved successfully",
             "ai_result_id": str(ai_result.id),
+            "consultation_id": ai_result.consultation_id,
             "data": {
                 "id": str(ai_result.id),
                 "patient_id": str(ai_result.patient_id),
+                "consultation_id": ai_result.consultation_id,
                 "diagnosis": ai_result.diagnosis,
                 "confidence": ai_result.confidence,
                 "suggested_questions_count": len(request.suggested_questions or []),
