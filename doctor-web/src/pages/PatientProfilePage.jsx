@@ -67,8 +67,8 @@ export default function PatientProfilePage() {
         const aiResultsData = Array.isArray(aiResultsResponse.data)
           ? aiResultsResponse.data
           : Array.isArray(aiResultsResponse)
-          ? aiResultsResponse
-          : [];
+            ? aiResultsResponse
+            : [];
         setConsultationsList(aiResultsData);
       } catch (error) {
         console.error("Error loading data:", error);
@@ -80,7 +80,7 @@ export default function PatientProfilePage() {
         toast.error(
           error.response?.data?.detail ||
             error.message ||
-            "Failed to load patient details or AI results"
+            "Failed to load patient details or AI results",
         );
       } finally {
         setLoading(false);
@@ -262,7 +262,7 @@ export default function PatientProfilePage() {
                                   year: "numeric",
                                   month: "long",
                                   day: "numeric",
-                                }
+                                },
                               )
                             : "Date non disponible"}
                         </p>
@@ -273,7 +273,7 @@ export default function PatientProfilePage() {
                                 {
                                   hour: "2-digit",
                                   minute: "2-digit",
-                                }
+                                },
                               )
                             : ""}
                         </p>
@@ -290,7 +290,11 @@ export default function PatientProfilePage() {
                           </p>
                           {result.confidence && (
                             <p className="text-xs text-gray-600 mt-1">
-                              Confiance: {result.confidence.percentage || result.confidence.score || "—"}%
+                              Confiance:{" "}
+                              {result.confidence.percentage ||
+                                result.confidence.score ||
+                                "—"}
+                              %
                             </p>
                           )}
                         </div>
@@ -304,6 +308,7 @@ export default function PatientProfilePage() {
                               state: {
                                 patientId,
                                 consultationId: result.consultation_id,
+                                sequentialNumber: idx + 1,
                               },
                             })
                           }

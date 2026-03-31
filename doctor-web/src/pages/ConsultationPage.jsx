@@ -4,7 +4,9 @@ import NavBar from "../components/NavBar";
 import Sidebar from "../components/Sidebar";
 import toast from "react-hot-toast";
 import { ArrowLeft, Download, Printer } from "lucide-react";
-import { ai } from "../services/api";
+import { ai, patients } from "../services/api";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 
 export default function ConsultationPage() {
   const { consultationId } = useParams();
@@ -12,11 +14,13 @@ export default function ConsultationPage() {
   const location = useLocation();
   const patientId = location.state?.patientId;
   const consultationNumber = location.state?.consultationId;
+  const sequentialNumber = location.state?.sequentialNumber;
 
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [consultationData, setConsultationData] = useState(null);
   const [aiResults, setAiResults] = useState(null);
   const [skinImage, setSkinImage] = useState(null);
+  const [patient, setPatient] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -26,7 +30,7 @@ export default function ConsultationPage() {
 
         if (!patientId || !consultationNumber) {
           toast.error(
-            "Patient ID or Consultation ID not found. Please go back and try again."
+            "Patient ID or Consultation ID not found. Please go back and try again.",
           );
           return;
         }
@@ -34,7 +38,7 @@ export default function ConsultationPage() {
         // Fetch AI results for this consultation
         const aiResultsResponse = await ai.getResultByConsultation(
           patientId,
-          consultationNumber
+          consultationNumber,
         );
 
         setAiResults(aiResultsResponse.data);
@@ -44,11 +48,20 @@ export default function ConsultationPage() {
           date: aiResultsResponse.data.generated_at,
         });
 
+        // Fetch patient data
+        try {
+          const patientResponse = await patients.get(patientId);
+          setPatient(patientResponse.data);
+          console.log("Patient loaded:", patientResponse.data);
+        } catch (patientError) {
+          console.error("Error fetching patient data:", patientError);
+        }
+
         // Fetch skin image for this consultation
         try {
           const skinImageResponse = await ai.getSkinImage(
             patientId,
-            consultationNumber
+            consultationNumber,
           );
           setSkinImage(skinImageResponse.data);
         } catch (imgError) {
@@ -90,6 +103,226 @@ export default function ConsultationPage() {
     );
   }
 
+  const downloadReport = async () => {
+    console.log("🔴 downloadReport called!");
+    console.log("Current state:", {
+      consultationData: !!consultationData,
+      aiResults: !!aiResults,
+      patient: !!patient,
+    });
+
+    if (!consultationData || !aiResults) {
+      console.log("❌ Data missing:", { consultationData, aiResults });
+      toast.error("Donnees manquantes pour generer le PDF");
+      return;
+    }
+
+    try {
+      console.log("✅ Generating PDF with data:", {
+        consultationData,
+        aiResults,
+        patient,
+      });
+      toast.loading("Generation du PDF en cours...");
+
+      const pdf = new jsPDF("p", "mm", "a4");
+
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      let yPosition = 10;
+      const margin = 10;
+      const maxWidth = pageWidth - 2 * margin;
+
+      // Title
+      pdf.setFontSize(22);
+      pdf.setTextColor(15, 110, 86); // #0F6E56
+      pdf.text("DermaAssist", margin, yPosition);
+
+      yPosition += 10;
+      pdf.setFontSize(10);
+      pdf.setTextColor(100, 100, 100);
+      pdf.text("Rapport de Consultation Dermatologique", margin, yPosition);
+
+      yPosition += 15;
+      pdf.setDrawColor(15, 110, 86);
+      pdf.line(margin, yPosition, pageWidth - margin, yPosition);
+      yPosition += 10;
+
+      // Reset to black for content
+      pdf.setTextColor(0, 0, 0);
+      pdf.setFontSize(10);
+
+      // Helper function to add text with wrapping
+      const addText = (label, value) => {
+        const labelWidth = 55;
+        pdf.setFont(undefined, "bold");
+        pdf.text(label + ":", margin, yPosition);
+        pdf.setFont(undefined, "normal");
+
+        if (!value) value = "Non disponible";
+        const lines = pdf.splitTextToSize(String(value), maxWidth - labelWidth);
+        pdf.text(lines, margin + labelWidth, yPosition);
+
+        yPosition += Math.max(lines.length * 5, 5) + 5;
+
+        if (yPosition > pageHeight - 20) {
+          pdf.addPage();
+          yPosition = 10;
+        }
+      };
+
+      // Add data
+      const dateStr = consultationData?.date
+        ? new Date(consultationData.date).toLocaleDateString("fr-FR", {
+            weekday: "long",
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+          })
+        : "Non disponible";
+
+      addText("Date", dateStr);
+
+      const patientName = patient
+        ? patient.first_name && patient.last_name
+          ? `${patient.first_name} ${patient.last_name}`
+          : patient.username || "Patient"
+        : "Patient";
+
+      addText("Nom Complet", patientName);
+
+      addText("La Maladie", aiResults?.diagnosis || "Non disponible");
+
+      const confidence =
+        aiResults?.confidence?.percentage ||
+        aiResults?.confidence?.score ||
+        "—";
+      addText("Taux de Confiance", `${confidence}%`);
+
+      // Analysis section
+      yPosition += 5;
+      pdf.setFont(undefined, "bold");
+      pdf.text("L'Analyse:", margin, yPosition);
+      pdf.setFont(undefined, "normal");
+      yPosition += 5;
+
+      const analysisLines = pdf.splitTextToSize(
+        aiResults?.diagnosis || "Non disponible",
+        maxWidth,
+      );
+      pdf.text(analysisLines, margin, yPosition);
+      yPosition += analysisLines.length * 5 + 10;
+
+      // Questions section
+      if (
+        aiResults?.suggested_questions &&
+        aiResults.suggested_questions.length > 0
+      ) {
+        if (yPosition > pageHeight - 40) {
+          pdf.addPage();
+          yPosition = 10;
+        }
+
+        pdf.setFont(undefined, "bold");
+        pdf.text("Les Questions:", margin, yPosition);
+        pdf.setFont(undefined, "normal");
+        yPosition += 7;
+
+        aiResults.suggested_questions.forEach((q, idx) => {
+          if (yPosition > pageHeight - 20) {
+            pdf.addPage();
+            yPosition = 10;
+          }
+
+          const qText = `${idx + 1}. ${q.question}`;
+          const qLines = pdf.splitTextToSize(qText, maxWidth - 5);
+          pdf.text(qLines, margin + 5, yPosition);
+          yPosition += qLines.length * 5;
+
+          pdf.setFont(undefined, "italic");
+          const aText = `Reponse: ${q.selected_option}`;
+          const aLines = pdf.splitTextToSize(aText, maxWidth - 10);
+          pdf.text(aLines, margin + 10, yPosition);
+          pdf.setFont(undefined, "normal");
+          yPosition += aLines.length * 5 + 3;
+        });
+
+        yPosition += 5;
+      }
+
+      // Treatments section
+      if (
+        aiResults?.treatment_options &&
+        aiResults.treatment_options.length > 0
+      ) {
+        if (yPosition > pageHeight - 40) {
+          pdf.addPage();
+          yPosition = 10;
+        }
+
+        pdf.setFont(undefined, "bold");
+        pdf.text("Les Medicaments Proposes:", margin, yPosition);
+        pdf.setFont(undefined, "normal");
+        yPosition += 7;
+
+        aiResults.treatment_options.forEach((med, idx) => {
+          if (yPosition > pageHeight - 25) {
+            pdf.addPage();
+            yPosition = 10;
+          }
+
+          pdf.setFont(undefined, "bold");
+          pdf.text(`${idx + 1}. ${med.nom}`, margin + 5, yPosition);
+          yPosition += 5;
+
+          pdf.setFont(undefined, "normal");
+          pdf.setFontSize(9);
+          const classeLines = pdf.splitTextToSize(
+            `Classe: ${med.classe}`,
+            maxWidth - 15,
+          );
+          pdf.text(classeLines, margin + 10, yPosition);
+          yPosition += classeLines.length * 4;
+
+          const indicLines = pdf.splitTextToSize(
+            `Indication: ${med.indication}`,
+            maxWidth - 15,
+          );
+          pdf.text(indicLines, margin + 10, yPosition);
+          yPosition += indicLines.length * 4;
+
+          const posLines = pdf.splitTextToSize(
+            `Posologie: ${med.posologie}`,
+            maxWidth - 15,
+          );
+          pdf.text(posLines, margin + 10, yPosition);
+          yPosition += posLines.length * 4 + 2;
+
+          pdf.setFontSize(10);
+        });
+      }
+
+      // Footer
+      pdf.setFontSize(8);
+      pdf.setTextColor(100, 100, 100);
+      const footerText = `Rapport genere par DermaAssist le ${new Date().toLocaleDateString("fr-FR")}`;
+      pdf.text(footerText, pageWidth / 2, pageHeight - 5, { align: "center" });
+
+      const filename = `consultation-dermaassist-${Date.now()}.pdf`;
+      pdf.save(filename);
+
+      toast.dismiss();
+      toast.success("PDF telecharge avec succes!");
+      console.log("✅ PDF saved as:", filename);
+    } catch (error) {
+      console.error("❌ Erreur PDF complete:", error);
+      toast.dismiss();
+      toast.error("Erreur PDF: " + error.message);
+    }
+  };
+
   return (
     <div className="flex h-screen bg-gray-50">
       <Sidebar open={sidebarOpen} />
@@ -120,9 +353,7 @@ export default function ConsultationPage() {
                 <div className="bg-gradient-to-r from-[#0F6E56] to-emerald-600 rounded-xl shadow-md p-8 text-white">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h1 className="text-4xl font-bold mb-2">
-                        Consultation #{consultationData.consultation_id}
-                      </h1>
+                      <h1 className="text-4xl font-bold mb-2">Consultation</h1>
                       <p className="text-white/80 text-sm">
                         {consultationData.date
                           ? new Date(consultationData.date).toLocaleDateString(
@@ -134,7 +365,7 @@ export default function ConsultationPage() {
                                 day: "numeric",
                                 hour: "2-digit",
                                 minute: "2-digit",
-                              }
+                              },
                             )
                           : "Date non disponible"}
                       </p>
@@ -146,6 +377,13 @@ export default function ConsultationPage() {
                       >
                         <Printer size={18} />
                         Imprimer
+                      </button>
+                      <button
+                        onClick={downloadReport}
+                        className="flex items-center gap-2 bg-white text-[#0F6E56] px-4 py-2 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
+                      >
+                        <Download size={18} />
+                        Télécharger
                       </button>
                     </div>
                   </div>
@@ -174,9 +412,23 @@ export default function ConsultationPage() {
                         <p className="text-gray-600">Aucune image disponible</p>
                       )}
                       <div className="mt-4 flex items-center gap-2 text-xs text-gray-600">
-                        <span>Source: <strong>{skinImage.source === "doctor" ? "Médecin" : "Patient"}</strong></span>
+                        <span>
+                          Source:{" "}
+                          <strong>
+                            {skinImage.source === "doctor"
+                              ? "Médecin"
+                              : "Patient"}
+                          </strong>
+                        </span>
                         {skinImage.uploaded_at && (
-                          <span>• Uploadée le: <strong>{new Date(skinImage.uploaded_at).toLocaleDateString("fr-FR")}</strong></span>
+                          <span>
+                            • Uploadée le:{" "}
+                            <strong>
+                              {new Date(
+                                skinImage.uploaded_at,
+                              ).toLocaleDateString("fr-FR")}
+                            </strong>
+                          </span>
                         )}
                       </div>
                     </div>
@@ -200,34 +452,6 @@ export default function ConsultationPage() {
                               {aiResults.diagnosis || "—"}
                             </p>
                           </div>
-
-                          {aiResults.confidence && (
-                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                              <p className="text-sm text-gray-600 uppercase tracking-widest font-semibold mb-2">
-                                Score de Confiance
-                              </p>
-                              <div className="space-y-2">
-                                <p className="text-2xl font-bold text-blue-600">
-                                  {aiResults.confidence.percentage ||
-                                    aiResults.confidence.score ||
-                                    "—"}
-                                  %
-                                </p>
-                                <div className="w-full h-2 bg-blue-200 rounded-full overflow-hidden">
-                                  <div
-                                    className="h-full bg-blue-600"
-                                    style={{
-                                      width: `${
-                                        aiResults.confidence.percentage ||
-                                        aiResults.confidence.score ||
-                                        0
-                                      }%`,
-                                    }}
-                                  ></div>
-                                </div>
-                              </div>
-                            </div>
-                          )}
                         </div>
                       </div>
 
@@ -246,7 +470,7 @@ export default function ConsultationPage() {
                                 <span className="text-sm font-bold text-[#0F6E56]">
                                   {aiResults.env_snapshot.fitzpatrick_type.replace(
                                     "TYPE_",
-                                    "Type "
+                                    "Type ",
                                   ) || "—"}
                                 </span>
                               </div>
@@ -309,7 +533,7 @@ export default function ConsultationPage() {
                                     </div>
                                   </div>
                                 </div>
-                              )
+                              ),
                             )}
                           </div>
                         </div>
@@ -358,7 +582,7 @@ export default function ConsultationPage() {
                                         {treatment.posologie || "—"}
                                       </td>
                                     </tr>
-                                  )
+                                  ),
                                 )}
                               </tbody>
                             </table>
@@ -369,6 +593,176 @@ export default function ConsultationPage() {
                 )}
               </>
             )}
+          </div>
+
+          {/* PDF/Print Report Section */}
+          <div
+            id="pdf-report"
+            style={{ display: "none" }}
+            className="print:block p-12 bg-white"
+          >
+            <style>{`
+              @media print {
+                body {
+                  margin: 0;
+                  padding: 0;
+                }
+                .print\\:block {
+                  display: block !important;
+                }
+                #pdf-report {
+                  display: block !important;
+                }
+                .flex-1.overflow-auto {
+                  display: none !important;
+                }
+                .flex-1.flex.flex-col.overflow-hidden {
+                  display: none !important;
+                }
+                nav {
+                  display: none !important;
+                }
+              }
+            `}</style>
+
+            {/* Logo / Header */}
+            <div className="text-center mb-8 border-b-2 border-[#0F6E56] pb-6">
+              <h1 className="text-5xl font-bold text-[#0F6E56] mb-2">
+                DermaAssist
+              </h1>
+              <p className="text-gray-600 text-sm">
+                Rapport de Consultation Dermatologique
+              </p>
+            </div>
+
+            {/* Report Content */}
+            <div className="space-y-6 text-sm">
+              {/* Date */}
+              <div className="border-b border-gray-300 pb-3">
+                <p className="font-semibold text-gray-900">
+                  Date:{" "}
+                  <span className="font-normal text-gray-700">
+                    {consultationData?.date
+                      ? new Date(consultationData.date).toLocaleDateString(
+                          "fr-FR",
+                          {
+                            weekday: "long",
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          },
+                        )
+                      : "Non disponible"}
+                  </span>
+                </p>
+              </div>
+
+              {/* Nom Complet */}
+              <div className="border-b border-gray-300 pb-3">
+                <p className="font-semibold text-gray-900">
+                  Nom Complet:{" "}
+                  <span className="font-normal text-gray-700">
+                    {patient
+                      ? patient.first_name && patient.last_name
+                        ? `${patient.first_name} ${patient.last_name}`
+                        : patient.username || "Non disponible"
+                      : "Chargement..."}
+                  </span>
+                </p>
+              </div>
+
+              {/* La Maladie */}
+              <div className="border-b border-gray-300 pb-3">
+                <p className="font-semibold text-gray-900">
+                  La Maladie:{" "}
+                  <span className="font-normal text-gray-700">
+                    {aiResults?.diagnosis || "Non disponible"}
+                  </span>
+                </p>
+              </div>
+
+              {/* Taux de Confiance */}
+              <div className="border-b border-gray-300 pb-3">
+                <p className="font-semibold text-gray-900">
+                  Taux de Confiance:{" "}
+                  <span className="font-normal text-gray-700">
+                    {aiResults?.confidence?.percentage ||
+                      aiResults?.confidence?.score ||
+                      "—"}
+                    %
+                  </span>
+                </p>
+              </div>
+
+              {/* L'Analyse */}
+              <div className="border-b border-gray-300 pb-3">
+                <p className="font-semibold text-gray-900 mb-2">L'Analyse:</p>
+                <p className="text-gray-700 ml-4">
+                  {aiResults?.diagnosis || "Non disponible"}
+                </p>
+              </div>
+
+              {/* Les Questions */}
+              {aiResults?.suggested_questions &&
+                aiResults.suggested_questions.length > 0 && (
+                  <div className="border-b border-gray-300 pb-3">
+                    <p className="font-semibold text-gray-900 mb-2">
+                      Les Questions:
+                    </p>
+                    <div className="ml-4 space-y-2">
+                      {aiResults.suggested_questions.map((q, idx) => (
+                        <div key={idx} className="text-gray-700">
+                          <p className="font-semibold">
+                            {idx + 1}. {q.question}
+                          </p>
+                          <p className="ml-4 text-gray-600">
+                            Reponse: {q.selected_option}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+              {/* Les Medicaments Proposes */}
+              {aiResults?.treatment_options &&
+                aiResults.treatment_options.length > 0 && (
+                  <div>
+                    <p className="font-semibold text-gray-900 mb-2">
+                      Les Medicaments Proposes:
+                    </p>
+                    <div className="ml-4 space-y-3">
+                      {aiResults.treatment_options.map((med, idx) => (
+                        <div
+                          key={idx}
+                          className="text-gray-700 border-l-2 border-[#0F6E56] pl-3"
+                        >
+                          <p className="font-semibold">
+                            {idx + 1}. {med.nom}
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            Classe: {med.classe}
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            Indication: {med.indication}
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            Posologie: {med.posologie}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+            </div>
+
+            {/* Footer */}
+            <div className="text-center mt-12 pt-6 border-t-2 border-[#0F6E56] text-xs text-gray-600">
+              <p>Rapport genere par DermaAssist</p>
+              <p>{new Date().toLocaleDateString("fr-FR")}</p>
+            </div>
           </div>
         </div>
       </div>
