@@ -29,6 +29,7 @@ class SkinImage(Base):
     # Relationships
     patient = relationship("Patient", back_populates="skin_images")
     consultation = relationship("Consultation", back_populates="skin_images")
+    ai_results = relationship("AIResult", back_populates="skin_image")
 
     def __repr__(self):
         return f"<SkinImage {self.id}>"

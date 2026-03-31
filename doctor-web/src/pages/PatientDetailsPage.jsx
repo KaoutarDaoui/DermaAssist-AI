@@ -202,6 +202,89 @@ export default function PatientDetailsPage() {
     toast.success("Médicament ajouté");
   };
 
+  const handleValidateAndSave = async () => {
+    if (!analysisResults) {
+      toast.error("Veuillez d'abord effectuer une analyse");
+      return;
+    }
+
+    if (!patient) {
+      toast.error("Données du patient non chargées");
+      return;
+    }
+
+    // Collect selected questions with their options
+    const selectedQuestions = clinicalQuestions
+      .map((question, idx) => {
+        if (selectedQuestionOptions[idx] !== undefined) {
+          return {
+            index: idx,
+            question: question.text,
+            selected_option: question.options[selectedQuestionOptions[idx]],
+          };
+        }
+        return null;
+      })
+      .filter(Boolean);
+
+    // Collect selected treatments
+    const selectedTreatmentsList = allTreatmentRows
+      .map((treatment, idx) => {
+        const treatmentKey = `${treatment.id}-${idx}`;
+        if (selectedTreatments[treatmentKey]) {
+          return {
+            nom: treatment.nom,
+            classe: treatment.classe,
+            indication: treatment.indication,
+            posologie: treatment.posologie,
+          };
+        }
+        return null;
+      })
+      .filter(Boolean);
+
+    try {
+      const payload = {
+        consultation_id: analysisResults?.consultation_id,
+        patient_id: patientId,
+        skin_image_id: analysisResults?.image_id,
+        diagnosis: displayedIllness,
+        confidence: {
+          score: displayedConfidence,
+          percentage: displayedConfidence,
+        },
+        suggested_questions: selectedQuestions,
+        treatment_options: selectedTreatmentsList,
+        env_snapshot: {
+          fitzpatrick_type: patient.fitzpatrick_type,
+          city: patient.city,
+          medical_history: patient.medical_history,
+        },
+      };
+
+      const response = await axios.post(
+        `${API_URL}/patients/${patientId}/ai-results`,
+        payload,
+      );
+
+      if (response.status === 201 || response.status === 200) {
+        toast.success("Analyse et recommandations enregistrées avec succès!");
+        // Optional: Reset or navigate
+        setTimeout(() => {
+          navigate(`/patients/${patientId}`);
+        }, 1500);
+      }
+    } catch (error) {
+      console.error("Error saving AI results:", error);
+      const errorMsg =
+        error.response?.data?.detail ||
+        error.response?.data?.message ||
+        error.message ||
+        "Erreur lors de l'enregistrement";
+      toast.error(errorMsg);
+    }
+  };
+
   useEffect(() => {
     loadPatient();
   }, [patientId]);
@@ -530,16 +613,22 @@ export default function PatientDetailsPage() {
               {/* Right: Information Panel */}
               <div className="col-span-1">
                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
-                  <h3 className="text-xl font-bold text-gray-900 mb-6">Guide d'Utilisation</h3>
-                  
+                  <h3 className="text-xl font-bold text-gray-900 mb-6">
+                    Guide d'Utilisation
+                  </h3>
+
                   <div className="space-y-3">
                     <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors">
                       <span className="w-8 h-8 flex-shrink-0 bg-[#0F6E56] text-white rounded-full flex items-center justify-center font-bold text-sm">
                         1
                       </span>
                       <div className="flex-1">
-                        <p className="font-semibold text-gray-800 text-sm">Télécharger</p>
-                        <p className="text-xs text-gray-600 mt-1">Sélectionnez une image dermato claire</p>
+                        <p className="font-semibold text-gray-800 text-sm">
+                          Télécharger
+                        </p>
+                        <p className="text-xs text-gray-600 mt-1">
+                          Sélectionnez une image dermato claire
+                        </p>
                       </div>
                     </div>
 
@@ -548,8 +637,12 @@ export default function PatientDetailsPage() {
                         2
                       </span>
                       <div className="flex-1">
-                        <p className="font-semibold text-gray-800 text-sm">Analyser</p>
-                        <p className="text-xs text-gray-600 mt-1">Lancez l'analyse automatique</p>
+                        <p className="font-semibold text-gray-800 text-sm">
+                          Analyser
+                        </p>
+                        <p className="text-xs text-gray-600 mt-1">
+                          Lancez l'analyse automatique
+                        </p>
                       </div>
                     </div>
 
@@ -558,8 +651,12 @@ export default function PatientDetailsPage() {
                         3
                       </span>
                       <div className="flex-1">
-                        <p className="font-semibold text-gray-800 text-sm">Résultats</p>
-                        <p className="text-xs text-gray-600 mt-1">Diagnostic avec alternatives</p>
+                        <p className="font-semibold text-gray-800 text-sm">
+                          Résultats
+                        </p>
+                        <p className="text-xs text-gray-600 mt-1">
+                          Diagnostic avec alternatives
+                        </p>
                       </div>
                     </div>
 
@@ -568,15 +665,23 @@ export default function PatientDetailsPage() {
                         4
                       </span>
                       <div className="flex-1">
-                        <p className="font-semibold text-gray-800 text-sm">Recommandations</p>
-                        <p className="text-xs text-gray-600 mt-1">Questions cliniques et traitements</p>
+                        <p className="font-semibold text-gray-800 text-sm">
+                          Recommandations
+                        </p>
+                        <p className="text-xs text-gray-600 mt-1">
+                          Questions cliniques et traitements
+                        </p>
                       </div>
                     </div>
                   </div>
 
                   <div className="mt-6 p-4 bg-[#0F6E56]/5 border border-[#0F6E56]/20 rounded-lg">
                     <p className="text-xs text-gray-700 leading-relaxed">
-                      <span className="font-semibold text-[#0F6E56]">Remarque:</span> Cet outil assiste le diagnostic. Une validation clinique est recommandée.
+                      <span className="font-semibold text-[#0F6E56]">
+                        Remarque:
+                      </span>{" "}
+                      Cet outil assiste le diagnostic. Une validation clinique
+                      est recommandée.
                     </p>
                   </div>
                 </div>
@@ -961,7 +1066,9 @@ export default function PatientDetailsPage() {
                       {/* Validate Treatment Button */}
                       <div className="mt-6 flex justify-end pr-6 pb-4">
                         <button
-                          onClick={() => setShowTreatmentAlerts(!showTreatmentAlerts)}
+                          onClick={() =>
+                            setShowTreatmentAlerts(!showTreatmentAlerts)
+                          }
                           className="px-6 py-2.5 bg-[#0F6E56] text-white font-bold uppercase tracking-wider text-sm rounded-lg hover:bg-[#0d5a47] transition-colors"
                         >
                           Valider les Traitements
@@ -971,77 +1078,111 @@ export default function PatientDetailsPage() {
                       {/* Treatment Alerts Section - From RAG */}
                       {showTreatmentAlerts && (
                         <div className="mt-6 space-y-4 border-t border-gray-200 pt-6">
-                          <h4 className="text-lg font-bold text-gray-900 mb-4">Alertes et Contre-indications</h4>
-                          
+                          <h4 className="text-lg font-bold text-gray-900 mb-4">
+                            Alertes et Contre-indications
+                          </h4>
+
                           {/* Warnings from RAG */}
-                          {advancedResults?.alertes && advancedResults.alertes.length > 0 && (
-                            <div className="space-y-3">
-                              {advancedResults.alertes.map((alerte, idx) => (
-                                <div
-                                  key={idx}
-                                  className="p-4 border-l-4 border-red-400 bg-red-50 rounded-lg"
-                                >
-                                  <p className="font-bold text-red-800 mb-2">Alerte Importante</p>
-                                  <p className="text-sm text-red-700">{alerte}</p>
-                                </div>
-                              ))}
-                            </div>
-                          )}
+                          {advancedResults?.alertes &&
+                            advancedResults.alertes.length > 0 && (
+                              <div className="space-y-3">
+                                {advancedResults.alertes.map((alerte, idx) => (
+                                  <div
+                                    key={idx}
+                                    className="p-4 border-l-4 border-red-400 bg-red-50 rounded-lg"
+                                  >
+                                    <p className="font-bold text-red-800 mb-2">
+                                      Alerte Importante
+                                    </p>
+                                    <p className="text-sm text-red-700">
+                                      {alerte}
+                                    </p>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
 
                           {/* Contraindications from RAG */}
-                          {advancedResults?.contre_indications && advancedResults.contre_indications.length > 0 && (
-                            <div className="space-y-3">
-                              {advancedResults.contre_indications.map((contraindi, idx) => (
-                                <div
-                                  key={idx}
-                                  className="p-4 border-l-4 border-orange-400 bg-orange-50 rounded-lg"
-                                >
-                                  <p className="font-bold text-orange-800 mb-2">Contre-indication</p>
-                                  <p className="text-sm text-orange-700">{contraindi}</p>
-                                </div>
-                              ))}
-                            </div>
-                          )}
+                          {advancedResults?.contre_indications &&
+                            advancedResults.contre_indications.length > 0 && (
+                              <div className="space-y-3">
+                                {advancedResults.contre_indications.map(
+                                  (contraindi, idx) => (
+                                    <div
+                                      key={idx}
+                                      className="p-4 border-l-4 border-orange-400 bg-orange-50 rounded-lg"
+                                    >
+                                      <p className="font-bold text-orange-800 mb-2">
+                                        Contre-indication
+                                      </p>
+                                      <p className="text-sm text-orange-700">
+                                        {contraindi}
+                                      </p>
+                                    </div>
+                                  ),
+                                )}
+                              </div>
+                            )}
 
                           {/* Dangers from RAG */}
-                          {advancedResults?.dangers && advancedResults.dangers.length > 0 && (
-                            <div className="space-y-3">
-                              {advancedResults.dangers.map((danger, idx) => (
-                                <div
-                                  key={idx}
-                                  className="p-4 border-l-4 border-yellow-400 bg-yellow-50 rounded-lg"
-                                >
-                                  <p className="font-bold text-yellow-800 mb-2">Danger Potentiel</p>
-                                  <p className="text-sm text-yellow-700">{danger}</p>
-                                </div>
-                              ))}
-                            </div>
-                          )}
+                          {advancedResults?.dangers &&
+                            advancedResults.dangers.length > 0 && (
+                              <div className="space-y-3">
+                                {advancedResults.dangers.map((danger, idx) => (
+                                  <div
+                                    key={idx}
+                                    className="p-4 border-l-4 border-yellow-400 bg-yellow-50 rounded-lg"
+                                  >
+                                    <p className="font-bold text-yellow-800 mb-2">
+                                      Danger Potentiel
+                                    </p>
+                                    <p className="text-sm text-yellow-700">
+                                      {danger}
+                                    </p>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
 
                           {/* Interactions from RAG */}
-                          {advancedResults?.interactions && advancedResults.interactions.length > 0 && (
-                            <div className="space-y-3">
-                              {advancedResults.interactions.map((interaction, idx) => (
-                                <div
-                                  key={idx}
-                                  className="p-4 border-l-4 border-amber-400 bg-amber-50 rounded-lg"
-                                >
-                                  <p className="font-bold text-amber-800 mb-2">Interaction Médicamenteuse</p>
-                                  <p className="text-sm text-amber-700">{interaction}</p>
-                                </div>
-                              ))}
-                            </div>
-                          )}
+                          {advancedResults?.interactions &&
+                            advancedResults.interactions.length > 0 && (
+                              <div className="space-y-3">
+                                {advancedResults.interactions.map(
+                                  (interaction, idx) => (
+                                    <div
+                                      key={idx}
+                                      className="p-4 border-l-4 border-amber-400 bg-amber-50 rounded-lg"
+                                    >
+                                      <p className="font-bold text-amber-800 mb-2">
+                                        Interaction Médicamenteuse
+                                      </p>
+                                      <p className="text-sm text-amber-700">
+                                        {interaction}
+                                      </p>
+                                    </div>
+                                  ),
+                                )}
+                              </div>
+                            )}
 
                           {/* Default message if no alerts from RAG */}
-                          {(!advancedResults?.alertes || advancedResults.alertes.length === 0) &&
-                            (!advancedResults?.contre_indications || advancedResults.contre_indications.length === 0) &&
-                            (!advancedResults?.dangers || advancedResults.dangers.length === 0) &&
-                            (!advancedResults?.interactions || advancedResults.interactions.length === 0) && (
-                            <div className="p-4 border-l-4 border-green-400 bg-green-50 rounded-lg">
-                              <p className="text-green-800 text-sm font-medium">Aucune alerte majeure détectée dans la base de connaissances.</p>
-                            </div>
-                          )}
+                          {(!advancedResults?.alertes ||
+                            advancedResults.alertes.length === 0) &&
+                            (!advancedResults?.contre_indications ||
+                              advancedResults.contre_indications.length ===
+                                0) &&
+                            (!advancedResults?.dangers ||
+                              advancedResults.dangers.length === 0) &&
+                            (!advancedResults?.interactions ||
+                              advancedResults.interactions.length === 0) && (
+                              <div className="p-4 border-l-4 border-green-400 bg-green-50 rounded-lg">
+                                <p className="text-green-800 text-sm font-medium">
+                                  Aucune alerte majeure détectée dans la base de
+                                  connaissances.
+                                </p>
+                              </div>
+                            )}
                         </div>
                       )}
                     </div>
@@ -1052,9 +1193,9 @@ export default function PatientDetailsPage() {
 
             {/* Validate Button */}
             <div className="mt-12 flex justify-end">
-              <button
-                className="px-8 py-3 bg-[#0F6E56] text-white font-bold uppercase tracking-wider rounded-lg hover:bg-[#0d5a47] transition-colors shadow-sm"
-              >
+              <button 
+                onClick={handleValidateAndSave}
+                className="px-8 py-3 bg-[#0F6E56] text-white font-bold uppercase tracking-wider rounded-lg hover:bg-[#0d5a47] transition-colors shadow-sm">
                 Valider et Enregistrer
               </button>
             </div>

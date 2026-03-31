@@ -104,6 +104,7 @@ class Patient(Base):
     check_ins = relationship("CheckIn", back_populates="patient", lazy="select")
     advice = relationship("PatientAdvice", back_populates="patient", lazy="select")
     skin_images = relationship("SkinImage", back_populates="patient", lazy="select", cascade="all, delete-orphan")
+    ai_results = relationship("AIResult", back_populates="patient", lazy="select")
 
     def get_age(self):
         """Calculate age from birth_date."""
