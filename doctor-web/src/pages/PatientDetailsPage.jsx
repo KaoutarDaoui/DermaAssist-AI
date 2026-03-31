@@ -956,11 +956,29 @@ export default function PatientDetailsPage() {
                           </tbody>
                         </table>
                       </div>
+
+                      {/* Validate Treatment Button */}
+                      <div className="mt-6 flex justify-end pr-6 pb-4">
+                        <button
+                          className="px-6 py-2.5 bg-[#0F6E56] text-white font-bold uppercase tracking-wider text-sm rounded-lg hover:bg-[#0d5a47] transition-colors"
+                        >
+                          Valider les Traitements
+                        </button>
+                      </div>
                     </div>
                   </div>
                 )}
               </div>
             )}
+
+            {/* Validate Button */}
+            <div className="mt-12 flex justify-end">
+              <button
+                className="px-8 py-3 bg-[#0F6E56] text-white font-bold uppercase tracking-wider rounded-lg hover:bg-[#0d5a47] transition-colors shadow-sm"
+              >
+                Valider et Enregistrer
+              </button>
+            </div>
           </div>
         </div>
       </div>
