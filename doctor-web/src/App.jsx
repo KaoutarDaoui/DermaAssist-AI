@@ -7,7 +7,8 @@ import {
 import { Toaster } from "react-hot-toast";
 import DashboardPage from "./pages/DashboardPage";
 import PatientsPage from "./pages/PatientsPage";
-import PatientDetailsPage from "./pages/PatientDetailsPage";
+import PatientProfilePage from "./pages/PatientProfilePage";
+import ConsultationFormPage from "./pages/ConsultationFormPage";
 import ConsultationPage from "./pages/ConsultationPage";
 import ContactPage from "./pages/ContactPage";
 import SettingsPage from "./pages/SettingsPage";
@@ -41,7 +42,15 @@ function App() {
             path="/patients/:patientId"
             element={
               <ProtectedRoute>
-                <PatientDetailsPage />
+                <PatientProfilePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/patients/:patientId/consultation"
+            element={
+              <ProtectedRoute>
+                <ConsultationFormPage />
               </ProtectedRoute>
             }
           />

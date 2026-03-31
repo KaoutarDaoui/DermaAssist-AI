@@ -14,7 +14,7 @@ const EMPTY_TREATMENT_DRAFT = {
   posologie: "",
 };
 
-export default function PatientDetailsPage() {
+export default function ConsultationFormPage() {
   const { patientId } = useParams();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -440,11 +440,11 @@ export default function PatientDetailsPage() {
           <div className="p-8 space-y-6 max-w-7xl mx-auto pb-12">
             {/* Back Button */}
             <button
-              onClick={() => navigate("/patients")}
+              onClick={() => navigate(`/patients/${patientId}`)}
               className="flex items-center gap-2 text-[#0F6E56] hover:text-[#0d5a47] transition-colors font-semibold text-sm mb-4"
             >
               <ArrowLeft size={18} />
-              Retour aux Patients
+              Retour au Profil du Patient
             </button>
 
             {/* Patient Info Card */}
