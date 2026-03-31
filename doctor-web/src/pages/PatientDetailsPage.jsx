@@ -33,6 +33,7 @@ export default function PatientDetailsPage() {
   const [newTreatmentDraft, setNewTreatmentDraft] = useState(
     EMPTY_TREATMENT_DRAFT,
   );
+  const [showTreatmentAlerts, setShowTreatmentAlerts] = useState(false);
 
   const toDisplayText = (value, fallback = "N/A") => {
     if (value === null || value === undefined || value === "") return fallback;
@@ -960,11 +961,89 @@ export default function PatientDetailsPage() {
                       {/* Validate Treatment Button */}
                       <div className="mt-6 flex justify-end pr-6 pb-4">
                         <button
+                          onClick={() => setShowTreatmentAlerts(!showTreatmentAlerts)}
                           className="px-6 py-2.5 bg-[#0F6E56] text-white font-bold uppercase tracking-wider text-sm rounded-lg hover:bg-[#0d5a47] transition-colors"
                         >
                           Valider les Traitements
                         </button>
                       </div>
+
+                      {/* Treatment Alerts Section - From RAG */}
+                      {showTreatmentAlerts && (
+                        <div className="mt-6 space-y-4 border-t border-gray-200 pt-6">
+                          <h4 className="text-lg font-bold text-gray-900 mb-4">Alertes et Contre-indications</h4>
+                          
+                          {/* Warnings from RAG */}
+                          {advancedResults?.alertes && advancedResults.alertes.length > 0 && (
+                            <div className="space-y-3">
+                              {advancedResults.alertes.map((alerte, idx) => (
+                                <div
+                                  key={idx}
+                                  className="p-4 border-l-4 border-red-400 bg-red-50 rounded-lg"
+                                >
+                                  <p className="font-bold text-red-800 mb-2">Alerte Importante</p>
+                                  <p className="text-sm text-red-700">{alerte}</p>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+
+                          {/* Contraindications from RAG */}
+                          {advancedResults?.contre_indications && advancedResults.contre_indications.length > 0 && (
+                            <div className="space-y-3">
+                              {advancedResults.contre_indications.map((contraindi, idx) => (
+                                <div
+                                  key={idx}
+                                  className="p-4 border-l-4 border-orange-400 bg-orange-50 rounded-lg"
+                                >
+                                  <p className="font-bold text-orange-800 mb-2">Contre-indication</p>
+                                  <p className="text-sm text-orange-700">{contraindi}</p>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+
+                          {/* Dangers from RAG */}
+                          {advancedResults?.dangers && advancedResults.dangers.length > 0 && (
+                            <div className="space-y-3">
+                              {advancedResults.dangers.map((danger, idx) => (
+                                <div
+                                  key={idx}
+                                  className="p-4 border-l-4 border-yellow-400 bg-yellow-50 rounded-lg"
+                                >
+                                  <p className="font-bold text-yellow-800 mb-2">Danger Potentiel</p>
+                                  <p className="text-sm text-yellow-700">{danger}</p>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+
+                          {/* Interactions from RAG */}
+                          {advancedResults?.interactions && advancedResults.interactions.length > 0 && (
+                            <div className="space-y-3">
+                              {advancedResults.interactions.map((interaction, idx) => (
+                                <div
+                                  key={idx}
+                                  className="p-4 border-l-4 border-amber-400 bg-amber-50 rounded-lg"
+                                >
+                                  <p className="font-bold text-amber-800 mb-2">Interaction Médicamenteuse</p>
+                                  <p className="text-sm text-amber-700">{interaction}</p>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+
+                          {/* Default message if no alerts from RAG */}
+                          {(!advancedResults?.alertes || advancedResults.alertes.length === 0) &&
+                            (!advancedResults?.contre_indications || advancedResults.contre_indications.length === 0) &&
+                            (!advancedResults?.dangers || advancedResults.dangers.length === 0) &&
+                            (!advancedResults?.interactions || advancedResults.interactions.length === 0) && (
+                            <div className="p-4 border-l-4 border-green-400 bg-green-50 rounded-lg">
+                              <p className="text-green-800 text-sm font-medium">Aucune alerte majeure détectée dans la base de connaissances.</p>
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
