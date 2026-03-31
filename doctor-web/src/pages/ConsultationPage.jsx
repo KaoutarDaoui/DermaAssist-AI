@@ -103,29 +103,14 @@ export default function ConsultationPage() {
     );
   }
 
-  const downloadReport = async () => {
-    console.log("🔴 downloadReport called!");
-    console.log("Current state:", {
-      consultationData: !!consultationData,
-      aiResults: !!aiResults,
-      patient: !!patient,
-    });
-
+  // Generate PDF content (reused for both download and print)
+  const generatePDF = () => {
     if (!consultationData || !aiResults) {
       console.log("❌ Data missing:", { consultationData, aiResults });
-      toast.error("Donnees manquantes pour generer le PDF");
-      return;
+      return null;
     }
 
-    try {
-      console.log("✅ Generating PDF with data:", {
-        consultationData,
-        aiResults,
-        patient,
-      });
-      toast.loading("Generation du PDF en cours...");
-
-      const pdf = new jsPDF("p", "mm", "a4");
+    const pdf = new jsPDF("p", "mm", "a4");
 
       const pageWidth = pdf.internal.pageSize.getWidth();
       const pageHeight = pdf.internal.pageSize.getHeight();
@@ -310,36 +295,112 @@ export default function ConsultationPage() {
       const footerText = `Rapport genere par DermaAssist le ${new Date().toLocaleDateString("fr-FR")}`;
       pdf.text(footerText, pageWidth / 2, pageHeight - 5, { align: "center" });
 
-      const filename = `consultation-dermaassist-${Date.now()}.pdf`;
-      pdf.save(filename);
+      return pdf;
+    };
 
-      toast.dismiss();
-      toast.success("PDF telecharge avec succes!");
-      console.log("✅ PDF saved as:", filename);
-    } catch (error) {
-      console.error("❌ Erreur PDF complete:", error);
-      toast.dismiss();
-      toast.error("Erreur PDF: " + error.message);
-    }
-  };
+    const downloadReport = async () => {
+      console.log("🔴 downloadReport called!");
+      console.log("Current state:", {
+        consultationData: !!consultationData,
+        aiResults: !!aiResults,
+        patient: !!patient,
+      });
 
-  return (
-    <div className="flex h-screen bg-gray-50">
-      <Sidebar open={sidebarOpen} />
+      if (!consultationData || !aiResults) {
+        toast.error("Donnees manquantes pour generer le PDF");
+        return;
+      }
 
-      <div className="flex-1 flex flex-col overflow-hidden min-w-0">
-        <NavBar onMenuToggle={() => setSidebarOpen(!sidebarOpen)} />
+      try {
+        console.log("✅ Generating PDF for download...");
+        toast.loading("Generation du PDF en cours...");
 
-        <div className="flex-1 overflow-auto">
-          <div className="p-8 space-y-6 max-w-7xl mx-auto pb-12">
-            {/* Back Button */}
-            <button
-              onClick={() => navigate(-1)}
-              className="flex items-center gap-2 text-[#0F6E56] hover:text-[#0d5a47] transition-colors font-semibold text-sm mb-4"
-            >
-              <ArrowLeft size={18} />
-              Retour
-            </button>
+        const pdf = generatePDF();
+        if (!pdf) {
+          toast.error("Erreur: Impossible de generer le PDF");
+          return;
+        }
+
+        const filename = `consultation-dermaassist-${Date.now()}.pdf`;
+        pdf.save(filename);
+
+        toast.dismiss();
+        toast.success("PDF telecharge avec succes!");
+        console.log("✅ PDF saved as:", filename);
+      } catch (error) {
+        console.error("❌ Erreur PDF complete:", error);
+        toast.dismiss();
+        toast.error("Erreur PDF: " + error.message);
+      }
+    };
+
+    const printReport = async () => {
+      console.log("🔴 printReport called!");
+      console.log("Current state:", {
+        consultationData: !!consultationData,
+        aiResults: !!aiResults,
+        patient: !!patient,
+      });
+
+      if (!consultationData || !aiResults) {
+        toast.error("Donnees manquantes pour imprimer le PDF");
+        return;
+      }
+
+      try {
+        console.log("✅ Generating PDF for print...");
+        toast.loading("Generation du PDF en cours...");
+
+        const pdf = generatePDF();
+        if (!pdf) {
+          toast.error("Erreur: Impossible de generer le PDF");
+          return;
+        }
+
+        // Convert PDF to blob and create URL
+        const pdfBlob = pdf.output("blob");
+        const pdfUrl = URL.createObjectURL(pdfBlob);
+
+        // Open in new window and print
+        const printWindow = window.open(pdfUrl, "_blank");
+        if (printWindow) {
+          printWindow.addEventListener("load", () => {
+            printWindow.print();
+            // Clean up after a short delay
+            setTimeout(() => {
+              URL.revokeObjectURL(pdfUrl);
+            }, 250);
+          });
+        } else {
+          toast.error("Impossible d'ouvrir la fenetre d'impression");
+        }
+
+        toast.dismiss();
+        console.log("✅ PDF opened for printing");
+      } catch (error) {
+        console.error("❌ Erreur impression:", error);
+        toast.dismiss();
+        toast.error("Erreur impression: " + error.message);
+      }
+    };
+
+    return (
+      <div className="flex h-screen bg-gray-50">
+        <Sidebar open={sidebarOpen} />
+
+        <div className="flex-1 flex flex-col overflow-hidden min-w-0">
+          <NavBar onMenuToggle={() => setSidebarOpen(!sidebarOpen)} />
+
+          <div className="flex-1 overflow-auto">
+            <div className="p-8 space-y-6 max-w-7xl mx-auto pb-12">
+              {/* Back Button */}
+              <button
+                onClick={() => navigate(-1)}
+                className="flex items-center gap-2 text-[#0F6E56] hover:text-[#0d5a47] transition-colors font-semibold text-sm mb-4"
+              >
+                <ArrowLeft size={18} />
+                Retour
+              </button>
 
             {!consultationData ? (
               <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
@@ -372,7 +433,7 @@ export default function ConsultationPage() {
                     </div>
                     <div className="flex gap-3">
                       <button
-                        onClick={() => window.print()}
+                        onClick={printReport}
                         className="flex items-center gap-2 bg-white text-[#0F6E56] px-4 py-2 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
                       >
                         <Printer size={18} />
