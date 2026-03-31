@@ -78,23 +78,39 @@ export default function QuickStatsCards() {
         return (
           <div
             key={idx}
-            className="bg-white border border-gray-300 rounded-3xl px-6 py-6 flex items-center justify-between"
+            className={`relative group overflow-hidden rounded-2xl bg-white border-2 border-emerald-200 px-8 py-8 flex items-center justify-between transition-all duration-500 hover:border-emerald-500 hover:shadow-2xl hover:shadow-emerald-100 hover:-translate-y-1`}
           >
-            <div>
-              <p className="text-gray-500 text-sm font-medium mb-2">
+            {/* Animated gradient background on hover */}
+            <div className="absolute inset-0 bg-gradient-to-br from-emerald-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            
+            {/* Top accent line */}
+            <div className="absolute top-0 left-0 h-0.5 bg-gradient-to-r from-emerald-400 via-emerald-500 to-emerald-600 w-0 group-hover:w-full transition-all duration-500"></div>
+            
+            {/* Content */}
+            <div className="relative z-10">
+              <p className="text-emerald-600 text-sm font-semibold tracking-wider mb-3 uppercase opacity-80 group-hover:opacity-100 transition-opacity duration-300">
                 {stat.label}
               </p>
-              <p className="text-4xl font-bold text-gray-800">{stat.value}</p>
+              <p className="text-5xl font-black text-emerald-900 transition-all duration-300 group-hover:text-emerald-700">
+                {stat.value}
+              </p>
             </div>
-            {stat.hasPulse && (
-              <div className="flex flex-col items-center gap-2">
-                <IconComponent size={32} className="text-[#0F6E56]" />
-                <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+            
+            {/* Icon */}
+            <div className="relative z-10 flex flex-col items-center gap-3">
+              <div className="p-3 rounded-xl bg-emerald-100 group-hover:bg-emerald-200 transition-all duration-500 group-hover:shadow-lg group-hover:shadow-emerald-300/30">
+                <IconComponent 
+                  size={40} 
+                  className={`text-emerald-600 transition-all duration-500 group-hover:scale-110`}
+                />
               </div>
-            )}
-            {!stat.hasPulse && (
-              <IconComponent size={36} className="text-gray-400" />
-            )}
+              {stat.hasPulse && (
+                <div className="flex gap-1">
+                  <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
+                  <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse delay-100"></div>
+                </div>
+              )}
+            </div>
           </div>
         );
       })}

@@ -305,8 +305,10 @@ export default function PatientsPage() {
                   <Users size={28} className="text-white" />
                 </div>
                 <div>
-                  <h1 className="text-3xl font-bold text-gray-800">Patients</h1>
-                  <p className="text-gray-600">
+                  <h1 className="text-3xl font-black text-gray-800">
+                    Patients
+                  </h1>
+                  <p className="text-gray-600 font-medium">
                     Manage and view all patient records
                   </p>
                 </div>
@@ -340,24 +342,32 @@ export default function PatientsPage() {
             {/* Stats Cards */}
             <div className="grid grid-cols-4 gap-4">
               <div className="bg-white p-4 rounded-lg shadow-sm">
-                <p className="text-gray-600 text-sm mb-1">Total Patients</p>
-                <p className="text-2xl font-bold text-gray-800">
+                <p className="text-gray-600 text-sm mb-1 font-semibold">
+                  Total Patients
+                </p>
+                <p className="text-2xl font-black text-gray-800">
                   {patientsList.length}
                 </p>
               </div>
               <div className="bg-white p-4 rounded-lg shadow-sm">
-                <p className="text-gray-600 text-sm mb-1">This Month</p>
-                <p className="text-2xl font-bold text-green-600">
+                <p className="text-gray-600 text-sm mb-1 font-semibold">
+                  This Month
+                </p>
+                <p className="text-2xl font-black text-green-600">
                   {filteredPatients.length}
                 </p>
               </div>
               <div className="bg-white p-4 rounded-lg shadow-sm">
-                <p className="text-gray-600 text-sm mb-1">Consultations</p>
-                <p className="text-2xl font-bold text-blue-600">0</p>
+                <p className="text-gray-600 text-sm mb-1 font-semibold">
+                  Consultations
+                </p>
+                <p className="text-2xl font-black text-blue-600">0</p>
               </div>
               <div className="bg-white p-4 rounded-lg shadow-sm">
-                <p className="text-gray-600 text-sm mb-1">Reports Pending</p>
-                <p className="text-2xl font-bold text-red-600">0</p>
+                <p className="text-gray-600 text-sm mb-1 font-semibold">
+                  Reports Pending
+                </p>
+                <p className="text-2xl font-black text-red-600">0</p>
               </div>
             </div>
 
@@ -388,7 +398,7 @@ export default function PatientsPage() {
                       <div className="grid grid-cols-12 gap-6 items-center">
                         {/* Patient Info */}
                         <div className="col-span-5">
-                          <h3 className="text-lg font-semibold text-gray-800 mb-3">
+                          <h3 className="text-lg font-black text-gray-800 mb-3">
                             {user.full_name || "Unknown Patient"}
                           </h3>
                           <div className="space-y-2 text-sm">
@@ -422,15 +432,15 @@ export default function PatientsPage() {
                         {/* Email & Fitzpatrick */}
                         <div className="col-span-3">
                           <div className="mb-3">
-                            <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">
+                            <p className="text-xs text-gray-500 uppercase tracking-wide mb-1 font-semibold">
                               Email
                             </p>
-                            <p className="text-sm font-medium text-gray-800 break-all">
+                            <p className="text-sm font-semibold text-gray-800 break-all">
                               {user.email || "N/A"}
                             </p>
                           </div>
                           <div>
-                            <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">
+                            <p className="text-xs text-gray-500 uppercase tracking-wide mb-1 font-semibold">
                               Fitzpatrick Type
                             </p>
                             <div className="flex items-center gap-2">
@@ -454,7 +464,7 @@ export default function PatientsPage() {
                                   ],
                                 }}
                               ></div>
-                              <span className="text-sm font-medium text-gray-800">
+                              <span className="text-sm font-semibold text-gray-800">
                                 Type {patient.fitzpatrick_type || "IV"}
                               </span>
                             </div>
@@ -463,7 +473,7 @@ export default function PatientsPage() {
 
                         {/* Status */}
                         <div className="col-span-2">
-                          <span className="inline-block px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
+                          <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">
                             Active
                           </span>
                         </div>

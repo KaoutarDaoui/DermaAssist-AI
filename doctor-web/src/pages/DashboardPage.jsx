@@ -21,13 +21,32 @@ export default function DashboardPage() {
 
         {/* Scrollable Content */}
         <div className="flex-1 overflow-auto">
-          {/* Environmental Banner - API Details */}
-          <EnvironmentalBanner />
-
           {/* Main Dashboard Content */}
           <div className="p-6 max-w-7xl mx-auto space-y-6">
-            {/* Quick Stats Cards */}
-            <QuickStatsCards />
+            {/* Main Layout: Left (Welcome + Stats) and Right (Environment) */}
+            <div className="flex gap-6">
+              {/* Left Column */}
+              <div className="flex-1 flex flex-col gap-10">
+                {/* Welcome Section */}
+                <div>
+                  <h1 className="text-4xl font-black text-emerald-950 tracking-tight">
+                    Welcome back,{" "}
+                    <span className="text-emerald-600">Dr. Ahmed Medina</span>
+                  </h1>
+                  <p className="text-emerald-600 font-medium mt-2">
+                    Here's what's happening with your practice today
+                  </p>
+                </div>
+
+                {/* Quick Stats Cards */}
+                <QuickStatsCards />
+              </div>
+
+              {/* Right Column - Environment Info */}
+              <div className="w-56">
+                <EnvironmentalBanner />
+              </div>
+            </div>
 
             {/* Recent Patients & System Status Grid */}
             <div className="grid grid-cols-2 gap-6">

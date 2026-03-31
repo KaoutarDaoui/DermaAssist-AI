@@ -56,11 +56,11 @@ class RAGResponse:
 class DiagnosisAwareRetriever:
     def __init__(self):
         self.client = chromadb.PersistentClient(path=str(CHROMA_PATH))
-        self.collection = self.client.get_collection(COLLECTION_NAME)
+        self.collection = self.client.get_or_create_collection(COLLECTION_NAME)
         self.kb = self._load_kb()
 
     def _load_kb(self):
-        kb_path = Path(__file__).parent.parent / "knowledge_base" / "knowledge_base.json"
+        kb_path = Path(__file__).parent / "knowledge_base.json"
         with open(kb_path, "r", encoding="utf-8") as f:
             return json.load(f)
 
@@ -223,14 +223,19 @@ class ClinicalGenerator:
     def _call_gemini(self, prompt: str) -> dict:
         if not self.model:
             return {"error": "GEMINI_API_KEY non configurée"}
-        response = self.model.generate_content(
-            prompt,
-            generation_config=genai.types.GenerationConfig(temperature=0.2, max_output_tokens=1000)
-        )
-        text = response.text.strip()
-        if text.startswith("```"):
-            text = text.split("\n", 1)[1].rsplit("```", 1)[0]
-        return json.loads(text)
+        try:
+            response = self.model.generate_content(
+                prompt,
+                generation_config=genai.types.GenerationConfig(temperature=0.2, max_output_tokens=1000),
+                request_options={"timeout": 20},
+            )
+            text = response.text.strip()
+            if text.startswith("```"):
+                text = text.split("\n", 1)[1].rsplit("```", 1)[0]
+            return json.loads(text)
+        except Exception as e:
+            # Keep the pipeline responsive even if external generation fails.
+            return {"error": f"Gemini call failed: {str(e)}"}
 
     def generate_analyse_initiale(self, module1, patient, condition_data, confidence_level, retrieved_chunks) -> dict:
         alternatives_str = ", ".join(f"{a['name']} ({int(a['confidence']*100)}%)" for a in module1.top_alternatives[:2]) or "aucune"
@@ -246,7 +251,10 @@ class ClinicalGenerator:
             alternatives=alternatives_str, retrieved_chunks="\n---\n".join(retrieved_chunks[:2]),
         )
         return self._call_gemini(prompt)
-atient_sexe = getattr(patient, 'sexe', 'unknown')
+
+    def generate_analyse_affinee(self, module1, patient, condition_data, confidence_level, retrieved_chunks, question_answers) -> dict:
+        answers_text = "\n".join([f"Q: {qa.get('question', '')}\nA: {qa.get('answer', '')}" for qa in question_answers])
+        patient_sexe = getattr(patient, 'sexe', 'unknown')
         patient_fitzpatrick = getattr(patient, 'fitzpatrick', 'unknown')
         patient_antecedents = getattr(patient, 'antecedents', [])
         patient_ville = getattr(patient, 'ville', 'unknown')
@@ -254,15 +262,13 @@ atient_sexe = getattr(patient, 'sexe', 'unknown')
             age=patient.age, sexe=patient_sexe, fitzpatrick=patient_fitzpatrick,
             antecedents=", ".join(patient_antecedents) or "aucun",
             comorbidites=self._build_comorbidites_str(patient),
-            ville=patient_e, sexe=patient.sexe, fitzpatrick=patient.fitzpatrick,
-            antecedents=", ".join(patient.antecedents) or "aucun",
-            comorbidites=self._build_comorbidites_str(patient),
-            ville=patient.ville, condition_name=module1.condition_name,
+            ville=patient_ville, condition_name=module1.condition_name,
             confidence_pct=int(module1.confidence * 100), confidence_level=confidence_level,
             answers_text=answers_text, retrieved_chunks="\n---\n".join(retrieved_chunks),
             analyse_template=condition_data.get("analyse_affinee_template", ""),
         )
         return self._call_gemini(prompt)
+
 
 
 # ─────────────────────────────────────────────

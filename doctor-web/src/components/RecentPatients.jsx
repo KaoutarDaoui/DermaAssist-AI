@@ -36,44 +36,49 @@ export default function RecentPatients() {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
-      <div className="flex items-center justify-between mb-6">
+    <div className="rounded-2xl bg-white border border-emerald-200 p-8 shadow-sm">
+      <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-3">
-          <h2 className="text-2xl font-bold text-gray-800">Recent Patients</h2>
-          <span className="inline-flex items-center gap-1 px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs font-semibold">
+          <h2 className="text-3xl font-black text-emerald-900">
+            Recent Patients
+          </h2>
+          <span className="inline-flex items-center gap-1 px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs font-bold border border-emerald-300 uppercase tracking-wide">
             <TrendingUp size={14} />
             Latest
           </span>
         </div>
         <button
           onClick={() => navigate("/patients")}
-          className="flex items-center gap-2 text-[#0F6E56] hover:opacity-80 transition-all font-medium text-sm"
+          className="flex items-center gap-2 text-emerald-600 hover:text-emerald-700 transition-all font-semibold text-sm group"
         >
           View All
-          <ChevronRight size={16} />
+          <ChevronRight
+            size={18}
+            className="group-hover:translate-x-1 transition-transform"
+          />
         </button>
       </div>
 
       {loading ? (
         <div className="text-center py-8">
-          <p className="text-gray-500">Loading patients...</p>
+          <p className="text-emerald-500">Loading patients...</p>
         </div>
       ) : patients.length === 0 ? (
         <div className="text-center py-8">
-          <p className="text-gray-500">No patients yet</p>
+          <p className="text-emerald-500">No patients yet</p>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-4">
           {patients.map((patient) => (
             <div
               key={patient.id}
               onClick={() => navigate(`/patients/${patient.id}`)}
-              className="border border-gray-200 rounded-lg p-4 hover:shadow-md hover:border-[#0F6E56] transition-all cursor-pointer"
+              className="group relative overflow-hidden rounded-xl bg-emerald-50 border border-emerald-200 p-5 hover:border-emerald-400 hover:shadow-md transition-all duration-300 cursor-pointer"
             >
-              <div className="flex items-start justify-between">
+              <div className="relative z-10 flex items-start justify-between">
                 <div className="flex items-start gap-4 flex-1">
                   {/* Avatar */}
-                  <div className="w-12 h-12 rounded-full bg-[#0F6E56] flex items-center justify-center text-white font-bold flex-shrink-0">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-bold flex-shrink-0 shadow-md">
                     {patient.user?.full_name
                       ?.split(" ")
                       .map((n) => n[0])
@@ -83,10 +88,10 @@ export default function RecentPatients() {
 
                   {/* Patient Info */}
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-gray-800">
+                    <h3 className="font-bold text-emerald-900 text-lg">
                       {patient.user?.full_name || "Patient"}
                     </h3>
-                    <div className="space-y-1 mt-2 text-sm text-gray-600">
+                    <div className="space-y-1 mt-2 text-sm text-emerald-600">
                       {patient.user?.email && (
                         <div className="flex items-center gap-2">
                           <Mail size={14} />
@@ -111,7 +116,7 @@ export default function RecentPatients() {
 
                 {/* Arrow */}
                 <ChevronRight
-                  className="text-gray-400 flex-shrink-0 mt-1"
+                  className="text-emerald-400 group-hover:text-emerald-600 flex-shrink-0 mt-1 transition-colors group-hover:translate-x-1 transition-transform"
                   size={20}
                 />
               </div>

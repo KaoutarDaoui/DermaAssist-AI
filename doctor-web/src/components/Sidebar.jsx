@@ -15,7 +15,7 @@ export default function Sidebar({ open }) {
 
   return (
     <div
-      className={`w-60 bg-[#0F6E56] text-white flex flex-col transition-all duration-300 ${
+      className={`w-60 bg-[#0A3F34] text-white flex flex-col transition-all duration-300 ${
         !open ? "hidden" : ""
       }`}
     >
@@ -34,21 +34,28 @@ export default function Sidebar({ open }) {
             <Link
               key={idx}
               to={item.path}
-              className={`flex items-center gap-4 px-4 py-3 rounded-lg cursor-pointer transition-all ${
+              className={`flex items-center gap-4 px-4 py-3 rounded-lg cursor-pointer transition-all duration-300 group ${
                 isActive
-                  ? "bg-teal-600 text-white"
-                  : "text-teal-100 hover:bg-teal-700 hover:text-white"
+                  ? "bg-gradient-to-r from-emerald-500/40 to-teal-500/40 text-white border border-emerald-400/50 shadow-lg shadow-emerald-500/20"
+                  : "text-white/70 hover:text-white hover:bg-white/10 border border-transparent"
               }`}
             >
-              <IconComponent size={20} />
-              <span className="font-medium">{item.label}</span>
+              <IconComponent
+                size={20}
+                className={
+                  isActive
+                    ? "text-emerald-400"
+                    : "group-hover:text-emerald-400 transition-colors"
+                }
+              />
+              <span className="font-semibold">{item.label}</span>
             </Link>
           );
         })}
       </nav>
 
       {/* Footer */}
-      <div className="p-4 border-t border-teal-600 text-center text-sm text-teal-100">
+      <div className="p-4 border-t border-white/10 text-center text-xs text-white/50 font-semibold uppercase tracking-wider">
         <p>© 2026 DermaAssist</p>
       </div>
     </div>

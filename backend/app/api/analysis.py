@@ -7,6 +7,12 @@ from datetime import datetime
 from typing import Optional
 from pydantic import BaseModel
 import json
+import sys
+from pathlib import Path
+import importlib
+
+# Load Module 1 CNN service from backend/ai
+sys.path.append(str(Path(__file__).resolve().parents[2] / "ai"))
 
 router = APIRouter(prefix="/patients", tags=["Analysis"])
 
@@ -23,6 +29,151 @@ class TestAnalysisRequest(BaseModel):
     confidence: Optional[float] = None    # e.g., 0.88
 
 
+@router.post("/{patient_id}/advanced-analysis")
+async def advanced_analysis(
+    patient_id: str,
+    request: AnalysisRequest,
+    db: Session = Depends(get_db)
+):
+    """
+    Run advanced RAG analysis from an already uploaded patient skin image.
+
+    Flow:
+    1) Load patient + image from DB
+    2) Re-run Module 1 on stored image bytes
+    3) Build PatientContext
+    4) Run DermAssistRAG and return structured clinical output
+    """
+    try:
+        image_id = request.image_id
+        if not image_id:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="image_id is required"
+            )
+
+        patient = db.query(Patient).filter(Patient.id == patient_id).first()
+        if not patient:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Patient not found"
+            )
+
+        skin_image = db.query(SkinImage).filter(
+            SkinImage.id == image_id,
+            SkinImage.patient_id == patient_id
+        ).first()
+
+        if not skin_image:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Image not found"
+            )
+
+        if not skin_image.image_data:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Image binary data is missing for this record"
+            )
+
+        # Module 1 inputs from patient profile
+        fitzpatrick_map = {
+            "I": 1,
+            "II": 2,
+            "III": 3,
+            "IV": 4,
+            "V": 5,
+            "VI": 6,
+        }
+        fitzpatrick_raw = patient.fitzpatrick_type.value if patient.fitzpatrick_type else "III"
+        fitzpatrick_value = str(fitzpatrick_raw).replace("TYPE_", "").upper()
+        fitzpatrick_num = fitzpatrick_map.get(fitzpatrick_value, 3)
+
+        patient_age = patient.age if patient.age and patient.age > 0 else 30
+        patient_city = patient.city.value if patient.city else "Alger"
+
+        # 1) CNN prediction
+        cnn_module = importlib.import_module("Modele1_CNN.cnn_service")
+        cnn_service = cnn_module.get_cnn_service()
+        module1_result = cnn_service.predict(
+            image_bytes=skin_image.image_data,
+            age=patient_age,
+            sexe="femme",
+            fitzpatrick=fitzpatrick_num,
+            localisation="unknown",
+            ville=patient_city,
+            top_k=3,
+        )
+
+        # 2) RAG pipeline
+        rag_module = importlib.import_module("modele2_RAG.rag_pipeline")
+        alert_module = importlib.import_module("modele2_RAG.alert_engine")
+
+        DermAssistRAG = rag_module.DermAssistRAG
+        Module1Output = rag_module.Module1Output
+        PatientContext = alert_module.PatientContext
+
+        module1_output = Module1Output(
+            condition_id=module1_result.get("condition_id", "unknown"),
+            condition_name=module1_result.get("condition_name", "Unknown"),
+            confidence=float(module1_result.get("confidence") or 0),
+            top_alternatives=module1_result.get("top_alternatives", []),
+        )
+
+        patient_context = PatientContext(
+            age=patient_age,
+            sexe="femme",
+            fitzpatrick=fitzpatrick_value,
+            ville=patient_city,
+            antecedents=patient.medical_history.split(",") if patient.medical_history else [],
+            medicaments_actuels=[],
+        )
+
+        rag = DermAssistRAG()
+        rag_response = rag.process(module1_output, patient_context)
+
+        return {
+            "status": "success",
+            "message": "Advanced analysis completed",
+            "patient_id": str(patient.id),
+            "image_id": str(skin_image.id),
+            "module1": {
+                "condition_id": module1_result.get("condition_id"),
+                "condition_name": module1_result.get("condition_name"),
+                "confidence": module1_result.get("confidence"),
+                "confidence_pct": round(float(module1_result.get("confidence") or 0) * 100, 1),
+                "top_alternatives": module1_result.get("top_alternatives", []),
+            },
+            "rag": {
+                "confidence_level": rag_response.confidence_level,
+                "questions": rag_response.questions,
+                "analyse_initiale": rag_response.analyse_initiale,
+                "analyse_affinee": rag_response.analyse_affinee,
+                "medicaments": rag_response.medicaments,
+                "orientation": rag_response.orientation,
+                "urgence": rag_response.urgence,
+                "alertes_maladie": rag_response.alertes_maladie,
+                "alertes_patient": rag_response.alertes_patient,
+                "alertes_summary": {
+                    "n_danger": sum(1 for a in rag_response.alertes_patient if a.get("severite") == "danger"),
+                    "n_warning": sum(1 for a in rag_response.alertes_patient if a.get("severite") == "warning"),
+                    "n_questions": sum(1 for a in rag_response.alertes_patient if a.get("type") == "question_requise"),
+                },
+            },
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        import traceback
+        print(f"Error during advanced analysis: {e}")
+        print(traceback.format_exc())
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Advanced analysis failed: {str(e)}"
+        )
+
+
 @router.post("/{patient_id}/analyze-skin-image")
 async def analyze_skin_image(
     patient_id: str,
@@ -30,12 +181,8 @@ async def analyze_skin_image(
     db: Session = Depends(get_db)
 ):
     """
-    Analyze a skin image using the RAG pipeline.
-    
-    Expects:
-    {
-        "image_id": "uuid of the skin image"
-    }
+    Analyze a skin image using Module 1 CNN only.
+    Saves illness name + confidence into skin_images table.
     """
     try:
         image_id = request.image_id
@@ -64,137 +211,68 @@ async def analyze_skin_image(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Image not found"
             )
-        
-        # Get patient demographics
-        patient_age = patient.age or 0
-        patient_city = patient.city.value if patient.city else "Unknown"
-        patient_fitzpatrick = patient.fitzpatrick_type.value if patient.fitzpatrick_type else "Unknown"
-        
-        # Parse CNN predictions if available
-        module1_output = None
-        if skin_image.cnn_predictions:
-            try:
-                cnn_data = json.loads(skin_image.cnn_predictions) if isinstance(skin_image.cnn_predictions, str) else skin_image.cnn_predictions
-                module1_output = {
-                    "condition_id": cnn_data.get("condition_id", "unknown"),
-                    "condition_name": cnn_data.get("condition_name", "Unknown Condition"),
-                    "confidence": cnn_data.get("confidence", 0.5),
-                    "top_alternatives": cnn_data.get("top_alternatives", []),
-                }
-            except Exception as e:
-                print(f"Error parsing CNN predictions: {e}")
-        
-        # If no Module 1 data yet, return template response
-        if not module1_output:
-            return {
-                "status": "waiting_for_module_1",
-                "message": "CNN Module 1 analysis not available yet. Please analyze with Module 1 first.",
-                "image_id": str(image_id),
-                "patient_info": {
-                    "age": patient_age,
-                    "fitzpatrick": patient_fitzpatrick,
-                    "city": patient_city,
-                    "medical_history": patient.medical_history or "None"
-                },
-                "image_metadata": {
-                    "cnn_label": skin_image.cnn_label,
-                    "cnn_confidence": skin_image.cnn_confidence,
-                    "uploaded_at": skin_image.uploaded_at.isoformat() if skin_image.uploaded_at else None,
-                    "source": skin_image.source.value if skin_image.source else None
-                }
-            }
-        
-        # Import RAG pipeline components
-        try:
-            from app.ai.modele2_RAG.rag_pipeline import DiagnosisAwareRetriever, ClinicalGenerator, Module1Output
-            from app.ai.modele2_RAG.alert_engine import PatientContext
-        except ImportError as e:
-            print(f"Warning: Could not import RAG modules: {e}")
-            # Return basic response if RAG modules not available
-            return {
-                "status": "rag_unavailable",
-                "message": "RAG pipeline not available. Returning basic analysis.",
-                "condition_name": module1_output["condition_name"],
-                "confidence": module1_output["confidence"],
-                "top_alternatives": module1_output.get("top_alternatives", []),
-            }
-        
-        # Build Module 1 Output object
-        module1 = Module1Output(
-            condition_id=module1_output["condition_id"],
-            condition_name=module1_output["condition_name"],
-            confidence=module1_output["confidence"],
-            top_alternatives=module1_output.get("top_alternatives", []),
-        )
-        
-        # Build Patient Context
-        patient_context = PatientContext(
-            age=patient_age,
-            sexe="unknown",  # Not available in current schema
-            fitzpatrick=patient_fitzpatrick,
-            ville=patient_city,
-            antecedents=patient.medical_history.split(",") if patient.medical_history else [],
-            medicaments_actuels=[],
-        )
-        
-        # Initialize RAG pipeline
-        retriever = DiagnosisAwareRetriever()
-        generator = ClinicalGenerator()
-        
-        # Get retrieval results
-        retrieval_results = retriever.retrieve(module1, patient_context)
-        
-        # Generate initial analysis
-        analyse_resultat_initiale = generator.generate_analyse_initiale(
-            module1,
-            patient_context,
-            retrieval_results["condition_data"],
-            retrieval_results["confidence_level"],
-            retrieval_results["retrieved_chunks"],
-        )
-        
-        # Generate refined analysis (if questions available)
-        analyse_resultat_affinee = generator.generate_analyse_affinee(
-            module1,
-            patient_context,
-            retrieval_results["condition_data"],
-            retrieval_results["confidence_level"],
-            retrieval_results["retrieved_chunks"],
-            [],  # No question answers yet
-        )
-        
-        # Compile response
-        response = {
-            "status": "success",
-            "condition_id": module1_output["condition_id"],
-            "condition_name": module1_output["condition_name"],
-            "confidence": module1_output["confidence"],
-            "confidence_level": retrieval_results["confidence_level"],
-            "top_alternatives": module1_output.get("top_alternatives", []),
-            
-            # Analysis results
-            "analyse_initiale": analyse_resultat_initiale.get("analyse_initiale", ""),
-            "analyse_affinee": analyse_resultat_affinee.get("analyse_affinee", ""),
-            "urgence_display": analyse_resultat_initiale.get("urgence_display", ""),
-            
-            # Clinical recommendations
-            "plan_prise_en_charge": analyse_resultat_affinee.get("plan_prise_en_charge", []),
-            "delai_urgence": analyse_resultat_affinee.get("delai_urgence", ""),
-            "medicaments_a_eviter": analyse_resultat_affinee.get("medicaments_a_eviter", []),
-            
-            # Medications and alerts
-            "medicaments": retrieval_results.get("medicaments", []),
-            "alertes_patient": retrieval_results.get("alertes_patient", []),
-            "alertes_maladie": retrieval_results.get("alertes_maladie", []),
-            "questions": retrieval_results.get("questions", []),
-            
-            # Image metadata
-            "image_id": str(image_id),
-            "patient_id": str(patient_id),
-            "analyzed_at": datetime.utcnow().isoformat(),
+
+        if not skin_image.image_data:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Image binary data is missing for this record"
+            )
+
+        # Build Module 1 inputs from patient profile
+        fitzpatrick_map = {
+            "I": 1,
+            "II": 2,
+            "III": 3,
+            "IV": 4,
+            "V": 5,
+            "VI": 6,
         }
-        
-        return response
+        fitzpatrick_raw = patient.fitzpatrick_type.value if patient.fitzpatrick_type else "III"
+        fitzpatrick_value = str(fitzpatrick_raw).replace("TYPE_", "").upper()
+        fitzpatrick = fitzpatrick_map.get(fitzpatrick_value, 3)
+
+        patient_age = patient.age if patient.age and patient.age > 0 else 30
+        patient_city = patient.city.value if patient.city else "Alger"
+
+        cnn_module = importlib.import_module("Modele1_CNN.cnn_service")
+        cnn_service = cnn_module.get_cnn_service()
+        module1_result = cnn_service.predict(
+            image_bytes=skin_image.image_data,
+            age=patient_age,
+            sexe="homme",
+            fitzpatrick=fitzpatrick,
+            localisation="unknown",
+            ville=patient_city,
+            top_k=3,
+        )
+
+        # Values shown in UI should be exactly what we persist.
+        display_condition_name = module1_result.get("condition_name") or module1_result.get("condition_id") or "Unknown"
+        raw_confidence = float(module1_result.get("confidence") or 0)
+        display_confidence_pct = round(raw_confidence * 100, 1)
+
+        # Persist illness name + confidence in skin_images table
+        skin_image.cnn_label = display_condition_name
+        skin_image.cnn_confidence = display_confidence_pct
+        db.commit()
+        db.refresh(skin_image)
+
+        return {
+            "status": "success",
+            "message": "Module 1 analysis completed and saved",
+            "image_id": str(skin_image.id),
+            "patient_id": str(patient.id),
+            "condition_id": module1_result.get("condition_id"),
+            "condition_name": display_condition_name,
+            "illness_name": display_condition_name,
+            "confidence": raw_confidence,
+            "confidence_pct": display_confidence_pct,
+            "top_alternatives": module1_result.get("top_alternatives", []),
+            "stored": {
+                "cnn_label": skin_image.cnn_label,
+                "cnn_confidence": skin_image.cnn_confidence,
+            },
+        }
     
     except HTTPException:
         raise
@@ -304,8 +382,13 @@ async def test_analyze_skin_image(
         # Build response with test CNN data
         try:
             # Try to import and use RAG pipeline
-            from app.ai.modele2_RAG.rag_pipeline import DiagnosisAwareRetriever, ClinicalGenerator, Module1Output
-            from app.ai.modele2_RAG.alert_engine import PatientContext
+            rag_module = importlib.import_module("modele2_RAG.rag_pipeline")
+            alert_module = importlib.import_module("modele2_RAG.alert_engine")
+
+            DiagnosisAwareRetriever = rag_module.DiagnosisAwareRetriever
+            ClinicalGenerator = rag_module.ClinicalGenerator
+            Module1Output = rag_module.Module1Output
+            PatientContext = alert_module.PatientContext
             
             # Get patient details for context
             patient_age = patient.age
