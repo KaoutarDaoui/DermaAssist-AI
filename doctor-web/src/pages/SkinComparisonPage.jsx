@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Upload, GitCompare, CheckCircle, Loader2, X } from "lucide-react";
+import { ArrowLeft, Upload, GitCompare, CheckCircle, Loader2, X, ZoomIn } from "lucide-react";
 import NavBar from "../components/NavBar";
 import Sidebar from "../components/Sidebar";
+import OverlayModal from "../components/OverlayModal";
 import { skinComparison } from "../services/api";
 import toast from "react-hot-toast";
 
@@ -12,23 +13,21 @@ export default function SkinComparisonPage() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   // ── États ─────────────────────────────────────────────────────
-  const [images, setImages]           = useState([]);
-  const [loading, setLoading]         = useState(true);
-  const [selected, setSelected]       = useState([]);       // max 2 ids
-  const [comparing, setComparing]     = useState(false);
-  const [result, setResult]           = useState(null);
-  const [uploading, setUploading]     = useState(false);
+  const [images, setImages]       = useState([]);
+  const [loading, setLoading]     = useState(true);
+  const [selected, setSelected]   = useState([]);
+  const [comparing, setComparing] = useState(false);
+  const [result, setResult]       = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);  // popup overlay
 
-  // ── Charger les photos du patient ─────────────────────────────
-  useEffect(() => {
-    loadImages();
-  }, [patientId]);
+  // ── Charger les photos ────────────────────────────────────────
+  useEffect(() => { loadImages(); }, [patientId]);
 
   const loadImages = async () => {
     try {
       setLoading(true);
       const res = await skinComparison.getImages(patientId);
-      // Pour chaque image, récupérer le base64
       const imagesWithData = await Promise.all(
         res.data.map(async (img) => {
           try {
@@ -40,28 +39,28 @@ export default function SkinComparisonPage() {
         })
       );
       setImages(imagesWithData);
-    } catch (error) {
+    } catch {
       toast.error("Impossible de charger les photos");
     } finally {
       setLoading(false);
     }
   };
 
-  // ── Sélectionner / désélectionner une photo ───────────────────
+  // ── Sélection ─────────────────────────────────────────────────
   const toggleSelect = (id) => {
-    setResult(null); // reset résultat si on change la sélection
+    setResult(null);
     if (selected.includes(id)) {
       setSelected(selected.filter((s) => s !== id));
     } else {
       if (selected.length >= 2) {
-        toast.error("Tu ne peux sélectionner que 2 photos");
+        toast.error("Sélectionne exactement 2 photos");
         return;
       }
       setSelected([...selected, id]);
     }
   };
 
-  // ── Upload nouvelle photo ─────────────────────────────────────
+  // ── Upload ────────────────────────────────────────────────────
   const handleUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -77,13 +76,12 @@ export default function SkinComparisonPage() {
     }
   };
 
-  // ── Lancer la comparaison ─────────────────────────────────────
+  // ── Comparaison ───────────────────────────────────────────────
   const handleCompare = async () => {
     if (selected.length !== 2) return;
     try {
       setComparing(true);
       setResult(null);
-      // La 1ère sélectionnée = référence, la 2ème = nouvelle
       const res = await skinComparison.compare(patientId, selected[0], selected[1]);
       setResult(res.data);
     } catch (error) {
@@ -93,26 +91,23 @@ export default function SkinComparisonPage() {
     }
   };
 
-  // ── Couleur du verdict ────────────────────────────────────────
+  // ── Style verdict ─────────────────────────────────────────────
   const getVerdictStyle = (verdict) => {
     if (!verdict) return {};
-    if (verdict.includes("Amélioration") || verdict.includes("Amélioré")) {
+    if (verdict.includes("Amélioration") || verdict.includes("Amélioré"))
       return { bg: "bg-green-50", border: "border-green-400", text: "text-green-700", badge: "bg-green-100 text-green-800" };
-    }
-    if (verdict.includes("Aggravation") || verdict.includes("Empiré")) {
+    if (verdict.includes("Aggravation") || verdict.includes("Empiré"))
       return { bg: "bg-red-50", border: "border-red-400", text: "text-red-700", badge: "bg-red-100 text-red-800" };
-    }
     return { bg: "bg-yellow-50", border: "border-yellow-400", text: "text-yellow-700", badge: "bg-yellow-100 text-yellow-800" };
   };
 
   const verdictStyle = result ? getVerdictStyle(result.verdict) : {};
 
-  // ── Formatter la date ─────────────────────────────────────────
   const formatDate = (dateStr) => {
     if (!dateStr) return "Date inconnue";
     return new Date(dateStr).toLocaleDateString("fr-FR", {
       day: "2-digit", month: "short", year: "numeric",
-      hour: "2-digit", minute: "2-digit"
+      hour: "2-digit", minute: "2-digit",
     });
   };
 
@@ -136,14 +131,11 @@ export default function SkinComparisonPage() {
                 Retour au patient
               </button>
 
-              {/* Upload bouton */}
               <label className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium cursor-pointer transition-all text-sm
                 ${uploading ? "bg-gray-200 text-gray-400 cursor-not-allowed" : "bg-[#0F6E56] text-white hover:bg-[#0d5a47]"}`}>
-                {uploading ? (
-                  <><Loader2 size={16} className="animate-spin" /> Upload en cours...</>
-                ) : (
-                  <><Upload size={16} /> Ajouter une photo</>
-                )}
+                {uploading
+                  ? <><Loader2 size={16} className="animate-spin" /> Upload en cours...</>
+                  : <><Upload size={16} /> Ajouter une photo</>}
                 <input type="file" accept="image/*" className="hidden" onChange={handleUpload} disabled={uploading} />
               </label>
             </div>
@@ -151,11 +143,11 @@ export default function SkinComparisonPage() {
             <div>
               <h1 className="text-3xl font-black text-gray-800">Comparaison de lésions</h1>
               <p className="text-gray-500 text-sm mt-1">
-                Sélectionne <span className="font-bold text-[#0F6E56]">2 photos</span> pour comparer l'évolution — la 1ère = référence, la 2ème = nouvelle
+                Sélectionne <span className="font-bold text-[#0F6E56]">2 photos</span> — la 1ère = référence <span className="font-bold">(R)</span>, la 2ème = nouvelle <span className="font-bold">(N)</span>
               </p>
             </div>
 
-            {/* ── Grille de photos ── */}
+            {/* ── Grille photos ── */}
             {loading ? (
               <div className="flex justify-center items-center py-20">
                 <Loader2 size={36} className="animate-spin text-[#0F6E56]" />
@@ -170,7 +162,6 @@ export default function SkinComparisonPage() {
                 {images.map((img, idx) => {
                   const isSelected = selected.includes(img.id);
                   const selectionIndex = selected.indexOf(img.id);
-
                   return (
                     <div
                       key={img.id}
@@ -178,34 +169,23 @@ export default function SkinComparisonPage() {
                       className={`relative cursor-pointer rounded-xl overflow-hidden border-2 transition-all
                         ${isSelected ? "border-[#0F6E56] shadow-lg scale-[1.02]" : "border-gray-200 hover:border-gray-400"}`}
                     >
-                      {/* Badge de sélection */}
                       {isSelected && (
                         <div className="absolute top-2 left-2 z-10 w-7 h-7 rounded-full bg-[#0F6E56] text-white flex items-center justify-center font-bold text-sm shadow">
                           {selectionIndex === 0 ? "R" : "N"}
                         </div>
                       )}
-
-                      {/* Checkmark */}
                       {isSelected && (
                         <div className="absolute top-2 right-2 z-10">
                           <CheckCircle size={22} className="text-[#0F6E56] bg-white rounded-full" />
                         </div>
                       )}
-
-                      {/* Image */}
                       {img.base64 ? (
-                        <img
-                          src={img.base64}
-                          alt={`Photo ${idx + 1}`}
-                          className="w-full h-40 object-cover"
-                        />
+                        <img src={img.base64} alt={`Photo ${idx + 1}`} className="w-full h-40 object-cover" />
                       ) : (
                         <div className="w-full h-40 bg-gray-100 flex items-center justify-center">
                           <span className="text-gray-400 text-xs">Image indisponible</span>
                         </div>
                       )}
-
-                      {/* Info bas */}
                       <div className="p-2 bg-white">
                         <p className="text-xs text-gray-500 truncate">{formatDate(img.uploaded_at)}</p>
                         <p className="text-xs font-semibold text-gray-700 capitalize">{img.source || "—"}</p>
@@ -224,11 +204,9 @@ export default function SkinComparisonPage() {
                   disabled={comparing}
                   className="flex items-center gap-3 bg-[#0F6E56] text-white px-8 py-3 rounded-xl font-bold text-lg hover:bg-[#0d5a47] transition-all shadow-md disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                  {comparing ? (
-                    <><Loader2 size={22} className="animate-spin" /> Analyse en cours...</>
-                  ) : (
-                    <><GitCompare size={22} /> Lancer la comparaison</>
-                  )}
+                  {comparing
+                    ? <><Loader2 size={22} className="animate-spin" /> Analyse en cours...</>
+                    : <><GitCompare size={22} /> Lancer la comparaison</>}
                 </button>
               </div>
             )}
@@ -237,7 +215,7 @@ export default function SkinComparisonPage() {
             {result && (
               <div className={`rounded-xl border-2 p-6 ${verdictStyle.bg} ${verdictStyle.border}`}>
 
-                {/* Verdict principal */}
+                {/* Verdict */}
                 <div className="flex items-center justify-between mb-6">
                   <h2 className={`text-2xl font-black ${verdictStyle.text}`}>
                     {result.verdict}
@@ -253,7 +231,7 @@ export default function SkinComparisonPage() {
                 </p>
 
                 {/* Métriques */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                   <div className="bg-white rounded-lg p-4 text-center shadow-sm">
                     <p className="text-xs text-gray-500 uppercase font-semibold mb-1">Similarité</p>
                     <p className="text-2xl font-black text-gray-800">
@@ -280,10 +258,59 @@ export default function SkinComparisonPage() {
                   </div>
                 </div>
 
+                {/* ── Overlay image ── */}
+                {result.overlay_image && (
+                  <div className="bg-white rounded-xl overflow-hidden border border-gray-200 shadow-sm mb-4">
+                    {/* Titre + actions */}
+                    <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 bg-gray-50">
+                      <span className="text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                        Zones d'évolution détectées
+                      </span>
+                      <button
+                        onClick={() => setModalOpen(true)}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#0F6E56] text-white text-xs font-semibold hover:bg-[#0d5a47] transition-colors"
+                      >
+                        <ZoomIn size={13} />
+                        Agrandir
+                      </button>
+                    </div>
+
+                    {/* Miniature cliquable */}
+                    <div
+                      className="relative cursor-zoom-in bg-gray-950 group"
+                      onClick={() => setModalOpen(true)}
+                    >
+                      <img
+                        src={result.overlay_image}
+                        alt="Évolution des lésions"
+                        className="w-full object-contain max-h-64 group-hover:opacity-90 transition-opacity"
+                      />
+                      {/* Hint hover */}
+                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <span className="bg-black/60 text-white text-xs font-semibold px-3 py-1.5 rounded-full flex items-center gap-1.5">
+                          <ZoomIn size={13} /> Cliquer pour agrandir
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Légende */}
+                    <div className="flex items-center gap-6 px-4 py-2.5 bg-gray-50 border-t border-gray-100">
+                      <span className="flex items-center gap-2 text-xs font-medium text-gray-600">
+                        <span className="w-3 h-3 rounded-full bg-red-500 flex-shrink-0" />
+                        Zone aggravée
+                      </span>
+                      <span className="flex items-center gap-2 text-xs font-medium text-gray-600">
+                        <span className="w-3 h-3 rounded-full bg-green-500 flex-shrink-0" />
+                        Zone améliorée
+                      </span>
+                    </div>
+                  </div>
+                )}
+
                 {/* Reset */}
                 <button
                   onClick={() => { setResult(null); setSelected([]); }}
-                  className="mt-4 flex items-center gap-2 text-gray-500 hover:text-gray-700 text-sm font-medium"
+                  className="flex items-center gap-2 text-gray-500 hover:text-gray-700 text-sm font-medium"
                 >
                   <X size={16} /> Nouvelle comparaison
                 </button>
@@ -293,6 +320,14 @@ export default function SkinComparisonPage() {
           </div>
         </div>
       </div>
+
+      {/* ── Popup plein écran ── */}
+      {modalOpen && result?.overlay_image && (
+        <OverlayModal
+          src={result.overlay_image}
+          onClose={() => setModalOpen(false)}
+        />
+      )}
     </div>
   );
 }

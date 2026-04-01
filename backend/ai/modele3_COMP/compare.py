@@ -20,6 +20,11 @@ import warnings
 import tempfile
 from pathlib import Path
 from urllib.parse import urlparse, unquote
+import cv2
+import numpy as np
+import base64
+from PIL import Image
+
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -30,7 +35,6 @@ import torchvision.transforms as transforms
 import torch.nn.functional as F
 from torchvision.models import efficientnet_b0, EfficientNet_B0_Weights
 from PIL import Image
-import numpy as np
 
 # ── psycopg2 ──────────────────────────────────────────────────────
 try:
@@ -317,6 +321,102 @@ def parse_args():
     )
     return parser.parse_args()
 
+def generate_evolution_overlay(
+    ref_source,
+    new_source,
+    verdict: str,
+    alpha: float = 0.45
+) -> str:
+    """
+    Génère une image base64 avec overlay coloré montrant
+    les zones d'amélioration (vert) et d'aggravation (rouge).
+    Ne stocke rien — retourne uniquement le base64.
+    """
+
+    # ── Charger les images ────────────────────────────────────────
+    def load_rgb(src):
+        if isinstance(src, (bytes, bytearray)):
+            return np.array(Image.open(io.BytesIO(src)).convert("RGB"))
+        return np.array(Image.open(src).convert("RGB"))
+
+    img_ref = load_rgb(ref_source)
+    img_new = load_rgb(new_source)
+
+    # ── Redimensionner à la même taille ──────────────────────────
+    h, w = img_new.shape[:2]
+    img_ref_resized = cv2.resize(img_ref, (w, h))
+
+    # ── Extraire les feature maps (layer intermédiaire) ───────────
+    def get_feature_map(image_array):
+        """Extrait la feature map 7x7 du dernier layer EfficientNet."""
+        tensor = transform(Image.fromarray(image_array)).unsqueeze(0)
+        with torch.no_grad():
+            # features[-1] → (1, 1280, 7, 7)
+            feat = model.features(tensor)
+        # Moyenne sur les canaux → (7, 7)
+        return feat[0].mean(dim=0).cpu().numpy()
+
+    fmap_ref = get_feature_map(img_ref_resized)
+    fmap_new = get_feature_map(img_new)
+
+    # ── Delta map ─────────────────────────────────────────────────
+    # positif = zone plus activée dans new → aggravation potentielle
+    # négatif = zone moins activée dans new → amélioration potentielle
+    delta = fmap_new - fmap_ref
+
+    # Normaliser entre -1 et 1
+    max_abs = np.abs(delta).max() + 1e-8
+    delta_norm = delta / max_abs
+
+    # Redimensionner à la taille de l'image
+    delta_up = cv2.resize(delta_norm, (w, h), interpolation=cv2.INTER_CUBIC)
+
+    # ── Créer l'overlay coloré ────────────────────────────────────
+    overlay = img_new.copy().astype(np.float32)
+
+    # Masque aggravation (delta positif fort) → rouge
+    aggravation_mask = delta_up > 0.3
+    overlay[aggravation_mask] = (
+        overlay[aggravation_mask] * (1 - alpha) +
+        np.array([220, 50, 50], dtype=np.float32) * alpha
+    )
+
+    # Masque amélioration (delta négatif fort) → vert
+    amelioration_mask = delta_up < -0.3
+    overlay[amelioration_mask] = (
+        overlay[amelioration_mask] * (1 - alpha) +
+        np.array([50, 180, 80], dtype=np.float32) * alpha
+    )
+
+    overlay = np.clip(overlay, 0, 255).astype(np.uint8)
+
+    # ── Ajouter les cercles autour des zones détectées ────────────
+    # Trouver les contours des zones aggravées
+    agg_binary = (aggravation_mask * 255).astype(np.uint8)
+    amel_binary = (amelioration_mask * 255).astype(np.uint8)
+
+    for binary, color in [(agg_binary, (220, 50, 50)), (amel_binary, (50, 180, 80))]:
+        contours, _ = cv2.findContours(
+            binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
+        )
+        for cnt in contours:
+            if cv2.contourArea(cnt) > 200:  # ignorer les trop petites zones
+                (cx, cy), radius = cv2.minEnclosingCircle(cnt)
+                cv2.circle(
+                    overlay,
+                    (int(cx), int(cy)),
+                    int(radius) + 8,
+                    color,
+                    thickness=3
+                )
+
+    # ── Encoder en base64 ─────────────────────────────────────────
+    pil_img = Image.fromarray(overlay)
+    buffer = io.BytesIO()
+    pil_img.save(buffer, format="JPEG", quality=90)
+    b64 = base64.b64encode(buffer.getvalue()).decode("utf-8")
+
+    return f"data:image/jpeg;base64,{b64}"
 
 if __name__ == "__main__":
     from severity import get_severity_score
