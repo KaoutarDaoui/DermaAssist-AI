@@ -10,7 +10,6 @@ const apiClient = axios.create({
   },
 });
 
-// Intercepteur pour ajouter le JWT aux requêtes
 apiClient.interceptors.request.use((config) => {
   const token = useAuthStore.getState().token;
   if (token) {
@@ -19,7 +18,6 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
-// Intercepteur pour gérer les erreurs d'authentification
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -99,15 +97,12 @@ export const advice = {
 };
 
 export const skinComparison = {
-  // Récupérer toutes les photos du patient
   getImages: (patientId) =>
     apiClient.get(`/patients/${patientId}/skin-images`),
 
-  // Récupérer une image en base64
   getImage: (patientId, imageId) =>
     apiClient.get(`/patients/${patientId}/skin-images/${imageId}`),
 
-  // Upload une nouvelle photo
   upload: (patientId, file) => {
     const formData = new FormData();
     formData.append("file", file);
@@ -116,7 +111,6 @@ export const skinComparison = {
     });
   },
 
-  // Lancer la comparaison entre 2 photos
   compare: (patientId, imageRefId, imageNewId) =>
     apiClient.post(`/patients/${patientId}/skin-images/compare`, null, {
       params: {
@@ -124,6 +118,9 @@ export const skinComparison = {
         image_new_id: imageNewId,
       },
     }),
+
+  getProgression: (patientId) =>
+    apiClient.get(`/patients/${patientId}/skin-images/progression`),
 };
 
 export default apiClient;

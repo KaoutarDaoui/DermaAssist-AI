@@ -25,7 +25,13 @@ def _get_overlay_fn():
 
 
 # ════════════════════════════════════════════════════════════════
-# ENDPOINTS
+# ENDPOINTS — ordre important pour FastAPI :
+#   1. GET  /skin-images                 (liste)
+#   2. POST /skin-images                 (upload)
+#   3. GET  /skin-images/progression     ← AVANT /{image_id} !
+#   4. GET  /skin-images/{image_id}
+#   5. DELETE /skin-images/{image_id}
+#   6. POST /skin-images/compare
 # ════════════════════════════════════════════════════════════════
 
 @router.get("/{patient_id}/skin-images", response_model=List[SkinImageResponse])
@@ -66,6 +72,90 @@ async def upload_skin_image(patient_id: str, file: UploadFile = File(...), db: S
         raise HTTPException(status_code=500, detail=f"Error uploading file: {str(e)}")
 
 
+# ── PROGRESSION — doit être AVANT /{image_id} ────────────────────
+@router.get("/{patient_id}/skin-images/progression")
+def get_patient_progression(patient_id: str, db: Session = Depends(get_db)):
+    """
+    Progression temporelle de sévérité avec cache intelligent :
+      - Score déjà en base → retourné directement (0 calcul)
+      - Score null → calculé + sauvegardé (ne sera plus recalculé)
+      - Nouvelle photo → seule la nouvelle est calculée
+    """
+    patient = db.query(Patient).filter(Patient.id == patient_id).first()
+    if not patient:
+        raise HTTPException(status_code=404, detail="Patient not found")
+
+    images = db.query(SkinImage).filter(
+        SkinImage.patient_id == patient_id,
+        SkinImage.image_data != None,
+    ).order_by(SkinImage.uploaded_at.asc()).all()
+
+    if not images:
+        return []
+
+    images_to_score = [img for img in images if img.severity_score is None]
+
+    if images_to_score:
+        module3_path = Path(__file__).resolve().parents[2] / "ai" / "modele3_COMP"
+        if str(module3_path) not in sys.path:
+            sys.path.insert(0, str(module3_path))
+
+        from severity import get_severity_score
+
+        fitzpatrick = "III"
+        if patient.fitzpatrick_type:
+            fitzpatrick = str(patient.fitzpatrick_type).replace("TYPE_", "")
+
+        print(f"[progression] {len(images_to_score)} nouvelle(s) image(s) à scorer")
+
+        for img in images_to_score:
+            tmp_path = None
+            try:
+                tmp = tempfile.NamedTemporaryFile(suffix=".png", delete=False)
+                tmp.write(bytes(img.image_data))
+                tmp.close()
+                tmp_path = tmp.name
+
+                score = get_severity_score(
+                    tmp_path,
+                    fitzpatrick=fitzpatrick,
+                    disease_label=img.cnn_label or "default",
+                )
+                img.severity_score = score
+                print(f"[progression] {img.id} → {score:.4f}")
+
+            except Exception as e:
+                print(f"[progression] ⚠️ {img.id}: {e}")
+            finally:
+                if tmp_path:
+                    try: os.unlink(tmp_path)
+                    except: pass
+
+        try:
+            db.commit()
+        except Exception as e:
+            db.rollback()
+            print(f"[progression] ⚠️ Commit failed: {e}")
+    else:
+        print(f"[progression] Cache hit — {len(images)} scores en base, 0 calcul")
+
+    results = []
+    for img in images:
+        if img.severity_score is None:
+            continue
+        results.append({
+            "date":      img.uploaded_at.isoformat() if img.uploaded_at else None,
+            "score":     round(float(img.severity_score), 4),
+            "score_pct": round(float(img.severity_score) * 100, 1),
+            "image_id":  str(img.id),
+            "source":    img.source.value if img.source else "unknown",
+            "cnn_label": img.cnn_label or "",
+        })
+
+    return results
+
+
+# ── /{image_id} — doit être APRÈS /progression ───────────────────
 @router.get("/{patient_id}/skin-images/{image_id}")
 def get_skin_image(patient_id: str, image_id: str, db: Session = Depends(get_db)):
     patient = db.query(Patient).filter(Patient.id == patient_id).first()
@@ -145,25 +235,38 @@ async def compare_skin_images(
         if patient.fitzpatrick_type:
             fitzpatrick = str(patient.fitzpatrick_type).replace("TYPE_", "")
 
+        cnn_label = img_ref.cnn_label or img_new.cnn_label or ""
+
+        # Utiliser le score en cache si disponible
+        score_ref = float(img_ref.severity_score) if img_ref.severity_score is not None \
+            else get_severity_score(tmp_ref.name, fitzpatrick=fitzpatrick, disease_label=cnn_label)
+        score_new = float(img_new.severity_score) if img_new.severity_score is not None \
+            else get_severity_score(tmp_new.name, fitzpatrick=fitzpatrick, disease_label=cnn_label)
+
+        # Sauvegarder les scores si pas encore en cache
+        if img_ref.severity_score is None:
+            img_ref.severity_score = score_ref
+        if img_new.severity_score is None:
+            img_new.severity_score = score_new
+        try:
+            db.commit()
+        except Exception:
+            db.rollback()
+
         emb_ref    = get_embedding(tmp_ref.name)
         emb_new    = get_embedding(tmp_new.name)
-        score_ref  = get_severity_score(tmp_ref.name, fitzpatrick=fitzpatrick)
-        score_new  = get_severity_score(tmp_new.name, fitzpatrick=fitzpatrick)
         similarite = F.cosine_similarity(emb_ref.unsqueeze(0), emb_new.unsqueeze(0)).item()
         result     = compute_verdict(similarite, score_ref, score_new)
 
-        # ── cnn_label depuis l'image de référence (diagnostic établi) ──
-        cnn_label = img_ref.cnn_label or img_new.cnn_label or ""
         print(f"[compare] cnn_label='{cnn_label}'")
 
-        # ── Overlay adaptatif ─────────────────────────────────────
         try:
             generate_overlay = _get_overlay_fn()
             overlay_b64 = generate_overlay(
-                ref_source = tmp_ref.name,
-                new_source = tmp_new.name,
-                verdict    = result.get("verdict", ""),
-                cnn_label  = cnn_label,
+                ref_source=tmp_ref.name,
+                new_source=tmp_new.name,
+                verdict=result.get("verdict", ""),
+                cnn_label=cnn_label,
             )
         except Exception as ov_err:
             print(f"⚠️ Overlay failed: {ov_err}")
