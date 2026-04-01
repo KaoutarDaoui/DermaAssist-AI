@@ -119,7 +119,6 @@ def get_patient_progression(patient_id: str, db: Session = Depends(get_db)):
                 score = get_severity_score(
                     tmp_path,
                     fitzpatrick=fitzpatrick,
-                    disease_label=img.cnn_label or "default",
                 )
                 img.severity_score = score
                 print(f"[progression] {img.id} → {score:.4f}")
@@ -239,9 +238,9 @@ async def compare_skin_images(
 
         # Utiliser le score en cache si disponible
         score_ref = float(img_ref.severity_score) if img_ref.severity_score is not None \
-            else get_severity_score(tmp_ref.name, fitzpatrick=fitzpatrick, disease_label=cnn_label)
+            else get_severity_score(tmp_ref.name, fitzpatrick=fitzpatrick)
         score_new = float(img_new.severity_score) if img_new.severity_score is not None \
-            else get_severity_score(tmp_new.name, fitzpatrick=fitzpatrick, disease_label=cnn_label)
+            else get_severity_score(tmp_new.name, fitzpatrick=fitzpatrick)
 
         # Sauvegarder les scores si pas encore en cache
         if img_ref.severity_score is None:
