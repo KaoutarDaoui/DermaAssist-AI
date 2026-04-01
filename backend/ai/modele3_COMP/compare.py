@@ -249,40 +249,64 @@ def bytes_to_temp(b: bytes, suffix=".png") -> str:
 
 
 # ════════════════════════════════════════════════════════════════
-# 3. VERDICT
+# 3. VERDICT — sévérité en premier, similarité en support
 # ════════════════════════════════════════════════════════════════
 
-SIMILARITY_STABLE  = 0.95
-SIMILARITY_CHANGED = 0.85
+# Seuils de sévérité (delta entre 0 et 1)
+SEV_STRONG   = 0.10   # changement fort    → verdict direct
+SEV_MODERATE = 0.04   # changement modéré  → croisé avec similarité
+
+# Seuil de similarité pour détecter un changement de structure
+SIM_STRUCTURAL_CHANGE = 0.88
 
 
-def compute_verdict(similarite: float, score_ref: float, score_new: float) -> dict:
+def compute_verdict(
+    similarite: float,
+    score_ref:  float,
+    score_new:  float,
+) -> dict:
+    """
+    La SÉVÉRITÉ est le signal principal.
+    La similarité cosine est utilisée uniquement en support.
+
+    Cas de ton screenshot :
+      score_ref=0.145, score_new=0.413, delta=+0.268 (>SEV_STRONG)
+      → Aggravation nette, confiance haute
+      (la similarité de 0.958 est IGNORÉE)
+    """
     delta     = score_new - score_ref
     delta_pct = (delta / (score_ref + 1e-6)) * 100
+    abs_delta = abs(delta)
 
-    if similarite > SIMILARITY_STABLE:
-        verdict, confiance = "🟡 Stable", "haute"
-        explication = "Lésions quasi identiques (similarité cosine élevée)."
-    elif similarite > SIMILARITY_CHANGED:
-        if delta < -0.05:
-            verdict, confiance = "🟢 Légère amélioration", "moyenne"
-            explication = f"Similarité modérée + sévérité en baisse de {abs(delta_pct):.1f}%."
-        elif delta > 0.05:
-            verdict, confiance = "🟠 Légère aggravation", "moyenne"
-            explication = f"Similarité modérée + sévérité en hausse de {delta_pct:.1f}%."
-        else:
-            verdict, confiance = "🟡 Stable (légère variation)", "moyenne"
-            explication = "Changement visuel modéré mais sévérité quasi identique."
-    else:
-        if delta < -0.1:
-            verdict, confiance = "🟢 Amélioration nette", "haute"
-            explication = f"Changement fort + sévérité en baisse de {abs(delta_pct):.1f}%."
-        elif delta > 0.1:
+    # ── Niveau 1 : delta fort → verdict direct ────────────────────
+    if abs_delta >= SEV_STRONG:
+        if delta > 0:
             verdict, confiance = "🔴 Aggravation nette", "haute"
-            explication = f"Changement fort + sévérité en hausse de {delta_pct:.1f}%."
+            explication = f"Sévérité en hausse de {delta_pct:.1f}% — changement clinique significatif."
         else:
-            verdict, confiance = "⚠️  Changement indéterminé", "faible"
-            explication = "Changement visuel important mais sévérité contradictoire. Révision manuelle."
+            verdict, confiance = "🟢 Amélioration nette", "haute"
+            explication = f"Sévérité en baisse de {abs(delta_pct):.1f}% — amélioration clinique significative."
+
+    # ── Niveau 2 : delta modéré → croiser avec similarité ─────────
+    elif abs_delta >= SEV_MODERATE:
+        confiance = "haute" if similarite < SIM_STRUCTURAL_CHANGE else "moyenne"
+        if delta > 0:
+            verdict    = "🟠 Légère aggravation"
+            explication = f"Sévérité en hausse de {delta_pct:.1f}%."
+        else:
+            verdict    = "🟢 Légère amélioration"
+            explication = f"Sévérité en baisse de {abs(delta_pct):.1f}%."
+
+    # ── Niveau 3 : delta faible → stable ─────────────────────────
+    else:
+        if similarite < SIM_STRUCTURAL_CHANGE:
+            verdict    = "⚠️  Changement indéterminé"
+            confiance  = "faible"
+            explication = "Changement visuel notable mais sévérité similaire. Révision manuelle."
+        else:
+            verdict    = "🟡 Stable"
+            confiance  = "haute"
+            explication = "Sévérité et structure visuelles quasi identiques."
 
     return {
         "verdict":           verdict,
@@ -294,7 +318,6 @@ def compute_verdict(similarite: float, score_ref: float, score_new: float) -> di
         "delta_pct":         round(delta_pct, 1),
         "explication":       explication,
     }
-
 
 # ════════════════════════════════════════════════════════════════
 # 4. MAIN
