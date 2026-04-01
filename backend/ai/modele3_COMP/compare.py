@@ -62,7 +62,7 @@ if DATABASE_URL:
 class MultiScaleEmbedder(nn.Module):
     def __init__(self):
         super().__init__()
-        base = efficientnet_b0(weights=EfficientNet_B0_Weights.DEFAULT)
+        base = efficientnet_b0(weights=None)
         self.features  = base.features
         self.proj_deep = nn.AdaptiveAvgPool2d(1)
         self.proj_mid  = nn.AdaptiveAvgPool2d(1)

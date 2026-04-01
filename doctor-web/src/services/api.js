@@ -98,4 +98,32 @@ export const advice = {
   update: (adviceId, data) => apiClient.patch(`/advice/${adviceId}`, data),
 };
 
+export const skinComparison = {
+  // Récupérer toutes les photos du patient
+  getImages: (patientId) =>
+    apiClient.get(`/patients/${patientId}/skin-images`),
+
+  // Récupérer une image en base64
+  getImage: (patientId, imageId) =>
+    apiClient.get(`/patients/${patientId}/skin-images/${imageId}`),
+
+  // Upload une nouvelle photo
+  upload: (patientId, file) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    return apiClient.post(`/patients/${patientId}/skin-images`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+  },
+
+  // Lancer la comparaison entre 2 photos
+  compare: (patientId, imageRefId, imageNewId) =>
+    apiClient.post(`/patients/${patientId}/skin-images/compare`, null, {
+      params: {
+        image_ref_id: imageRefId,
+        image_new_id: imageNewId,
+      },
+    }),
+};
+
 export default apiClient;

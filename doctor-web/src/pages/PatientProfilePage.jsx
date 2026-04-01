@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import NavBar from "../components/NavBar";
 import Sidebar from "../components/Sidebar";
 import toast from "react-hot-toast";
-import { ArrowLeft, Plus } from "lucide-react";
+import { ArrowLeft, Plus, GitCompare } from "lucide-react";
 import { patients, ai } from "../services/api";
 
 export default function PatientProfilePage() {
@@ -215,6 +215,13 @@ export default function PatientProfilePage() {
                 >
                   <Plus size={18} />
                   Ajouter une Analyse
+                </button>
+                <button
+                  onClick={() => navigate(`/patients/${patientId}/comparison`)}
+                  className="flex items-center gap-2 bg-white border border-[#0F6E56] text-[#0F6E56] px-4 py-2 rounded-lg font-semibold hover:bg-[#0F6E56] hover:text-white transition-colors"
+                >
+                  <GitCompare size={18} />
+                  Suivi photo
                 </button>
               </div>
 
