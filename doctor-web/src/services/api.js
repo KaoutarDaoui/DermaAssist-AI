@@ -10,7 +10,6 @@ const apiClient = axios.create({
   },
 });
 
-// Intercepteur pour ajouter le JWT aux requêtes
 apiClient.interceptors.request.use((config) => {
   const token = useAuthStore.getState().token;
   if (token) {
@@ -19,7 +18,6 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
-// Intercepteur pour gérer les erreurs d'authentification
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -96,6 +94,33 @@ export const advice = {
     apiClient.post(`/consultations/${consultationId}/advice`, data),
   get: (adviceId) => apiClient.get(`/advice/${adviceId}`),
   update: (adviceId, data) => apiClient.patch(`/advice/${adviceId}`, data),
+};
+
+export const skinComparison = {
+  getImages: (patientId) =>
+    apiClient.get(`/patients/${patientId}/skin-images`),
+
+  getImage: (patientId, imageId) =>
+    apiClient.get(`/patients/${patientId}/skin-images/${imageId}`),
+
+  upload: (patientId, file) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    return apiClient.post(`/patients/${patientId}/skin-images`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+  },
+
+  compare: (patientId, imageRefId, imageNewId) =>
+    apiClient.post(`/patients/${patientId}/skin-images/compare`, null, {
+      params: {
+        image_ref_id: imageRefId,
+        image_new_id: imageNewId,
+      },
+    }),
+
+  getProgression: (patientId) =>
+    apiClient.get(`/patients/${patientId}/skin-images/progression`),
 };
 
 export default apiClient;

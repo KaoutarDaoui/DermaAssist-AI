@@ -20,6 +20,11 @@ import warnings
 import tempfile
 from pathlib import Path
 from urllib.parse import urlparse, unquote
+import cv2
+import numpy as np
+import base64
+from PIL import Image
+
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -30,7 +35,6 @@ import torchvision.transforms as transforms
 import torch.nn.functional as F
 from torchvision.models import efficientnet_b0, EfficientNet_B0_Weights
 from PIL import Image
-import numpy as np
 
 # ── psycopg2 ──────────────────────────────────────────────────────
 try:
@@ -62,7 +66,7 @@ if DATABASE_URL:
 class MultiScaleEmbedder(nn.Module):
     def __init__(self):
         super().__init__()
-        base = efficientnet_b0(weights=EfficientNet_B0_Weights.DEFAULT)
+        base = efficientnet_b0(weights=None)
         self.features  = base.features
         self.proj_deep = nn.AdaptiveAvgPool2d(1)
         self.proj_mid  = nn.AdaptiveAvgPool2d(1)
@@ -245,40 +249,64 @@ def bytes_to_temp(b: bytes, suffix=".png") -> str:
 
 
 # ════════════════════════════════════════════════════════════════
-# 3. VERDICT
+# 3. VERDICT — sévérité en premier, similarité en support
 # ════════════════════════════════════════════════════════════════
 
-SIMILARITY_STABLE  = 0.95
-SIMILARITY_CHANGED = 0.85
+# Seuils de sévérité (delta entre 0 et 1)
+SEV_STRONG   = 0.10   # changement fort    → verdict direct
+SEV_MODERATE = 0.04   # changement modéré  → croisé avec similarité
+
+# Seuil de similarité pour détecter un changement de structure
+SIM_STRUCTURAL_CHANGE = 0.88
 
 
-def compute_verdict(similarite: float, score_ref: float, score_new: float) -> dict:
+def compute_verdict(
+    similarite: float,
+    score_ref:  float,
+    score_new:  float,
+) -> dict:
+    """
+    La SÉVÉRITÉ est le signal principal.
+    La similarité cosine est utilisée uniquement en support.
+
+    Cas de ton screenshot :
+      score_ref=0.145, score_new=0.413, delta=+0.268 (>SEV_STRONG)
+      → Aggravation nette, confiance haute
+      (la similarité de 0.958 est IGNORÉE)
+    """
     delta     = score_new - score_ref
     delta_pct = (delta / (score_ref + 1e-6)) * 100
+    abs_delta = abs(delta)
 
-    if similarite > SIMILARITY_STABLE:
-        verdict, confiance = "🟡 Stable", "haute"
-        explication = "Lésions quasi identiques (similarité cosine élevée)."
-    elif similarite > SIMILARITY_CHANGED:
-        if delta < -0.05:
-            verdict, confiance = "🟢 Légère amélioration", "moyenne"
-            explication = f"Similarité modérée + sévérité en baisse de {abs(delta_pct):.1f}%."
-        elif delta > 0.05:
-            verdict, confiance = "🟠 Légère aggravation", "moyenne"
-            explication = f"Similarité modérée + sévérité en hausse de {delta_pct:.1f}%."
-        else:
-            verdict, confiance = "🟡 Stable (légère variation)", "moyenne"
-            explication = "Changement visuel modéré mais sévérité quasi identique."
-    else:
-        if delta < -0.1:
-            verdict, confiance = "🟢 Amélioration nette", "haute"
-            explication = f"Changement fort + sévérité en baisse de {abs(delta_pct):.1f}%."
-        elif delta > 0.1:
+    # ── Niveau 1 : delta fort → verdict direct ────────────────────
+    if abs_delta >= SEV_STRONG:
+        if delta > 0:
             verdict, confiance = "🔴 Aggravation nette", "haute"
-            explication = f"Changement fort + sévérité en hausse de {delta_pct:.1f}%."
+            explication = f"Sévérité en hausse de {delta_pct:.1f}% — changement clinique significatif."
         else:
-            verdict, confiance = "⚠️  Changement indéterminé", "faible"
-            explication = "Changement visuel important mais sévérité contradictoire. Révision manuelle."
+            verdict, confiance = "🟢 Amélioration nette", "haute"
+            explication = f"Sévérité en baisse de {abs(delta_pct):.1f}% — amélioration clinique significative."
+
+    # ── Niveau 2 : delta modéré → croiser avec similarité ─────────
+    elif abs_delta >= SEV_MODERATE:
+        confiance = "haute" if similarite < SIM_STRUCTURAL_CHANGE else "moyenne"
+        if delta > 0:
+            verdict    = "🟠 Légère aggravation"
+            explication = f"Sévérité en hausse de {delta_pct:.1f}%."
+        else:
+            verdict    = "🟢 Légère amélioration"
+            explication = f"Sévérité en baisse de {abs(delta_pct):.1f}%."
+
+    # ── Niveau 3 : delta faible → stable ─────────────────────────
+    else:
+        if similarite < SIM_STRUCTURAL_CHANGE:
+            verdict    = "⚠️  Changement indéterminé"
+            confiance  = "faible"
+            explication = "Changement visuel notable mais sévérité similaire. Révision manuelle."
+        else:
+            verdict    = "🟡 Stable"
+            confiance  = "haute"
+            explication = "Sévérité et structure visuelles quasi identiques."
 
     return {
         "verdict":           verdict,
@@ -290,7 +318,6 @@ def compute_verdict(similarite: float, score_ref: float, score_new: float) -> di
         "delta_pct":         round(delta_pct, 1),
         "explication":       explication,
     }
-
 
 # ════════════════════════════════════════════════════════════════
 # 4. MAIN
@@ -317,6 +344,102 @@ def parse_args():
     )
     return parser.parse_args()
 
+def generate_evolution_overlay(
+    ref_source,
+    new_source,
+    verdict: str,
+    alpha: float = 0.45
+) -> str:
+    """
+    Génère une image base64 avec overlay coloré montrant
+    les zones d'amélioration (vert) et d'aggravation (rouge).
+    Ne stocke rien — retourne uniquement le base64.
+    """
+
+    # ── Charger les images ────────────────────────────────────────
+    def load_rgb(src):
+        if isinstance(src, (bytes, bytearray)):
+            return np.array(Image.open(io.BytesIO(src)).convert("RGB"))
+        return np.array(Image.open(src).convert("RGB"))
+
+    img_ref = load_rgb(ref_source)
+    img_new = load_rgb(new_source)
+
+    # ── Redimensionner à la même taille ──────────────────────────
+    h, w = img_new.shape[:2]
+    img_ref_resized = cv2.resize(img_ref, (w, h))
+
+    # ── Extraire les feature maps (layer intermédiaire) ───────────
+    def get_feature_map(image_array):
+        """Extrait la feature map 7x7 du dernier layer EfficientNet."""
+        tensor = transform(Image.fromarray(image_array)).unsqueeze(0)
+        with torch.no_grad():
+            # features[-1] → (1, 1280, 7, 7)
+            feat = model.features(tensor)
+        # Moyenne sur les canaux → (7, 7)
+        return feat[0].mean(dim=0).cpu().numpy()
+
+    fmap_ref = get_feature_map(img_ref_resized)
+    fmap_new = get_feature_map(img_new)
+
+    # ── Delta map ─────────────────────────────────────────────────
+    # positif = zone plus activée dans new → aggravation potentielle
+    # négatif = zone moins activée dans new → amélioration potentielle
+    delta = fmap_new - fmap_ref
+
+    # Normaliser entre -1 et 1
+    max_abs = np.abs(delta).max() + 1e-8
+    delta_norm = delta / max_abs
+
+    # Redimensionner à la taille de l'image
+    delta_up = cv2.resize(delta_norm, (w, h), interpolation=cv2.INTER_CUBIC)
+
+    # ── Créer l'overlay coloré ────────────────────────────────────
+    overlay = img_new.copy().astype(np.float32)
+
+    # Masque aggravation (delta positif fort) → rouge
+    aggravation_mask = delta_up > 0.3
+    overlay[aggravation_mask] = (
+        overlay[aggravation_mask] * (1 - alpha) +
+        np.array([220, 50, 50], dtype=np.float32) * alpha
+    )
+
+    # Masque amélioration (delta négatif fort) → vert
+    amelioration_mask = delta_up < -0.3
+    overlay[amelioration_mask] = (
+        overlay[amelioration_mask] * (1 - alpha) +
+        np.array([50, 180, 80], dtype=np.float32) * alpha
+    )
+
+    overlay = np.clip(overlay, 0, 255).astype(np.uint8)
+
+    # ── Ajouter les cercles autour des zones détectées ────────────
+    # Trouver les contours des zones aggravées
+    agg_binary = (aggravation_mask * 255).astype(np.uint8)
+    amel_binary = (amelioration_mask * 255).astype(np.uint8)
+
+    for binary, color in [(agg_binary, (220, 50, 50)), (amel_binary, (50, 180, 80))]:
+        contours, _ = cv2.findContours(
+            binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
+        )
+        for cnt in contours:
+            if cv2.contourArea(cnt) > 200:  # ignorer les trop petites zones
+                (cx, cy), radius = cv2.minEnclosingCircle(cnt)
+                cv2.circle(
+                    overlay,
+                    (int(cx), int(cy)),
+                    int(radius) + 8,
+                    color,
+                    thickness=3
+                )
+
+    # ── Encoder en base64 ─────────────────────────────────────────
+    pil_img = Image.fromarray(overlay)
+    buffer = io.BytesIO()
+    pil_img.save(buffer, format="JPEG", quality=90)
+    b64 = base64.b64encode(buffer.getvalue()).decode("utf-8")
+
+    return f"data:image/jpeg;base64,{b64}"
 
 if __name__ == "__main__":
     from severity import get_severity_score
