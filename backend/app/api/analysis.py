@@ -20,8 +20,13 @@ router = APIRouter(prefix="/patients", tags=["Analysis"])
 
 
 class AnalysisRequest(BaseModel):
-    """Request body for skin image analysis."""
+    """Request body for skin image analysis WITH metadata for CNN."""
     image_id: str
+    age: Optional[int] = None  # Patient age (0-120)
+    sex: Optional[str] = None  # Patient sex: male, female, unknown
+    site: Optional[str] = None  # Body location: visage, cou, tronc, dos, bras, jambe, pied, unknown
+    wilaya: Optional[str] = None  # Region: nord, sud, est, ouest
+    saison: Optional[str] = None  # Season: printemps, ete, automne, hiver
 
 
 class TestAnalysisRequest(BaseModel):
@@ -119,7 +124,11 @@ async def advanced_analysis(
         fitzpatrick_num = fitzpatrick_map.get(fitzpatrick_value, 3)
 
         patient_age = patient.age if patient.age and patient.age > 0 else 30
-        patient_city = patient.city.value if patient.city else "Alger"
+        
+        # Map city (wilaya) enum to string value for new model
+        wilaya_raw = patient.city.value if patient.city else "nord"
+        patient_wilaya = str(wilaya_raw).lower().replace("wilaya_", "") if wilaya_raw else "nord"
+        patient_season = "ete"  # Default season
 
         # 1) CNN prediction
         cnn_module = importlib.import_module("Modele1_CNN.cnn_service")
@@ -127,10 +136,10 @@ async def advanced_analysis(
         module1_result = cnn_service.predict(
             image_bytes=skin_image.image_data,
             age=patient_age,
-            sexe="femme",
-            fitzpatrick=fitzpatrick_num,
-            localisation="unknown",
-            ville=patient_city,
+            sex="unknown",
+            site="unknown",
+            wilaya=patient_wilaya,
+            saison=patient_season,
             top_k=3,
         )
 
@@ -153,7 +162,7 @@ async def advanced_analysis(
             age=patient_age,
             sexe="femme",
             fitzpatrick=fitzpatrick_value,
-            ville=patient_city,
+            ville=patient_wilaya,
             antecedents=patient.medical_history.split(",") if patient.medical_history else [],
             medicaments_actuels=[],
         )
@@ -247,31 +256,37 @@ async def analyze_skin_image(
                 detail="Image binary data is missing for this record"
             )
 
-        # Build Module 1 inputs from patient profile
-        fitzpatrick_map = {
-            "I": 1,
-            "II": 2,
-            "III": 3,
-            "IV": 4,
-            "V": 5,
-            "VI": 6,
-        }
-        fitzpatrick_raw = patient.fitzpatrick_type.value if patient.fitzpatrick_type else "III"
-        fitzpatrick_value = str(fitzpatrick_raw).replace("TYPE_", "").upper()
-        fitzpatrick = fitzpatrick_map.get(fitzpatrick_value, 3)
-
-        patient_age = patient.age if patient.age and patient.age > 0 else 30
-        patient_city = patient.city.value if patient.city else "Alger"
+        # Build Module 1 inputs from request metadata OR patient profile fallbacks
+        # Priority: request data > patient profile > defaults
+        
+        # Get age from request or patient profile
+        patient_age = request.age if request.age is not None else (patient.age if patient.age and patient.age > 0 else 30)
+        
+        # Get sex from request or default
+        patient_sex = request.sex if request.sex else "unknown"
+        
+        # Get site (body location) from request or default
+        patient_site = request.site if request.site else "unknown"
+        
+        # Get wilaya from request or map from patient city
+        if request.wilaya:
+            patient_wilaya = request.wilaya.lower()
+        else:
+            wilaya_raw = patient.city.value if patient.city else "nord"
+            patient_wilaya = str(wilaya_raw).lower().replace("wilaya_", "") if wilaya_raw else "nord"
+        
+        # Get season from request or default
+        patient_season = request.saison if request.saison else "ete"
 
         cnn_module = importlib.import_module("Modele1_CNN.cnn_service")
         cnn_service = cnn_module.get_cnn_service()
         module1_result = cnn_service.predict(
             image_bytes=skin_image.image_data,
             age=patient_age,
-            sexe="homme",
-            fitzpatrick=fitzpatrick,
-            localisation="unknown",
-            ville=patient_city,
+            sex=patient_sex,  # ✅ From request or unknown
+            site=patient_site,  # ✅ From request or unknown
+            wilaya=patient_wilaya,  # ✅ From request or patient city
+            saison=patient_season,  # ✅ From request or default to summer
             top_k=3,
         )
 

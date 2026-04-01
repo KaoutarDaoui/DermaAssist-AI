@@ -13,10 +13,6 @@
       "package": "com.dermassist.patient",
       "permissions": ["CAMERA", "READ_EXTERNAL_STORAGE"]
     },
-    "plugins": [["expo-image-picker"]],
-    "notification": {
-      "icon": "./assets/notification-icon.png",
-      "color": "#2563eb"
-    }
+    "plugins": [["expo-image-picker"]]
   }
 }

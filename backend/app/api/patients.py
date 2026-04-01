@@ -15,7 +15,9 @@ class PatientCreateSimplified(BaseModel):
     """Schéma simplifié pour créer un patient avec user automatique."""
     name: str
     email: str
+    username: str = None  # Optional, will be auto-generated if not provided
     password: str = "DermaAssist@2026"
+    is_premium: bool = False
     phone: str = None
     birth_date: str = None
     fitzpatrick_type: str = "IV"
@@ -66,14 +68,28 @@ def create_patient_simple(
     try:
         print(f"Received patient data: {patient_data.dict()}")
         
-        # Convert fitzpatrick_type if needed (add TYPE_ prefix if not present)
         data_dict = patient_data.dict()
+        
+        # Generate username if not provided
+        if not data_dict.get("username"):
+            import uuid
+            base_username = data_dict["name"].lower().replace(" ", "")[:10]
+            unique_id = str(uuid.uuid4())[:6]
+            data_dict["username"] = f"{base_username}_{unique_id}"
+        
+        # Ensure username is unique
+        while db.query(User).filter(User.username == data_dict["username"]).first():
+            import uuid
+            unique_id = str(uuid.uuid4())[:6]
+            data_dict["username"] = f"{data_dict['username'].split('_')[0]}_{unique_id}"
+        
+        # Convert fitzpatrick_type if needed (add TYPE_ prefix if not present)
         if data_dict.get("fitzpatrick_type") and not data_dict["fitzpatrick_type"].startswith("TYPE_"):
             data_dict["fitzpatrick_type"] = f"TYPE_{data_dict['fitzpatrick_type']}"
         
         patient = PatientService.create_patient_with_user(db, data_dict)
         
-        # Return patient with user info
+        # Return patient with user info including username and is_premium
         user = db.query(User).filter(User.id == patient.user_id).first()
         return {
             "id": str(patient.id),
@@ -81,7 +97,9 @@ def create_patient_simple(
             "user": {
                 "id": str(user.id),
                 "email": user.email,
-                "full_name": user.full_name
+                "username": user.username,
+                "full_name": user.full_name,
+                "is_premium": user.is_premium
             } if user else None,
             "full_name": patient.full_name,
             "age": patient.age,

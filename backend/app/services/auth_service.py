@@ -23,12 +23,23 @@ class AuthService:
                 detail="Email already registered"
             )
         
+        # Vérifier si le username existe si fourni
+        if user_data.username:
+            existing_username = db.query(User).filter(User.username == user_data.username).first()
+            if existing_username:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Username already taken"
+                )
+        
         # Créer l'utilisateur
         user = User(
             email=user_data.email,
+            username=user_data.username,
             password_hash=hash_password(user_data.password),
             full_name=user_data.full_name,
-            role=user_data.role
+            role=user_data.role,
+            is_premium=user_data.is_premium
         )
         db.add(user)
         db.flush()  # Flush pour obtenir l'ID sans committer
@@ -47,36 +58,56 @@ class AuthService:
         return {
             "id": str(user.id),
             "email": user.email,
+            "username": user.username,
             "full_name": user.full_name,
-            "role": user.role.value
+            "role": user.role.value,
+            "is_premium": user.is_premium
         }
 
     @staticmethod
     def login_user(db: Session, login_data: UserLogin) -> dict:
         """Authentifier un utilisateur et retourner les tokens JWT."""
         
-        user = db.query(User).filter(User.email == login_data.email).first()
+        # Support both email and username login
+        user = None
+        if login_data.email:
+            user = db.query(User).filter(User.email == login_data.email).first()
+        elif login_data.username:
+            user = db.query(User).filter(User.username == login_data.username).first()
         
         if not user or not verify_password(login_data.password, user.password_hash):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid email or password"
+                detail="Invalid credentials"
             )
         
         # Créer les tokens
         access_token_data = {
             "sub": str(user.id),
             "email": user.email,
-            "role": user.role.value
+            "username": user.username,
+            "role": user.role.value,
+            "is_premium": user.is_premium
         }
         access_token = create_access_token(access_token_data)
         refresh_token = create_refresh_token(access_token_data)
+        
+        user_response = {
+            "id": str(user.id),
+            "email": user.email,
+            "username": user.username,
+            "full_name": user.full_name,
+            "role": user.role.value,
+            "is_premium": user.is_premium,
+            "created_at": user.created_at.isoformat()
+        }
         
         return {
             "access_token": access_token,
             "refresh_token": refresh_token,
             "token_type": "bearer",
-            "expires_in": 30 * 60  # 30 minutes en secondes
+            "expires_in": 30 * 60,  # 30 minutes
+            "user": user_response
         }
 
     @staticmethod

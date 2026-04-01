@@ -32,9 +32,14 @@ export default function PatientsPage() {
   const [patientToEdit, setPatientToEdit] = useState(null);
   const [deleting, setDeleting] = useState(false);
   const [updating, setUpdating] = useState(false);
+  const [showCredentialsModal, setShowCredentialsModal] = useState(false);
+  const [generatedCredentials, setGeneratedCredentials] = useState(null);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
+    password: "DermaAssist@2026",
+    username: "",
+    is_premium: false,
     city: "",
     fitzpatrick_type: "IV",
     phone: "",
@@ -84,6 +89,9 @@ export default function PatientsPage() {
       const payload = {
         name: formData.name,
         email: formData.email,
+        password: formData.password || "DermaAssist@2026",
+        username: formData.username || undefined,
+        is_premium: formData.is_premium || false,
         phone: formData.phone || null,
         birth_date: formData.birth_date || null,
         fitzpatrick_type: formData.fitzpatrick_type || "IV",
@@ -100,10 +108,22 @@ export default function PatientsPage() {
 
       console.log("Response:", response.data);
 
+      // Show credentials modal
+      setGeneratedCredentials({
+        username: response.data.user?.username,
+        password: formData.password,
+        email: response.data.user?.email,
+        fullName: response.data.user?.full_name,
+      });
+      setShowCredentialsModal(true);
+
       setPatientsList([...patientsList, response.data]);
       setFormData({
         name: "",
         email: "",
+        password: "DermaAssist@2026",
+        username: "",
+        is_premium: false,
         city: "",
         fitzpatrick_type: "IV",
         phone: "",
@@ -111,7 +131,6 @@ export default function PatientsPage() {
         medical_history: "",
       });
       setShowAddModal(false);
-      toast.success("Patient added successfully!");
     } catch (error) {
       console.error("Full error:", error);
       console.error("Error response:", error.response?.data);
@@ -515,7 +534,7 @@ export default function PatientsPage() {
       {/* Add Patient Modal */}
       {showAddModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 max-h-96 overflow-y-auto">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 max-h-[600px] overflow-y-auto">
             <div className="flex items-center justify-between p-6 border-b border-gray-200 sticky top-0 bg-white">
               <h2 className="text-xl font-bold text-gray-800">
                 Add New Patient
@@ -557,6 +576,51 @@ export default function PatientsPage() {
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0F6E56] outline-none"
                   placeholder="patient@example.com"
                 />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Username (Optional - auto-generated if empty)
+                </label>
+                <input
+                  type="text"
+                  value={formData.username}
+                  onChange={(e) =>
+                    setFormData({ ...formData, username: e.target.value })
+                  }
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0F6E56] outline-none"
+                  placeholder="Leave empty for auto-generation"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Password
+                </label>
+                <input
+                  type="password"
+                  value={formData.password}
+                  onChange={(e) =>
+                    setFormData({ ...formData, password: e.target.value })
+                  }
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0F6E56] outline-none"
+                  placeholder="DermaAssist@2026"
+                />
+              </div>
+
+              <div className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  id="is_premium"
+                  checked={formData.is_premium}
+                  onChange={(e) =>
+                    setFormData({ ...formData, is_premium: e.target.checked })
+                  }
+                  className="w-4 h-4 rounded border-gray-300 text-[#0F6E56] focus:ring-2 focus:ring-[#0F6E56]"
+                />
+                <label htmlFor="is_premium" className="text-sm font-medium text-gray-700">
+                  Premium Account (Optional)
+                </label>
               </div>
 
               <div>
@@ -728,6 +792,110 @@ export default function PatientsPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Credentials Modal */}
+      {showCredentialsModal && generatedCredentials && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+              <h2 className="text-xl font-bold text-gray-800">
+                Patient Credentials
+              </h2>
+              <button
+                onClick={() => {
+                  setShowCredentialsModal(false);
+                  toast.success("Patient added successfully!");
+                }}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4">
+              <p className="text-gray-700 font-medium">
+                Share these credentials with the patient:
+              </p>
+
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-3">
+                <div>
+                  <p className="text-xs font-semibold text-gray-600 mb-1">
+                    Full Name
+                  </p>
+                  <p className="text-sm font-mono bg-white border border-gray-300 rounded px-3 py-2">
+                    {generatedCredentials.fullName}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-xs font-semibold text-gray-600 mb-1">
+                    Username
+                  </p>
+                  <div className="flex gap-2 items-center">
+                    <p className="text-sm font-mono bg-white border border-gray-300 rounded px-3 py-2 flex-1">
+                      {generatedCredentials.username}
+                    </p>
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(generatedCredentials.username);
+                        toast.success("Username copied!");
+                      }}
+                      className="p-2 bg-[#0F6E56] text-white rounded hover:bg-[#0d5a47] text-xs font-medium"
+                    >
+                      Copy
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-xs font-semibold text-gray-600 mb-1">
+                    Password
+                  </p>
+                  <div className="flex gap-2 items-center">
+                    <p className="text-sm font-mono bg-white border border-gray-300 rounded px-3 py-2 flex-1">
+                      {generatedCredentials.password}
+                    </p>
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(generatedCredentials.password);
+                        toast.success("Password copied!");
+                      }}
+                      className="p-2 bg-[#0F6E56] text-white rounded hover:bg-[#0d5a47] text-xs font-medium"
+                    >
+                      Copy
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-xs font-semibold text-gray-600 mb-1">
+                    Email
+                  </p>
+                  <p className="text-sm font-mono bg-white border border-gray-300 rounded px-3 py-2">
+                    {generatedCredentials.email}
+                  </p>
+                </div>
+              </div>
+
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                <p className="text-sm text-amber-800">
+                  <span className="font-semibold">Note:</span> Please securely share these credentials with the patient. They will use the username and password to log into the mobile app.
+                </p>
+              </div>
+
+              <button
+                onClick={() => {
+                  setShowCredentialsModal(false);
+                  toast.success("Patient added successfully!");
+                }}
+                className="w-full px-4 py-2 bg-[#0F6E56] text-white rounded-lg font-medium hover:bg-[#0d5a47] transition-all"
+              >
+                Done
+              </button>
+            </div>
           </div>
         </div>
       )}

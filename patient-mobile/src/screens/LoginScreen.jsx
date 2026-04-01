@@ -6,139 +6,241 @@ import {
   TextInput,
   TouchableOpacity,
   Alert,
-  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  Dimensions,
+  Image,
+  SafeAreaView,
+  ActivityIndicator
 } from "react-native";
-import { useAuthStore } from "../services/authStore";
-import { auth } from "../services/api";
+import authService from '../services/authService';
 
-export default function LoginScreen() {
-  const setAuth = useAuthStore((state) => state.setAuth);
-  const [email, setEmail] = useState("");
+const { width } = Dimensions.get('window');
+
+const COLORS = {
+  primary: '#1565D8',
+  textDark: '#2D3748',
+  textGray: '#718096',
+  border: '#E2E8F0',
+  white: '#FFFFFF',
+  background: '#F0F4F8',
+};
+
+export default function LoginScreen({ navigation }) {
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
-    if (!email || !password) {
-      Alert.alert("Error", "Please fill in all fields");
+    if (!username || !password) {
+      Alert.alert("Erreur", "Veuillez remplir tous les champs");
       return;
     }
 
     setLoading(true);
     try {
-      const response = await auth.login(email, password);
-      const { access_token, refresh_token } = response.data;
-      await setAuth({ email }, access_token, refresh_token);
+      const result = await authService.login(username, password);
+      
+      if (result && result.access_token) {
+        // Navigation will be replaced by the app's auth state management
+        // The app should check for stored token on startup
+        navigation.replace("MainApp");
+      } else {
+        Alert.alert("Erreur", "Login failed");
+      }
     } catch (error) {
-      Alert.alert(
-        "Login Error",
-        error.response?.data?.detail || "Failed to login",
-      );
+      console.error('Login error:', error);
+      Alert.alert("Erreur", error.message || "Échec de la connexion");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>DermAssist</Text>
-      <Text style={styles.subtitle}>Patient Health Companion</Text>
+    <SafeAreaView style={styles.safeArea}>
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={styles.container}
+      >
+        <View style={styles.card}>
+          <Text style={styles.title}>Connexion</Text>
 
-      <View style={styles.form}>
-        <TextInput
-          style={styles.input}
-          placeholder="Email"
-          value={email}
-          onChangeText={setEmail}
-          keyboardType="email-address"
-          editable={!loading}
-        />
+          {/* Doctor Visual */}
+          <View style={styles.visualContainer}>
+            <Image 
+              source={{ uri: 'https://cdn-icons-png.flaticon.com/512/2785/2785482.png' }}
+              style={styles.visualImage}
+              resizeMode="contain"
+            />
+          </View>
 
-        <TextInput
-          style={styles.input}
-          placeholder="Password"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-          editable={!loading}
-        />
+          {/* Input Fields */}
+          <View style={styles.inputContainer}>
+            <TextInput 
+              style={styles.input} 
+              placeholder="Nom d'utilisateur" 
+              placeholderTextColor={COLORS.textGray}
+              value={username}
+              onChangeText={setUsername}
+              autoCapitalize="none"
+              editable={!loading}
+            />
+            <TextInput 
+              style={styles.input} 
+              placeholder="Mot de passe" 
+              placeholderTextColor={COLORS.textGray}
+              secureTextEntry
+              value={password}
+              onChangeText={setPassword}
+              editable={!loading}
+            />
+          </View>
 
-        <TouchableOpacity
-          style={[styles.button, loading && styles.buttonDisabled]}
-          onPress={handleLogin}
-          disabled={loading}
-        >
-          {loading ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text style={styles.buttonText}>Login</Text>
-          )}
-        </TouchableOpacity>
+          {/* Forgot Password */}
+          <TouchableOpacity style={styles.forgotPass}>
+            <Text style={styles.forgotText}>Mot de passe oublié ?</Text>
+          </TouchableOpacity>
 
-        <Text style={styles.demoText}>
-          Demo: patient@test.com / password123
-        </Text>
-      </View>
-    </View>
+          {/* Login Button */}
+          <TouchableOpacity 
+            style={[styles.loginButton, loading && { opacity: 0.7 }]} 
+            onPress={handleLogin}
+            disabled={loading}
+            activeOpacity={0.8}
+          >
+            {loading ? (
+              <ActivityIndicator color={COLORS.white} size="small" />
+            ) : (
+              <Text style={styles.loginButtonText}>Se Connecter</Text>
+            )}
+          </TouchableOpacity>
+
+          
+
+      
+        </View>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: COLORS.background,
+  },
   container: {
     flex: 1,
-    justifyContent: "center",
-    paddingHorizontal: 20,
-    backgroundColor: "#f3f4f6",
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: COLORS.background,
+  },
+  card: {
+    width: width * 0.88,
+    backgroundColor: COLORS.white,
+    borderRadius: 28,
+    paddingVertical: 40,
+    paddingHorizontal: 25,
+    alignItems: 'center',
+    shadowColor: '#1E293B',
+    shadowOffset: { width: 0, height: 15 },
+    shadowOpacity: 0.12,
+    shadowRadius: 25,
+    elevation: 10,
   },
   title: {
     fontSize: 32,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 8,
-    color: "#1f2937",
+    fontWeight: '800',
+    color: COLORS.textDark,
+    marginBottom: 24,
   },
-  subtitle: {
-    fontSize: 16,
-    textAlign: "center",
-    color: "#6b7280",
-    marginBottom: 32,
+  visualContainer: {
+    width: 120,
+    height: 120,
+    marginBottom: 24,
+    borderRadius: 60,
+    backgroundColor: COLORS.background,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  form: {
-    backgroundColor: "#fff",
-    padding: 24,
-    borderRadius: 12,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+  visualImage: {
+    width: 100,
+    height: 100,
+  },
+  inputContainer: {
+    width: '100%',
+    marginBottom: 20,
   },
   input: {
+    width: '100%',
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    marginBottom: 12,
+    borderRadius: 12,
     borderWidth: 1,
-    borderColor: "#e5e7eb",
-    padding: 12,
-    marginBottom: 16,
-    borderRadius: 8,
-    fontSize: 16,
+    borderColor: COLORS.border,
+    fontSize: 14,
+    color: COLORS.textDark,
+    backgroundColor: COLORS.background,
   },
-  button: {
-    backgroundColor: "#2563eb",
-    padding: 14,
-    borderRadius: 8,
-    alignItems: "center",
+  forgotPass: {
+    alignSelf: 'flex-end',
+    marginBottom: 20,
+  },
+  forgotText: {
+    color: COLORS.primary,
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  loginButton: {
+    width: '100%',
+    paddingVertical: 14,
+    borderRadius: 12,
+    backgroundColor: COLORS.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: COLORS.primary,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 4,
+    marginBottom: 16,
+  },
+  loginButtonText: {
+    color: COLORS.white,
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  socialSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 20,
+    width: '100%',
+  },
+  divider: {
+    flex: 1,
+    height: 1,
+    backgroundColor: COLORS.border,
+  },
+  socialText: {
+    marginHorizontal: 12,
+    color: COLORS.textGray,
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  registerSection: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
     marginTop: 8,
   },
-  buttonDisabled: {
-    opacity: 0.6,
+  registerText: {
+    color: COLORS.textGray,
+    fontSize: 14,
   },
-  buttonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  demoText: {
-    textAlign: "center",
-    color: "#999",
-    marginTop: 16,
-    fontSize: 12,
+  registerLink: {
+    color: COLORS.primary,
+    fontSize: 14,
+    fontWeight: '700',
   },
 });
