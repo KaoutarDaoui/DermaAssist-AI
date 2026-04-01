@@ -1,81 +1,164 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import { View, Text, AppRegistry, ActivityIndicator } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
-import { createNativeStackNavigator } from "@react-navigation/stack";
+import { createStackNavigator } from "@react-navigation/stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { Text } from "react-native";
-import { useAuthStore } from "./src/services/authStore";
+import { Home, BookOpen, Activity, User } from 'lucide-react-native';
 
-// Screens
-import LoginScreen from "./src/screens/LoginScreen";
-import AdviceScreen from "./src/screens/AdviceScreen";
+// Import screens
+import WelcomeScreen from './src/screens/WelcomeScreen';
+import HomeScreen from "./src/screens/HomeScreen";
+import TreatmentScreen from "./src/screens/TreatmentScreen";
 import CheckInScreen from "./src/screens/CheckInScreen";
 import ProfileScreen from "./src/screens/ProfileScreen";
+import LoginScreen from "./src/screens/LoginScreen";
+import RegisterScreen from "./src/screens/RegisterScreen";
+import ConsultationHistoryScreen from "./src/screens/ConsultationHistoryScreen";
+import PhotoUploadScreen from "./src/screens/PhotoUploadScreen";
 
-const Stack = createNativeStackNavigator();
+// Import colors
+import { colors } from "./src/constants/theme";
+
+// Create navigators at module level
+const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
-function AdviceTabs() {
+const ICON_COLOR = "#4A90E2";
+const INACTIVE_COLOR = "#8E9AAF";
+
+// Tab Navigator with all app screens
+const TabNavigator = () => {
   return (
     <Tab.Navigator
-      screenOptions={{
-        tabBarLabelStyle: { fontSize: 12 },
-        tabBarActiveTintColor: "#2563eb",
-      }}
+      screenOptions={({ route }) => ({
+        tabBarIcon: ({ focused, color }) => {
+          let icon;
+          if (route.name === "Home") {
+            return <Home size={24} color={focused ? ICON_COLOR : INACTIVE_COLOR} />;
+          } else if (route.name === "Treatment") {
+            return <BookOpen size={24} color={focused ? ICON_COLOR : INACTIVE_COLOR} />;
+          } else if (route.name === "CheckIn") {
+            return <Activity size={24} color={focused ? ICON_COLOR : INACTIVE_COLOR} />;
+          } else if (route.name === "Profile") {
+            return <User size={24} color={focused ? ICON_COLOR : INACTIVE_COLOR} />;
+          }
+        },
+        tabBarLabel: ({ focused }) => {
+          let label;
+          if (route.name === "Home") {
+            label = "Accueil";
+          } else if (route.name === "Treatment") {
+            label = "Traitement";
+          } else if (route.name === "CheckIn") {
+            label = "Check-in";
+          } else if (route.name === "Profile") {
+            label = "Profil";
+          }
+          return <Text style={{ fontSize: 11, color: focused ? ICON_COLOR : INACTIVE_COLOR, marginTop: 3, fontWeight: "500" }}>{label}</Text>;
+        },
+        tabBarActiveTintColor: ICON_COLOR,
+        tabBarInactiveTintColor: INACTIVE_COLOR,
+        tabBarStyle: {
+          backgroundColor: "#fff",
+          borderTopWidth: 1,
+          borderTopColor: "#F1F3F7",
+          paddingBottom: 8,
+          paddingTop: 8,
+          height: 85,
+        },
+        headerShown: false,
+      })}
     >
-      <Tab.Screen
-        name="MyAdvice"
-        component={AdviceScreen}
-        options={{
-          title: "My Advice",
-          tabBarLabel: "Advice",
-        }}
+      <Tab.Screen 
+        name="Home" 
+        component={HomeScreen} 
+        options={{ title: "Accueil" }}
       />
-      <Tab.Screen
-        name="CheckIn"
-        component={CheckInScreen}
-        options={{
-          title: "Daily Check-in",
-          tabBarLabel: "Check-in",
-        }}
+      <Tab.Screen 
+        name="Treatment" 
+        component={TreatmentScreen} 
+        options={{ title: "Traitement" }}
       />
-      <Tab.Screen
-        name="Profile"
-        component={ProfileScreen}
-        options={{
-          title: "My Profile",
-          tabBarLabel: "Profile",
-        }}
+      <Tab.Screen 
+        name="CheckIn" 
+        component={CheckInScreen} 
+        options={{ title: "Check-in" }}
+      />
+      <Tab.Screen 
+        name="Profile" 
+        component={ProfileScreen} 
+        options={{ title: "Profil" }}
       />
     </Tab.Navigator>
   );
-}
+};
 
-export default function App() {
-  const token = useAuthStore((state) => state.token);
-  const isHydrated = useAuthStore((state) => state.isHydrated);
-  const rehydrate = useAuthStore((state) => state.rehydrate);
+// Main App Navigation
+const AppNavigator = () => {
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: false,
+        cardStyle: { backgroundColor: "#F9FBFF" },
+      }}
+    >
+      <Stack.Screen 
+        name="Welcome" 
+        component={WelcomeScreen}
+        options={{ animationEnabled: false }}
+      />
+      <Stack.Screen 
+        name="Login" 
+        component={LoginScreen}
+        options={{ animationEnabled: false }}
+      />
+      <Stack.Screen 
+        name="Register" 
+        component={RegisterScreen}
+        options={{ animationEnabled: false }}
+      />
+      <Stack.Screen 
+        name="MainApp" 
+        component={TabNavigator}
+        options={{ animationEnabled: false }}
+      />
+      <Stack.Screen 
+        name="ConsultationHistory" 
+        component={ConsultationHistoryScreen}
+      />
+      <Stack.Screen 
+        name="PhotoUpload" 
+        component={PhotoUploadScreen}
+      />
+    </Stack.Navigator>
+  );
+};
+
+const App = () => {
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    rehydrate();
+    // Simulate app initialization
+    const timer = setTimeout(() => setReady(true), 500);
+    return () => clearTimeout(timer);
   }, []);
 
-  if (!isHydrated) {
-    return <Text>Loading...</Text>;
+  if (!ready) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#F9FBFF" }}>
+        <Text style={{ fontSize: 40, marginBottom: 24 }}>🏥</Text>
+        <ActivityIndicator size="large" color={ICON_COLOR} />
+        <Text style={{ marginTop: 16, color: "#8E9AAF" }}>Chargement...</Text>
+      </View>
+    );
   }
 
   return (
     <NavigationContainer>
-      <Stack.Navigator
-        screenOptions={{
-          headerShown: false,
-        }}
-      >
-        {token ? (
-          <Stack.Screen name="Main" component={AdviceTabs} />
-        ) : (
-          <Stack.Screen name="Login" component={LoginScreen} />
-        )}
-      </Stack.Navigator>
+      <AppNavigator />
     </NavigationContainer>
   );
-}
+};
+
+AppRegistry.registerComponent("main", () => App);
+export default App;

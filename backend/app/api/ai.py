@@ -38,13 +38,13 @@ def get_rag() -> DermAssistRAG:
 async def analyze_image(
     # ── Image & mandatory fields ──
     image: UploadFile = File(..., description="Photo de la lésion cutanée"),
-    age: int = Form(..., ge=0, le=120),
-    sexe: str = Form(..., regex="^(homme|femme)$"),
-    fitzpatrick: int = Form(..., ge=1, le=6),
+    age: int = Form(..., ge=0, le=120, description="Âge du patient (0-120)"),
+    sex: str = Form(..., regex="^(male|female|homme|femme)$", description="Sexe: male/homme, female/femme"),
     
-    # ── Optional patient context ──
-    localisation: str = Form("unknown", description="Zone corporelle affectée"),
-    ville: str = Form("Alger", description="Ville du patient"),
+    # ── Clinical metadata (NEW IMPROVED MODEL) ──
+    site: str = Form("unknown", description="Localisation: visage, cou, tronc, dos, bras, jambe, pied, unknown"),
+    wilaya: str = Form("nord", description="Région: nord, sud, est, ouest"),
+    saison: str = Form("ete", description="Saison: printemps, ete, automne, hiver"),
     
     # ── Comorbidités (None = unknown) ──
     grossesse: Optional[str] = Form(None),
@@ -62,14 +62,15 @@ async def analyze_image(
 ):
     """
     ──────────────────────────────────────────────────────────────────────────
-    UNIFIED PIPELINE: Module 1 (CNN) + Module 2 (RAG Clinical Analysis)
+    UNIFIED PIPELINE: Module 1 (Improved CNN with Metadata) + Module 2 (RAG)
     ──────────────────────────────────────────────────────────────────────────
     
-    1️⃣  Module 1 — CNN Inference
-        - EfficientNet-B0 sur photo lésion
+    1️⃣  Module 1 — Improved CNN Inference (with metadata)
+        - EfficientNet-B0 + metadata fusion
+        - Metadata: age, sex, site, wilaya, saison
         - Output: disease + confidence + alternatives
     
-    2️⃣  Module 2 — RAG Analysis
+    2️⃣  Module 2 — RAG Clinical Analysis
         - Retriever: KB recherche basée diagnostic + patient
         - Generator: Gemini Flash pour analyse clinique
         - Alert Engine: Moteur alertes comorbidités
@@ -87,7 +88,7 @@ async def analyze_image(
             return v.lower() == "true"
 
         # ──────────────────────────────────────────────────────────────────
-        # 1️⃣  MODULE 1 — CNN INFERENCE
+        # 1️⃣  MODULE 1 — IMPROVED CNN INFERENCE (with metadata)
         # ──────────────────────────────────────────────────────────────────
         
         cnn_service = get_cnn_service()
@@ -96,22 +97,30 @@ async def analyze_image(
         module1_result = cnn_service.predict(
             image_bytes=image_bytes,
             age=age,
-            sexe=sexe,
-            fitzpatrick=fitzpatrick,
-            localisation=localisation,
-            ville=ville,
-            top_k=3,
+            sex=sex,
+            site=site,
+            wilaya=wilaya,
+            saison=saison,
+            top_k=5,
         )
         
         # ──────────────────────────────────────────────────────────────────
         # 2️⃣  BUILD PATIENT CONTEXT
         # ──────────────────────────────────────────────────────────────────
         
+        # Normalize sex value (convert homme/femme to male/female if needed)
+        sex_normalized = sex.lower()
+        if sex_normalized == "homme":
+            sex_normalized = "male"
+        elif sex_normalized == "femme":
+            sex_normalized = "female"
+        
         patient_context = PatientContext(
             age=age,
-            sexe=sexe,
-            fitzpatrick=str(fitzpatrick),
-            ville=ville,
+            sexe=sex_normalized,
+            site=site,
+            wilaya=wilaya,
+            saison=saison,
             grossesse=parse_bool(grossesse),
             insuffisance_cardiaque=parse_bool(insuffisance_cardiaque),
             insuffisance_renale=parse_bool(insuffisance_renale),
@@ -154,11 +163,18 @@ async def analyze_image(
         
         response = {
             "status": "success" if rag_available else "partial",
+            "request_metadata": {
+                "age": age,
+                "sex": sex_normalized,
+                "site": site,
+                "wilaya": wilaya,
+                "saison": saison,
+            },
             "module1": {
                 "condition_id": module1_result["condition_id"],
                 "condition_name": module1_result["condition_name"],
                 "confidence": module1_result["confidence"],
-                "confidence_pct": round(module1_result["confidence"] * 100, 1),
+                "confidence_pct": module1_result.get("confidence_pct", round(module1_result["confidence"] * 100, 1)),
                 "top_alternatives": module1_result.get("top_alternatives", []),
             },
         }
@@ -226,10 +242,10 @@ async def analyze_image(
 async def analyze_image_cnn_only(
     image: UploadFile = File(..., description="Photo de la lésion cutanée"),
     age: int = Form(25),
-    sexe: str = Form("homme"),
-    fitzpatrick: int = Form(3),
-    localisation: str = Form("unknown"),
-    ville: str = Form("Alger"),
+    sex: str = Form("unknown"),
+    site: str = Form("unknown"),
+    wilaya: str = Form("nord"),
+    saison: str = Form("ete"),
 ):
     """
     FAST TEST: Module 1 (CNN) Only
@@ -244,10 +260,10 @@ async def analyze_image_cnn_only(
         module1_result = cnn_service.predict(
             image_bytes=image_bytes,
             age=age,
-            sexe=sexe,
-            fitzpatrick=fitzpatrick,
-            localisation=localisation,
-            ville=ville,
+            sex=sex,
+            site=site,
+            wilaya=wilaya,
+            saison=saison,
             top_k=3,
         )
         
