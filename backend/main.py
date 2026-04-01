@@ -15,7 +15,7 @@ from app.models.patient_advice import PatientAdvice
 from app.models.checkin import CheckIn
 from app.models.rag_analysis import AIAnalysis, ClinicalQuestion, Treatment, Alert, KnowledgeChunk
 
-from app.api import auth, patients, consultations, images, ai, advice, checkins, skin_images, analysis
+from app.api import auth, patients, consultations, images, ai, advice, checkins, skin_images, analysis, mobile
 
 # Initialiser l'application FastAPI
 app = FastAPI(
@@ -64,6 +64,7 @@ app.include_router(advice.router)
 app.include_router(checkins.router)
 app.include_router(skin_images.router)
 app.include_router(analysis.router)
+app.include_router(mobile.router)
 
 # Health check endpoint
 @app.get("/health")

@@ -72,9 +72,11 @@ class PatientService:
         # Créer l'utilisateur d'abord
         user_data = {
             "email": patient_data.get("email"),
+            "username": patient_data.get("username"),
             "full_name": patient_data.get("name"),
             "password_hash": hash_password(patient_data.get("password", "DermaAssist@2026")),
-            "role": "patient"
+            "role": "patient",
+            "is_premium": patient_data.get("is_premium", False)
         }
         
         # Vérifier que l'email n'existe pas déjà
@@ -84,6 +86,15 @@ class PatientService:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Email already exists"
             )
+        
+        # Vérifier que le username n'existe pas déjà
+        if user_data.get("username"):
+            existing_username = db.query(User).filter(User.username == user_data["username"]).first()
+            if existing_username:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Username already exists"
+                )
         
         user = User(**user_data)
         db.add(user)

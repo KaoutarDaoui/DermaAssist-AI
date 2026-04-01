@@ -12,6 +12,8 @@ import {
   TrendingDown,
   Minus,
 } from "lucide-react";
+import { Chart, registerables } from "chart.js";
+Chart.register(...registerables);
 import NavBar from "../components/NavBar";
 import Sidebar from "../components/Sidebar";
 import OverlayModal from "../components/OverlayModal";
@@ -39,6 +41,84 @@ export default function SkinComparisonPage() {
     loadImages();
     loadProgression();
   }, [patientId]);
+
+  useEffect(() => {
+    if (!canvasRef.current || progression.length < 2) return;
+
+    // Détruire le graphe précédent si existant
+    if (chartRef.current) {
+      chartRef.current.destroy();
+    }
+
+    const ctx = canvasRef.current.getContext("2d");
+
+    const labels = progression.map((p) =>
+      new Date(p.date).toLocaleDateString("fr-FR", {
+        day: "2-digit",
+        month: "short",
+      }),
+    );
+
+    const data = progression.map((p) => p.score_pct);
+
+    const pointColors = data.map((v) =>
+      v < 30 ? "#22c55e" : v < 60 ? "#f59e0b" : "#ef4444",
+    );
+
+    chartRef.current = new Chart(ctx, {
+      type: "line",
+      data: {
+        labels,
+        datasets: [
+          {
+            label: "Sévérité (%)",
+            data,
+            borderColor: "#0F6E56",
+            backgroundColor: "rgba(15, 110, 86, 0.08)",
+            borderWidth: 2.5,
+            pointBackgroundColor: pointColors,
+            pointBorderColor: pointColors,
+            pointRadius: 6,
+            pointHoverRadius: 8,
+            tension: 0.4,
+            fill: true,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => ` Sévérité : ${ctx.parsed.y.toFixed(1)}%`,
+            },
+          },
+        },
+        scales: {
+          y: {
+            min: 0,
+            max: 100,
+            ticks: {
+              callback: (v) => `${v}%`,
+              font: { size: 11 },
+            },
+            grid: { color: "rgba(0,0,0,0.05)" },
+          },
+          x: {
+            ticks: { font: { size: 11 } },
+            grid: { display: false },
+          },
+        },
+      },
+    });
+
+    // Cleanup
+    return () => {
+      if (chartRef.current) chartRef.current.destroy();
+    };
+  }, [progression]);
 
   const loadImages = async () => {
     try {
@@ -73,86 +153,6 @@ export default function SkinComparisonPage() {
       setProgLoading(false);
     }
   };
-
-  useEffect(() => {
-    if (!progression.length || !canvasRef.current) return;
-    if (chartRef.current) {
-      chartRef.current.destroy();
-      chartRef.current = null;
-    }
-    const Chart = window.Chart;
-    if (!Chart) return;
-
-    const labels = progression.map((d) =>
-      new Date(d.date).toLocaleDateString("fr-FR", {
-        day: "2-digit",
-        month: "short",
-      }),
-    );
-    const scores = progression.map((d) => parseFloat(d.score_pct.toFixed(1)));
-    const pointColors = scores.map((s) =>
-      s < 30 ? "#1D9E75" : s < 60 ? "#BA7517" : "#E24B4A",
-    );
-
-    chartRef.current = new Chart(canvasRef.current, {
-      type: "line",
-      data: {
-        labels,
-        datasets: [
-          {
-            data: scores,
-            borderColor: "#0F6E56",
-            borderWidth: 2,
-            pointBackgroundColor: pointColors,
-            pointBorderColor: pointColors,
-            pointRadius: 5,
-            pointHoverRadius: 7,
-            tension: 0.35,
-            fill: false,
-          },
-        ],
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { display: false },
-          tooltip: {
-            callbacks: {
-              label: (ctx) => {
-                const d = progression[ctx.dataIndex];
-                return [
-                  `Sévérité : ${ctx.parsed.y.toFixed(1)}%`,
-                  d.cnn_label ? `Diagnostic : ${d.cnn_label}` : "",
-                ].filter(Boolean);
-              },
-            },
-          },
-        },
-        scales: {
-          x: {
-            grid: { color: "rgba(0,0,0,0.05)" },
-            ticks: {
-              color: "#888780",
-              font: { size: 10 },
-              maxRotation: 45,
-              autoSkip: false,
-            },
-          },
-          y: {
-            min: 0,
-            max: 100,
-            grid: { color: "rgba(0,0,0,0.05)" },
-            ticks: {
-              color: "#888780",
-              font: { size: 10 },
-              callback: (v) => `${v}%`,
-            },
-          },
-        },
-      },
-    });
-  }, [progression]);
 
   const toggleSelect = (id) => {
     setResult(null);
@@ -642,5 +642,4 @@ export default function SkinComparisonPage() {
       <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js" />
     </div>
   );
-  
 }

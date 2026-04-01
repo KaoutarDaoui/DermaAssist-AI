@@ -13,6 +13,8 @@ class UserBase(BaseModel):
     email: EmailStr
     full_name: str
     role: UserRole
+    username: Optional[str] = None
+    is_premium: bool = False
 
 
 class UserRegister(UserBase):
@@ -20,7 +22,9 @@ class UserRegister(UserBase):
 
 
 class UserLogin(BaseModel):
-    email: EmailStr
+    """Support both email and username for login"""
+    email: Optional[EmailStr] = None
+    username: Optional[str] = None
     password: str
 
 
@@ -37,6 +41,7 @@ class TokenResponse(BaseModel):
     refresh_token: str
     token_type: str = "bearer"
     expires_in: int  # Secondes
+    user: UserResponse
 
 
 class TokenRefresh(BaseModel):
