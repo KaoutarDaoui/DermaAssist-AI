@@ -7,13 +7,14 @@ import { Home, BookOpen, Activity, User } from 'lucide-react-native';
 
 // Import screens
 import WelcomeScreen from './src/screens/WelcomeScreen';
+import HomeScreen from "./src/screens/HomeScreen";
+import TreatmentScreen from "./src/screens/TreatmentScreen";
+import CheckInScreen from "./src/screens/CheckInScreen";
+import ProfileScreen from "./src/screens/ProfileScreen";
 import LoginScreen from "./src/screens/LoginScreen";
 import RegisterScreen from "./src/screens/RegisterScreen";
-import SuiviScreen from "./src/screens/SuiviScreen";
-import ConsultationsScreen from "./src/screens/ConsultationsScreen";
-import AnalyseScreen from "./src/screens/AnalyseScreen";
-import ConsultationDetailScreen from "./src/screens/ConsultationDetailScreen";
-import ProfileScreen from "./src/screens/ProfileScreen";
+import ConsultationHistoryScreen from "./src/screens/ConsultationHistoryScreen";
+import PhotoUploadScreen from "./src/screens/PhotoUploadScreen";
 
 // Import colors
 import { colors } from "./src/constants/theme";
@@ -22,7 +23,7 @@ import { colors } from "./src/constants/theme";
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
-const ICON_COLOR = colors.primary;
+const ICON_COLOR = "#4A90E2";
 const INACTIVE_COLOR = "#8E9AAF";
 
 // Tab Navigator with all app screens
@@ -32,22 +33,26 @@ const TabNavigator = () => {
       screenOptions={({ route }) => ({
         tabBarIcon: ({ focused, color }) => {
           let icon;
-          if (route.name === "Suivi") {
-            return <Activity size={24} color={focused ? ICON_COLOR : INACTIVE_COLOR} />;
-          } else if (route.name === "Consultations") {
+          if (route.name === "Home") {
+            return <Home size={24} color={focused ? ICON_COLOR : INACTIVE_COLOR} />;
+          } else if (route.name === "Treatment") {
             return <BookOpen size={24} color={focused ? ICON_COLOR : INACTIVE_COLOR} />;
-          } else if (route.name === "Analyse") {
+          } else if (route.name === "CheckIn") {
             return <Activity size={24} color={focused ? ICON_COLOR : INACTIVE_COLOR} />;
+          } else if (route.name === "Profile") {
+            return <User size={24} color={focused ? ICON_COLOR : INACTIVE_COLOR} />;
           }
         },
         tabBarLabel: ({ focused }) => {
           let label;
-          if (route.name === "Suivi") {
-            label = "Suivre mon état";
-          } else if (route.name === "Consultations") {
-            label = "Mes consultations";
-          } else if (route.name === "Analyse") {
-            label = "Évaluer mon état";
+          if (route.name === "Home") {
+            label = "Accueil";
+          } else if (route.name === "Treatment") {
+            label = "Traitement";
+          } else if (route.name === "CheckIn") {
+            label = "Check-in";
+          } else if (route.name === "Profile") {
+            label = "Profil";
           }
           return <Text style={{ fontSize: 11, color: focused ? ICON_COLOR : INACTIVE_COLOR, marginTop: 3, fontWeight: "500" }}>{label}</Text>;
         },
@@ -65,19 +70,24 @@ const TabNavigator = () => {
       })}
     >
       <Tab.Screen 
-        name="Suivi" 
-        component={SuiviScreen} 
-        options={{ title: "Suivre mon état" }}
+        name="Home" 
+        component={HomeScreen} 
+        options={{ title: "Accueil" }}
       />
       <Tab.Screen 
-        name="Consultations" 
-        component={ConsultationsScreen} 
-        options={{ title: "Mes consultations" }}
+        name="Treatment" 
+        component={TreatmentScreen} 
+        options={{ title: "Traitement" }}
       />
       <Tab.Screen 
-        name="Analyse" 
-        component={AnalyseScreen} 
-        options={{ title: "Évaluer mon état" }}
+        name="CheckIn" 
+        component={CheckInScreen} 
+        options={{ title: "Check-in" }}
+      />
+      <Tab.Screen 
+        name="Profile" 
+        component={ProfileScreen} 
+        options={{ title: "Profil" }}
       />
     </Tab.Navigator>
   );
@@ -113,14 +123,12 @@ const AppNavigator = () => {
         options={{ animationEnabled: false }}
       />
       <Stack.Screen 
-        name="ConsultationDetail" 
-        component={ConsultationDetailScreen}
-        options={{ headerShown: false }}
+        name="ConsultationHistory" 
+        component={ConsultationHistoryScreen}
       />
       <Stack.Screen 
-        name="Profile" 
-        component={ProfileScreen}
-        options={{ headerShown: false }}
+        name="PhotoUpload" 
+        component={PhotoUploadScreen}
       />
     </Stack.Navigator>
   );

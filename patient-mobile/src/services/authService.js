@@ -3,7 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // For Android Emulator: 10.0.2.2
 // For Physical Device: Use your machine's IP address (e.g., http://192.168.x.x:8000)
 //const API_URL = 'http://10.21.138.178:8000';
-const API_URL = "https://mean-planes-knock.loca.lt";
+const API_URL = 'http://10.0.2.2:8000';
 
 
 class AuthService {
