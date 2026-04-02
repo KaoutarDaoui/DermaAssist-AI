@@ -4,8 +4,8 @@ import { Sun, Wind, Droplets, MapPin } from "lucide-react";
 export default function EnvironmentalBanner() {
   const envData = {
     uvIndex: {
-      label: "UV Index",
-      value: "HIGH 7",
+      label: "Indice UV",
+      value: "ÉLEVÉ 7",
       gradientFrom: "from-orange-500/20",
       gradientTo: "to-yellow-500/20",
       textColor: "text-orange-300",
@@ -14,7 +14,7 @@ export default function EnvironmentalBanner() {
     },
     aqi: {
       label: "AQI",
-      value: "MODERATE 42",
+      value: "MODÉRÉ 42",
       gradientFrom: "from-cyan-500/20",
       gradientTo: "to-blue-500/20",
       textColor: "text-cyan-300",
@@ -22,7 +22,7 @@ export default function EnvironmentalBanner() {
       iconColor: "text-cyan-400",
     },
     humidity: {
-      label: "Humidity",
+      label: "Humidité",
       value: "65%",
       gradientFrom: "from-teal-500/20",
       gradientTo: "to-emerald-500/20",
@@ -30,7 +30,7 @@ export default function EnvironmentalBanner() {
       borderColor: "border-teal-400/30",
       iconColor: "text-teal-400",
     },
-    location: "Boumerdes, Algeria",
+    location: "Boumerdes, Algérie",
   };
 
   return (

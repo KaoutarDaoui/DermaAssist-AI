@@ -4,22 +4,22 @@ import { Activity, AlertCircle, CheckCircle, Clock } from "lucide-react";
 export default function SystemStatus() {
   const metrics = [
     {
-      label: "Active Analyses",
+      label: "Analyses actives",
       value: "12",
       icon: Activity,
     },
     {
-      label: "Pending Reviews",
+      label: "Revues en attente",
       value: "5",
       icon: Clock,
     },
     {
-      label: "Completed Today",
+      label: "Terminées aujourd'hui",
       value: "28",
       icon: CheckCircle,
     },
     {
-      label: "System Alerts",
+      label: "Alertes système",
       value: "2",
       icon: AlertCircle,
     },
@@ -28,7 +28,7 @@ export default function SystemStatus() {
   return (
     <div className="rounded-2xl bg-white border-2 border-emerald-200 p-6 shadow-sm h-full">
       <h2 className="text-2xl font-black text-emerald-900 mb-5">
-        System Status
+        État du système
       </h2>
 
       <div className="space-y-3">

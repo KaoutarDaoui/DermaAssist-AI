@@ -23,7 +23,7 @@ export default function NavBar({ onMenuClick }) {
         <button
           onClick={onMenuClick}
           className="w-10 h-10 rounded-xl border border-emerald-500/30 flex items-center justify-center text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/20 hover:border-emerald-500/50 transition-all duration-300 group"
-          title="Toggle Sidebar"
+          title="Afficher/Masquer la barre latérale"
         >
           <Menu
             size={20}
@@ -39,7 +39,7 @@ export default function NavBar({ onMenuClick }) {
           />
           <input
             type="text"
-            placeholder="Search patient, condition..."
+            placeholder="Rechercher un patient, une condition..."
             className="flex-1 bg-transparent text-emerald-100 placeholder-emerald-500/50 focus:outline-none font-medium"
           />
         </div>
@@ -51,7 +51,7 @@ export default function NavBar({ onMenuClick }) {
         <button
           onClick={() => navigate("/notifications")}
           className="relative w-10 h-10 rounded-xl border border-emerald-500/30 flex items-center justify-center text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/20 hover:border-emerald-500/50 transition-all duration-300 group"
-          title="View Notifications"
+          title="Voir les notifications"
         >
           <Bell
             size={20}

@@ -40,18 +40,18 @@ export default function RecentPatients() {
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-3">
           <h2 className="text-3xl font-black text-emerald-900">
-            Recent Patients
+            Patients récents
           </h2>
           <span className="inline-flex items-center gap-1 px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs font-bold border border-emerald-300 uppercase tracking-wide">
             <TrendingUp size={14} />
-            Latest
+            Récents
           </span>
         </div>
         <button
           onClick={() => navigate("/patients")}
           className="flex items-center gap-2 text-emerald-600 hover:text-emerald-700 transition-all font-semibold text-sm group"
         >
-          View All
+          Voir tout
           <ChevronRight
             size={18}
             className="group-hover:translate-x-1 transition-transform"
@@ -61,11 +61,11 @@ export default function RecentPatients() {
 
       {loading ? (
         <div className="text-center py-8">
-          <p className="text-emerald-500">Loading patients...</p>
+          <p className="text-emerald-500">Chargement des patients...</p>
         </div>
       ) : patients.length === 0 ? (
         <div className="text-center py-8">
-          <p className="text-emerald-500">No patients yet</p>
+          <p className="text-emerald-500">Aucun patient pour le moment</p>
         </div>
       ) : (
         <div className="space-y-4">

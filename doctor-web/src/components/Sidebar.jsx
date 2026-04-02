@@ -7,10 +7,10 @@ export default function Sidebar({ open }) {
   const location = useLocation();
 
   const menuItems = [
-    { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
+    { icon: LayoutDashboard, label: "Tableau de bord", path: "/dashboard" },
     { icon: Users, label: "Patients", path: "/patients" },
     { icon: Phone, label: "Contact", path: "/contact" },
-    { icon: Settings, label: "Settings", path: "/settings" },
+    { icon: Settings, label: "Paramètres", path: "/settings" },
   ];
 
   return (
@@ -56,7 +56,7 @@ export default function Sidebar({ open }) {
 
       {/* Footer */}
       <div className="p-4 border-t border-white/10 text-center text-xs text-white/50 font-semibold uppercase tracking-wider">
-        <p>© 2026 DermaAssist</p>
+        <p>© 2026 Skin+</p>
       </div>
     </div>
   );

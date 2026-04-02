@@ -8,9 +8,9 @@ export default function SettingsPage() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [settings, setSettings] = useState({
     fullName: "Dr. Ahmed Medina",
-    email: "dr.ahmed@dermaassist.com",
+    email: "dr.ahmed@skinplus.com",
     phone: "+213 662210203",
-    specialization: "Dermatology",
+    specialization: "Dermatologie",
     licenseNumber: "DRS-2025-12345",
     currentPassword: "",
     newPassword: "",
@@ -57,11 +57,11 @@ export default function SettingsPage() {
       settings.newPassword &&
       settings.newPassword !== settings.confirmPassword
     ) {
-      toast.error("New passwords do not match");
+      toast.error("Les nouveaux mots de passe ne correspondent pas");
       return;
     }
 
-    toast.success("Settings saved successfully!");
+    toast.success("Parametres enregistres avec succes !");
     setIsEditing(false);
     setSettings({
       ...settings,
@@ -90,14 +90,14 @@ export default function SettingsPage() {
                   settings.darkMode ? "text-white" : "text-gray-800"
                 }`}
               >
-                Settings
+                Parametres
               </h1>
               <p
                 className={`${
                   settings.darkMode ? "text-gray-400" : "text-gray-600"
                 }`}
               >
-                Manage your account and preferences
+                Gerez votre compte et vos preferences
               </p>
             </div>
 
@@ -117,7 +117,7 @@ export default function SettingsPage() {
                       }`}
                     >
                       <User size={24} className="text-[#0F6E56]" />
-                      Profile Information
+                      Informations du profil
                     </h2>
                     <button
                       onClick={() => setIsEditing(!isEditing)}
@@ -127,7 +127,7 @@ export default function SettingsPage() {
                           : "bg-[#0F6E56] hover:bg-teal-700 text-white"
                       }`}
                     >
-                      {isEditing ? "Cancel" : "Edit"}
+                      {isEditing ? "Annuler" : "Modifier"}
                     </button>
                   </div>
 
@@ -141,7 +141,7 @@ export default function SettingsPage() {
                               : "text-gray-700"
                           }`}
                         >
-                          Full Name
+                          Nom complet
                         </label>
                         <input
                           type="text"
@@ -164,7 +164,7 @@ export default function SettingsPage() {
                               : "text-gray-700"
                           }`}
                         >
-                          Specialization
+                          Specialite
                         </label>
                         <input
                           type="text"
@@ -213,7 +213,7 @@ export default function SettingsPage() {
                               : "text-gray-700"
                           }`}
                         >
-                          Phone
+                          Telephone
                         </label>
                         <input
                           type="text"
@@ -236,7 +236,7 @@ export default function SettingsPage() {
                           settings.darkMode ? "text-gray-300" : "text-gray-700"
                         }`}
                       >
-                        License Number
+                        Numero de licence
                       </label>
                       <input
                         type="text"
@@ -259,7 +259,7 @@ export default function SettingsPage() {
                       className="w-full mt-6 bg-[#0F6E56] hover:bg-teal-700 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition-colors"
                     >
                       <Save size={20} />
-                      Save Changes
+                      Enregistrer les modifications
                     </button>
                   )}
                 </div>
@@ -277,7 +277,7 @@ export default function SettingsPage() {
                       }`}
                     >
                       <Lock size={24} className="text-[#0F6E56]" />
-                      Change Password
+                      Changer le mot de passe
                     </h2>
 
                     <div className="space-y-4">
@@ -289,7 +289,7 @@ export default function SettingsPage() {
                               : "text-gray-700"
                           }`}
                         >
-                          Current Password
+                          Mot de passe actuel
                         </label>
                         <div className="relative">
                           <input
@@ -329,7 +329,7 @@ export default function SettingsPage() {
                               : "text-gray-700"
                           }`}
                         >
-                          New Password
+                          Nouveau mot de passe
                         </label>
                         <div className="relative">
                           <input
@@ -369,7 +369,7 @@ export default function SettingsPage() {
                               : "text-gray-700"
                           }`}
                         >
-                          Confirm Password
+                          Confirmer le mot de passe
                         </label>
                         <div className="relative">
                           <input
@@ -434,12 +434,12 @@ export default function SettingsPage() {
                             }`}
                           >
                             {key === "emailAlerts"
-                              ? "Email Alerts"
+                              ? "Alertes e-mail"
                               : key === "smsAlerts"
-                                ? "SMS Alerts"
+                                ? "Alertes SMS"
                                 : key === "pushNotifications"
-                                  ? "Push Notifications"
-                                  : "Weekly Report"}
+                                  ? "Notifications push"
+                                  : "Rapport hebdomadaire"}
                           </label>
                           <input
                             type="checkbox"
@@ -468,7 +468,7 @@ export default function SettingsPage() {
                     }`}
                   >
                     <Palette size={20} className="text-[#0F6E56]" />
-                    Appearance
+                    Apparence
                   </h3>
 
                   <div className="flex items-center justify-between">
@@ -477,7 +477,7 @@ export default function SettingsPage() {
                         settings.darkMode ? "text-gray-300" : "text-gray-700"
                       }`}
                     >
-                      Dark Mode
+                      Mode sombre
                     </label>
                     <input
                       type="checkbox"
@@ -499,7 +499,7 @@ export default function SettingsPage() {
                       settings.darkMode ? "text-white" : "text-gray-800"
                     }`}
                   >
-                    Account Status
+                    Statut du compte
                   </h3>
 
                   <div className="space-y-3 text-sm">
@@ -509,10 +509,10 @@ export default function SettingsPage() {
                           settings.darkMode ? "text-gray-400" : "text-gray-600"
                         }`}
                       >
-                        Status
+                        Statut
                       </span>
                       <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-semibold">
-                        Active
+                        Actif
                       </span>
                     </div>
                     <div className="flex items-center justify-between">
@@ -521,14 +521,14 @@ export default function SettingsPage() {
                           settings.darkMode ? "text-gray-400" : "text-gray-600"
                         }`}
                       >
-                        Member Since
+                        Membre depuis
                       </span>
                       <span
                         className={`${
                           settings.darkMode ? "text-gray-300" : "text-gray-700"
                         }`}
                       >
-                        Jan 2025
+                        Janv. 2025
                       </span>
                     </div>
                     <div className="flex items-center justify-between">
@@ -537,14 +537,14 @@ export default function SettingsPage() {
                           settings.darkMode ? "text-gray-400" : "text-gray-600"
                         }`}
                       >
-                        Last Login
+                        Derniere connexion
                       </span>
                       <span
                         className={`${
                           settings.darkMode ? "text-gray-300" : "text-gray-700"
                         }`}
                       >
-                        Today
+                        Aujourd'hui
                       </span>
                     </div>
                   </div>

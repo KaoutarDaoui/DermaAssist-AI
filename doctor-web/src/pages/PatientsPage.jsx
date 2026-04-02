@@ -37,7 +37,7 @@ export default function PatientsPage() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    password: "DermaAssist@2026",
+    password: "Skin+@2026",
     username: "",
     is_premium: false,
     city: "",
@@ -72,7 +72,7 @@ export default function PatientsPage() {
     } catch (error) {
       console.error("Error loading patients:", error);
       console.error("Error response:", error.response?.data);
-      toast.error("Failed to load patients");
+      toast.error("Impossible de charger les patients");
     } finally {
       setLoading(false);
     }
@@ -82,14 +82,14 @@ export default function PatientsPage() {
     e.preventDefault();
     try {
       if (!formData.name || !formData.email) {
-        toast.error("Name and email are required");
+        toast.error("Le nom et l'email sont obligatoires");
         return;
       }
 
       const payload = {
         name: formData.name,
         email: formData.email,
-        password: formData.password || "DermaAssist@2026",
+        password: formData.password || "Skin+@2026",
         username: formData.username || undefined,
         is_premium: formData.is_premium || false,
         phone: formData.phone || null,
@@ -121,7 +121,7 @@ export default function PatientsPage() {
       setFormData({
         name: "",
         email: "",
-        password: "DermaAssist@2026",
+        password: "Skin+@2026",
         username: "",
         is_premium: false,
         city: "",
@@ -138,7 +138,7 @@ export default function PatientsPage() {
         error.response?.data?.detail ||
         error.response?.data?.message ||
         error.message ||
-        "Failed to add patient";
+        "Impossible d'ajouter le patient";
       toast.error(errorMsg);
     }
   };
@@ -168,7 +168,7 @@ export default function PatientsPage() {
       setPatientsList(patientsList.filter((p) => p.id !== patientToDelete.id));
       setShowDeleteConfirm(false);
       setPatientToDelete(null);
-      toast.success("Patient deleted successfully");
+      toast.success("Patient supprime avec succes");
     } catch (error) {
       console.error("=== DELETE ERROR ===");
       console.error("Full error object:", error);
@@ -184,7 +184,7 @@ export default function PatientsPage() {
         error.response?.data?.detail ||
         error.response?.data?.message ||
         error.message ||
-        "Failed to delete patient";
+        "Impossible de supprimer le patient";
       toast.error(errorMsg);
     } finally {
       setDeleting(false);
@@ -254,14 +254,14 @@ export default function PatientsPage() {
         birth_date: "",
         medical_history: "",
       });
-      toast.success("Patient updated successfully!");
+      toast.success("Patient mis a jour avec succes !");
     } catch (error) {
       console.error("Update error:", error);
       const errorMsg =
         error.response?.data?.detail ||
         error.response?.data?.message ||
         error.message ||
-        "Failed to update patient";
+        "Impossible de mettre a jour le patient";
       toast.error(errorMsg);
     } finally {
       setUpdating(false);
@@ -290,7 +290,7 @@ export default function PatientsPage() {
 
   const getAgeDisplay = (patient) => {
     const age = calculateAge(patient.birth_date);
-    return age ? `${age} years` : "N/A";
+    return age ? `${age} ans` : "Non renseigne";
   };
 
   const filteredPatients = patientsList.filter((patient) => {
@@ -328,7 +328,7 @@ export default function PatientsPage() {
                     Patients
                   </h1>
                   <p className="text-gray-600 font-medium">
-                    Manage and view all patient records
+                    Gere et consulte tous les dossiers patients
                   </p>
                 </div>
               </div>
@@ -337,7 +337,7 @@ export default function PatientsPage() {
                 className="flex items-center gap-2 bg-[#0F6E56] text-white px-6 py-3 rounded-lg hover:bg-[#0d5a47] transition-all font-medium shadow-md"
               >
                 <Plus size={20} />
-                Add Patient
+                Ajouter un patient
               </button>
             </div>
 
@@ -350,7 +350,7 @@ export default function PatientsPage() {
                 />
                 <input
                   type="text"
-                  placeholder="Search by name, email, or city..."
+                  placeholder="Rechercher par nom, email ou ville..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full pl-12 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0F6E56] focus:border-transparent outline-none transition-all"
@@ -362,7 +362,7 @@ export default function PatientsPage() {
             <div className="grid grid-cols-4 gap-4">
               <div className="bg-white p-4 rounded-lg shadow-sm">
                 <p className="text-gray-600 text-sm mb-1 font-semibold">
-                  Total Patients
+                  Patients au total
                 </p>
                 <p className="text-2xl font-black text-gray-800">
                   {patientsList.length}
@@ -370,7 +370,7 @@ export default function PatientsPage() {
               </div>
               <div className="bg-white p-4 rounded-lg shadow-sm">
                 <p className="text-gray-600 text-sm mb-1 font-semibold">
-                  This Month
+                  Ce mois-ci
                 </p>
                 <p className="text-2xl font-black text-green-600">
                   {filteredPatients.length}
@@ -384,7 +384,7 @@ export default function PatientsPage() {
               </div>
               <div className="bg-white p-4 rounded-lg shadow-sm">
                 <p className="text-gray-600 text-sm mb-1 font-semibold">
-                  Reports Pending
+                  Rapports en attente
                 </p>
                 <p className="text-2xl font-black text-red-600">0</p>
               </div>
@@ -400,9 +400,10 @@ export default function PatientsPage() {
             ) : filteredPatients.length === 0 ? (
               <div className="bg-white p-12 rounded-lg shadow-sm text-center">
                 <Users size={48} className="mx-auto text-gray-300 mb-4" />
-                <p className="text-gray-600 text-lg">No patients found</p>
+                <p className="text-gray-600 text-lg">Aucun patient trouve</p>
                 <p className="text-gray-500 text-sm">
-                  Try adjusting your search criteria or add a new patient
+                  Essaie de modifier tes criteres de recherche ou d'ajouter un
+                  nouveau patient
                 </p>
               </div>
             ) : (
@@ -418,20 +419,20 @@ export default function PatientsPage() {
                         {/* Patient Info */}
                         <div className="col-span-5">
                           <h3 className="text-lg font-black text-gray-800 mb-3">
-                            {user.full_name || "Unknown Patient"}
+                            {user.full_name || "Patient inconnu"}
                           </h3>
                           <div className="space-y-2 text-sm">
                             <div className="flex items-center gap-2 text-gray-600">
                               <Phone size={16} className="text-[#0F6E56]" />
-                              {patient.phone || "N/A"}
+                              {patient.phone || "Non renseigne"}
                             </div>
                             <div className="flex items-center gap-2 text-gray-600">
                               <MapPin size={16} className="text-[#0F6E56]" />
-                              {patient.city || "N/A"}
+                              {patient.city || "Non renseigne"}
                             </div>
                             <div className="flex items-center gap-2 text-gray-600 text-xs">
                               <Calendar size={16} className="text-[#0F6E56]" />
-                              Age: {getAgeDisplay(patient)}
+                              Age : {getAgeDisplay(patient)}
                             </div>
                             {patient.birth_date && (
                               <div className="flex items-center gap-2 text-gray-600 text-xs">
@@ -439,7 +440,7 @@ export default function PatientsPage() {
                                   size={16}
                                   className="text-[#0F6E56]"
                                 />
-                                DOB:{" "}
+                                Date de naissance :{" "}
                                 {new Date(
                                   patient.birth_date,
                                 ).toLocaleDateString()}
@@ -455,12 +456,12 @@ export default function PatientsPage() {
                               Email
                             </p>
                             <p className="text-sm font-semibold text-gray-800 break-all">
-                              {user.email || "N/A"}
+                              {user.email || "Non renseigne"}
                             </p>
                           </div>
                           <div>
                             <p className="text-xs text-gray-500 uppercase tracking-wide mb-1 font-semibold">
-                              Fitzpatrick Type
+                              Type Fitzpatrick
                             </p>
                             <div className="flex items-center gap-2">
                               <div
@@ -493,7 +494,7 @@ export default function PatientsPage() {
                         {/* Status */}
                         <div className="col-span-2">
                           <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">
-                            Active
+                            Actif
                           </span>
                         </div>
 
@@ -502,21 +503,21 @@ export default function PatientsPage() {
                           <button
                             onClick={() => navigate(`/patients/${patient.id}`)}
                             className="p-2 hover:bg-blue-50 rounded-lg transition-all text-blue-600 hover:text-blue-700"
-                            title="View details"
+                            title="Voir les details"
                           >
                             <Eye size={18} />
                           </button>
                           <button
                             onClick={() => handleEdit(patient)}
                             className="p-2 hover:bg-yellow-50 rounded-lg transition-all text-yellow-600 hover:text-yellow-700"
-                            title="Edit"
+                            title="Modifier"
                           >
                             <Edit2 size={18} />
                           </button>
                           <button
                             onClick={() => handleDelete(patient)}
                             className="p-2 hover:bg-red-50 rounded-lg transition-all text-red-600 hover:text-red-700"
-                            title="Delete"
+                            title="Supprimer"
                           >
                             <Trash2 size={18} />
                           </button>
@@ -537,7 +538,7 @@ export default function PatientsPage() {
           <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 max-h-[600px] overflow-y-auto">
             <div className="flex items-center justify-between p-6 border-b border-gray-200 sticky top-0 bg-white">
               <h2 className="text-xl font-bold text-gray-800">
-                Add New Patient
+                Ajouter un patient
               </h2>
               <button
                 onClick={() => setShowAddModal(false)}
@@ -550,7 +551,7 @@ export default function PatientsPage() {
             <form onSubmit={handleAddPatient} className="p-6 space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Full Name *
+                  Nom complet *
                 </label>
                 <input
                   type="text"
@@ -559,13 +560,13 @@ export default function PatientsPage() {
                     setFormData({ ...formData, name: e.target.value })
                   }
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0F6E56] outline-none"
-                  placeholder="Patient name"
+                  placeholder="Nom du patient"
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Email *
+                  E-mail *
                 </label>
                 <input
                   type="email"
@@ -580,7 +581,7 @@ export default function PatientsPage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Username (Optional - auto-generated if empty)
+                  Nom d'utilisateur (optionnel - genere automatiquement si vide)
                 </label>
                 <input
                   type="text"
@@ -589,13 +590,13 @@ export default function PatientsPage() {
                     setFormData({ ...formData, username: e.target.value })
                   }
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0F6E56] outline-none"
-                  placeholder="Leave empty for auto-generation"
+                  placeholder="Laisser vide pour la generation automatique"
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Password
+                  Mot de passe
                 </label>
                 <input
                   type="password"
@@ -604,7 +605,7 @@ export default function PatientsPage() {
                     setFormData({ ...formData, password: e.target.value })
                   }
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0F6E56] outline-none"
-                  placeholder="DermaAssist@2026"
+                  placeholder="Skin+@2026"
                 />
               </div>
 
@@ -618,14 +619,17 @@ export default function PatientsPage() {
                   }
                   className="w-4 h-4 rounded border-gray-300 text-[#0F6E56] focus:ring-2 focus:ring-[#0F6E56]"
                 />
-                <label htmlFor="is_premium" className="text-sm font-medium text-gray-700">
-                  Premium Account (Optional)
+                <label
+                  htmlFor="is_premium"
+                  className="text-sm font-medium text-gray-700"
+                >
+                  Compte premium (optionnel)
                 </label>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Phone
+                  Telephone
                 </label>
                 <input
                   type="tel"
@@ -645,7 +649,7 @@ export default function PatientsPage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Wilaya (Province)
+                  Wilaya (province)
                 </label>
                 <select
                   value={formData.city}
@@ -654,7 +658,7 @@ export default function PatientsPage() {
                   }
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0F6E56] outline-none max-h-48"
                 >
-                  <option value="">Select a wilaya...</option>
+                  <option value="">Selectionner une wilaya...</option>
                   <option value="Adrar">Adrar</option>
                   <option value="Chlef">Chlef</option>
                   <option value="Laghouat">Laghouat</option>
@@ -669,7 +673,7 @@ export default function PatientsPage() {
                   <option value="Tlemcen">Tlemcen</option>
                   <option value="Tiaret">Tiaret</option>
                   <option value="Tizi Ouzou">Tizi Ouzou</option>
-                  <option value="Algiers">Algiers</option>
+                  <option value="Algiers">Alger</option>
                   <option value="Djelfa">Djelfa</option>
                   <option value="Jijel">Jijel</option>
                   <option value="Sétif">Sétif</option>
@@ -723,7 +727,7 @@ export default function PatientsPage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Date of Birth
+                  Date de naissance
                 </label>
                 <input
                   type="date"
@@ -760,7 +764,7 @@ export default function PatientsPage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Medical History
+                  Antecedents medicaux
                 </label>
                 <textarea
                   value={formData.medical_history}
@@ -771,7 +775,7 @@ export default function PatientsPage() {
                     })
                   }
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0F6E56] outline-none"
-                  placeholder="Any relevant medical history..."
+                  placeholder="Antecedents medicaux pertinents..."
                   rows="2"
                 />
               </div>
@@ -782,13 +786,13 @@ export default function PatientsPage() {
                   onClick={() => setShowAddModal(false)}
                   className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition-all"
                 >
-                  Cancel
+                  Annuler
                 </button>
                 <button
                   type="submit"
                   className="flex-1 px-4 py-2 bg-[#0F6E56] text-white rounded-lg font-medium hover:bg-[#0d5a47] transition-all"
                 >
-                  Add Patient
+                  Ajouter le patient
                 </button>
               </div>
             </form>
@@ -802,12 +806,12 @@ export default function PatientsPage() {
           <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
             <div className="flex items-center justify-between p-6 border-b border-gray-200">
               <h2 className="text-xl font-bold text-gray-800">
-                Patient Credentials
+                Identifiants du patient
               </h2>
               <button
                 onClick={() => {
                   setShowCredentialsModal(false);
-                  toast.success("Patient added successfully!");
+                  toast.success("Patient ajoute avec succes !");
                 }}
                 className="text-gray-500 hover:text-gray-700"
               >
@@ -817,13 +821,13 @@ export default function PatientsPage() {
 
             <div className="p-6 space-y-4">
               <p className="text-gray-700 font-medium">
-                Share these credentials with the patient:
+                Partage ces identifiants avec le patient :
               </p>
 
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-3">
                 <div>
                   <p className="text-xs font-semibold text-gray-600 mb-1">
-                    Full Name
+                    Nom complet
                   </p>
                   <p className="text-sm font-mono bg-white border border-gray-300 rounded px-3 py-2">
                     {generatedCredentials.fullName}
@@ -832,7 +836,7 @@ export default function PatientsPage() {
 
                 <div>
                   <p className="text-xs font-semibold text-gray-600 mb-1">
-                    Username
+                    Nom d'utilisateur
                   </p>
                   <div className="flex gap-2 items-center">
                     <p className="text-sm font-mono bg-white border border-gray-300 rounded px-3 py-2 flex-1">
@@ -840,19 +844,21 @@ export default function PatientsPage() {
                     </p>
                     <button
                       onClick={() => {
-                        navigator.clipboard.writeText(generatedCredentials.username);
-                        toast.success("Username copied!");
+                        navigator.clipboard.writeText(
+                          generatedCredentials.username,
+                        );
+                        toast.success("Nom d'utilisateur copie !");
                       }}
                       className="p-2 bg-[#0F6E56] text-white rounded hover:bg-[#0d5a47] text-xs font-medium"
                     >
-                      Copy
+                      Copier
                     </button>
                   </div>
                 </div>
 
                 <div>
                   <p className="text-xs font-semibold text-gray-600 mb-1">
-                    Password
+                    Mot de passe
                   </p>
                   <div className="flex gap-2 items-center">
                     <p className="text-sm font-mono bg-white border border-gray-300 rounded px-3 py-2 flex-1">
@@ -860,12 +866,14 @@ export default function PatientsPage() {
                     </p>
                     <button
                       onClick={() => {
-                        navigator.clipboard.writeText(generatedCredentials.password);
-                        toast.success("Password copied!");
+                        navigator.clipboard.writeText(
+                          generatedCredentials.password,
+                        );
+                        toast.success("Mot de passe copie !");
                       }}
                       className="p-2 bg-[#0F6E56] text-white rounded hover:bg-[#0d5a47] text-xs font-medium"
                     >
-                      Copy
+                      Copier
                     </button>
                   </div>
                 </div>
@@ -882,18 +890,21 @@ export default function PatientsPage() {
 
               <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
                 <p className="text-sm text-amber-800">
-                  <span className="font-semibold">Note:</span> Please securely share these credentials with the patient. They will use the username and password to log into the mobile app.
+                  <span className="font-semibold">Note :</span> Partage ces
+                  identifiants en toute securite avec le patient. Il utilisera
+                  le nom d'utilisateur et le mot de passe pour se connecter a
+                  l'application mobile.
                 </p>
               </div>
 
               <button
                 onClick={() => {
                   setShowCredentialsModal(false);
-                  toast.success("Patient added successfully!");
+                  toast.success("Patient ajoute avec succes !");
                 }}
                 className="w-full px-4 py-2 bg-[#0F6E56] text-white rounded-lg font-medium hover:bg-[#0d5a47] transition-all"
               >
-                Done
+                Terminer
               </button>
             </div>
           </div>
@@ -910,20 +921,20 @@ export default function PatientsPage() {
               </div>
 
               <h3 className="text-lg font-bold text-gray-800 text-center mb-2">
-                Delete Patient
+                Supprimer le patient
               </h3>
 
               <p className="text-gray-600 text-center mb-2">
-                Are you sure you want to delete{" "}
+                Es-tu sur de vouloir supprimer{" "}
                 <span className="font-semibold">
-                  {patientToDelete.user?.full_name || "this patient"}
+                  {patientToDelete.user?.full_name || "ce patient"}
                 </span>
                 ?
               </p>
 
               <p className="text-gray-500 text-center text-sm mb-6">
-                This action cannot be undone. The patient account and all
-                associated data will be permanently deleted.
+                Cette action est irreversible. Le compte patient et toutes les
+                donnees associees seront supprimes definitivement.
               </p>
 
               <div className="flex gap-3">
@@ -932,7 +943,7 @@ export default function PatientsPage() {
                   disabled={deleting}
                   className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Cancel
+                  Annuler
                 </button>
                 <button
                   onClick={confirmDelete}
@@ -942,12 +953,12 @@ export default function PatientsPage() {
                   {deleting ? (
                     <>
                       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      Deleting...
+                      Suppression...
                     </>
                   ) : (
                     <>
                       <Trash2 size={18} />
-                      Delete Patient
+                      Supprimer
                     </>
                   )}
                 </button>
@@ -962,7 +973,9 @@ export default function PatientsPage() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 max-h-96 overflow-y-auto">
             <div className="flex items-center justify-between p-6 border-b border-gray-200 sticky top-0 bg-white">
-              <h2 className="text-xl font-bold text-gray-800">Edit Patient</h2>
+              <h2 className="text-xl font-bold text-gray-800">
+                Modifier le patient
+              </h2>
               <button
                 onClick={cancelEdit}
                 className="text-gray-500 hover:text-gray-700"
@@ -974,7 +987,7 @@ export default function PatientsPage() {
             <form onSubmit={handleUpdatePatient} className="p-6 space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Full Name *
+                  Nom complet *
                 </label>
                 <input
                   type="text"
@@ -983,13 +996,13 @@ export default function PatientsPage() {
                     setEditFormData({ ...editFormData, name: e.target.value })
                   }
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0F6E56] outline-none"
-                  placeholder="Patient name"
+                  placeholder="Nom du patient"
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Email *
+                  E-mail *
                 </label>
                 <input
                   type="email"
@@ -1004,7 +1017,7 @@ export default function PatientsPage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Phone
+                  Telephone
                 </label>
                 <input
                   type="tel"
@@ -1024,7 +1037,7 @@ export default function PatientsPage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Wilaya (Province)
+                  Wilaya (province)
                 </label>
                 <select
                   value={editFormData.city}
@@ -1033,7 +1046,7 @@ export default function PatientsPage() {
                   }
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0F6E56] outline-none max-h-48"
                 >
-                  <option value="">Select a wilaya...</option>
+                  <option value="">Selectionner une wilaya...</option>
                   <option value="Adrar">Adrar</option>
                   <option value="Chlef">Chlef</option>
                   <option value="Laghouat">Laghouat</option>
@@ -1048,7 +1061,7 @@ export default function PatientsPage() {
                   <option value="Tlemcen">Tlemcen</option>
                   <option value="Tiaret">Tiaret</option>
                   <option value="Tizi Ouzou">Tizi Ouzou</option>
-                  <option value="Algiers">Algiers</option>
+                  <option value="Algiers">Alger</option>
                   <option value="Djelfa">Djelfa</option>
                   <option value="Jijel">Jijel</option>
                   <option value="Sétif">Sétif</option>
@@ -1102,7 +1115,7 @@ export default function PatientsPage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Date of Birth
+                  Date de naissance
                 </label>
                 <input
                   type="date"
@@ -1142,7 +1155,7 @@ export default function PatientsPage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Medical History
+                  Antecedents medicaux
                 </label>
                 <textarea
                   value={editFormData.medical_history}
@@ -1153,7 +1166,7 @@ export default function PatientsPage() {
                     })
                   }
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0F6E56] outline-none"
-                  placeholder="Any relevant medical history..."
+                  placeholder="Antecedents medicaux pertinents..."
                   rows="2"
                 />
               </div>
@@ -1164,7 +1177,7 @@ export default function PatientsPage() {
                   onClick={cancelEdit}
                   className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition-all"
                 >
-                  Cancel
+                  Annuler
                 </button>
                 <button
                   type="submit"
@@ -1174,10 +1187,10 @@ export default function PatientsPage() {
                   {updating ? (
                     <>
                       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      Updating...
+                      Mise a jour...
                     </>
                   ) : (
-                    "Save Changes"
+                    "Enregistrer les modifications"
                   )}
                 </button>
               </div>

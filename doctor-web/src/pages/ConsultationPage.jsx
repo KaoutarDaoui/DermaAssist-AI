@@ -23,6 +23,30 @@ export default function ConsultationPage() {
   const [patient, setPatient] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const getPatientDisplayName = (patientData, fallback = "Patient") => {
+    if (!patientData) return fallback;
+
+    const rootFirstName = patientData.first_name || patientData.firstName;
+    const rootLastName = patientData.last_name || patientData.lastName;
+    const userFirstName = patientData.user?.first_name || patientData.user?.firstName;
+    const userLastName = patientData.user?.last_name || patientData.user?.lastName;
+
+    const candidates = [
+      patientData.user?.full_name,
+      patientData.user?.fullName,
+      patientData.full_name,
+      patientData.fullName,
+      rootFirstName && rootLastName ? `${rootFirstName} ${rootLastName}` : "",
+      userFirstName && userLastName ? `${userFirstName} ${userLastName}` : "",
+      patientData.user?.username,
+      patientData.username,
+    ]
+      .map((value) => (typeof value === "string" ? value.trim() : ""))
+      .filter(Boolean);
+
+    return candidates[0] || fallback;
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -103,7 +127,184 @@ export default function ConsultationPage() {
     );
   }
 
-  const downloadReport = async () => {
+  const buildConsultationPdf = () => {
+    const pdf = new jsPDF("p", "mm", "a4");
+
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    let yPosition = 10;
+    const margin = 10;
+    const maxWidth = pageWidth - 2 * margin;
+
+    // Title
+    pdf.setFontSize(22);
+    pdf.setTextColor(15, 110, 86); // #0F6E56
+    pdf.text("Skin+", margin, yPosition);
+
+    yPosition += 10;
+    pdf.setFontSize(10);
+    pdf.setTextColor(100, 100, 100);
+    pdf.text("Rapport de Consultation Dermatologique", margin, yPosition);
+
+    yPosition += 15;
+    pdf.setDrawColor(15, 110, 86);
+    pdf.line(margin, yPosition, pageWidth - margin, yPosition);
+    yPosition += 10;
+
+    // Reset to black for content
+    pdf.setTextColor(0, 0, 0);
+    pdf.setFontSize(10);
+
+    // Helper function to add text with wrapping
+    const addText = (label, value) => {
+      const labelWidth = 55;
+      pdf.setFont(undefined, "bold");
+      pdf.text(label + ":", margin, yPosition);
+      pdf.setFont(undefined, "normal");
+
+      if (!value) value = "Non disponible";
+      const lines = pdf.splitTextToSize(String(value), maxWidth - labelWidth);
+      pdf.text(lines, margin + labelWidth, yPosition);
+
+      yPosition += Math.max(lines.length * 5, 5) + 5;
+
+      if (yPosition > pageHeight - 20) {
+        pdf.addPage();
+        yPosition = 10;
+      }
+    };
+
+    // Add data
+    const dateStr = consultationData?.date
+      ? new Date(consultationData.date).toLocaleDateString("fr-FR", {
+          weekday: "long",
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        })
+      : "Non disponible";
+
+    addText("Date", dateStr);
+
+    const patientName = getPatientDisplayName(patient, "Patient");
+
+    addText("Nom Complet", patientName);
+
+    addText("La Maladie", aiResults?.diagnosis || "Non disponible");
+
+    const confidence =
+      aiResults?.confidence?.percentage || aiResults?.confidence?.score || "—";
+    addText("Taux de Confiance", `${confidence}%`);
+
+    // Analysis section
+    yPosition += 5;
+    pdf.setFont(undefined, "bold");
+    pdf.text("L'Analyse:", margin, yPosition);
+    pdf.setFont(undefined, "normal");
+    yPosition += 5;
+
+    const analysisLines = pdf.splitTextToSize(
+      aiResults?.diagnosis || "Non disponible",
+      maxWidth,
+    );
+    pdf.text(analysisLines, margin, yPosition);
+    yPosition += analysisLines.length * 5 + 10;
+
+    // Questions section
+    if (aiResults?.suggested_questions && aiResults.suggested_questions.length > 0) {
+      if (yPosition > pageHeight - 40) {
+        pdf.addPage();
+        yPosition = 10;
+      }
+
+      pdf.setFont(undefined, "bold");
+      pdf.text("Les Questions:", margin, yPosition);
+      pdf.setFont(undefined, "normal");
+      yPosition += 7;
+
+      aiResults.suggested_questions.forEach((q, idx) => {
+        if (yPosition > pageHeight - 20) {
+          pdf.addPage();
+          yPosition = 10;
+        }
+
+        const qText = `${idx + 1}. ${q.question}`;
+        const qLines = pdf.splitTextToSize(qText, maxWidth - 5);
+        pdf.text(qLines, margin + 5, yPosition);
+        yPosition += qLines.length * 5;
+
+        pdf.setFont(undefined, "italic");
+        const aText = `Reponse: ${q.selected_option}`;
+        const aLines = pdf.splitTextToSize(aText, maxWidth - 10);
+        pdf.text(aLines, margin + 10, yPosition);
+        pdf.setFont(undefined, "normal");
+        yPosition += aLines.length * 5 + 3;
+      });
+
+      yPosition += 5;
+    }
+
+    // Treatments section
+    if (aiResults?.treatment_options && aiResults.treatment_options.length > 0) {
+      if (yPosition > pageHeight - 40) {
+        pdf.addPage();
+        yPosition = 10;
+      }
+
+      pdf.setFont(undefined, "bold");
+      pdf.text("Les Medicaments Proposes:", margin, yPosition);
+      pdf.setFont(undefined, "normal");
+      yPosition += 7;
+
+      aiResults.treatment_options.forEach((med, idx) => {
+        if (yPosition > pageHeight - 25) {
+          pdf.addPage();
+          yPosition = 10;
+        }
+
+        pdf.setFont(undefined, "bold");
+        pdf.text(`${idx + 1}. ${med.nom}`, margin + 5, yPosition);
+        yPosition += 5;
+
+        pdf.setFont(undefined, "normal");
+        pdf.setFontSize(9);
+        const classeLines = pdf.splitTextToSize(
+          `Classe: ${med.classe}`,
+          maxWidth - 15,
+        );
+        pdf.text(classeLines, margin + 10, yPosition);
+        yPosition += classeLines.length * 4;
+
+        const indicLines = pdf.splitTextToSize(
+          `Indication: ${med.indication}`,
+          maxWidth - 15,
+        );
+        pdf.text(indicLines, margin + 10, yPosition);
+        yPosition += indicLines.length * 4;
+
+        const posLines = pdf.splitTextToSize(
+          `Posologie: ${med.posologie}`,
+          maxWidth - 15,
+        );
+        pdf.text(posLines, margin + 10, yPosition);
+        yPosition += posLines.length * 4 + 2;
+
+        pdf.setFontSize(10);
+      });
+    }
+
+    // Footer
+    pdf.setFontSize(8);
+    pdf.setTextColor(100, 100, 100);
+    const footerText = `Rapport genere par Skin+ le ${new Date().toLocaleDateString("fr-FR")}`;
+    pdf.text(footerText, pageWidth / 2, pageHeight - 5, { align: "center" });
+
+    return pdf;
+  };
+
+  const downloadReport = () => {
     console.log("🔴 downloadReport called!");
     console.log("Current state:", {
       consultationData: !!consultationData,
@@ -125,192 +326,8 @@ export default function ConsultationPage() {
       });
       toast.loading("Generation du PDF en cours...");
 
-      const pdf = new jsPDF("p", "mm", "a4");
-
-      const pageWidth = pdf.internal.pageSize.getWidth();
-      const pageHeight = pdf.internal.pageSize.getHeight();
-      let yPosition = 10;
-      const margin = 10;
-      const maxWidth = pageWidth - 2 * margin;
-
-      // Title
-      pdf.setFontSize(22);
-      pdf.setTextColor(15, 110, 86); // #0F6E56
-      pdf.text("DermaAssist", margin, yPosition);
-
-      yPosition += 10;
-      pdf.setFontSize(10);
-      pdf.setTextColor(100, 100, 100);
-      pdf.text("Rapport de Consultation Dermatologique", margin, yPosition);
-
-      yPosition += 15;
-      pdf.setDrawColor(15, 110, 86);
-      pdf.line(margin, yPosition, pageWidth - margin, yPosition);
-      yPosition += 10;
-
-      // Reset to black for content
-      pdf.setTextColor(0, 0, 0);
-      pdf.setFontSize(10);
-
-      // Helper function to add text with wrapping
-      const addText = (label, value) => {
-        const labelWidth = 55;
-        pdf.setFont(undefined, "bold");
-        pdf.text(label + ":", margin, yPosition);
-        pdf.setFont(undefined, "normal");
-
-        if (!value) value = "Non disponible";
-        const lines = pdf.splitTextToSize(String(value), maxWidth - labelWidth);
-        pdf.text(lines, margin + labelWidth, yPosition);
-
-        yPosition += Math.max(lines.length * 5, 5) + 5;
-
-        if (yPosition > pageHeight - 20) {
-          pdf.addPage();
-          yPosition = 10;
-        }
-      };
-
-      // Add data
-      const dateStr = consultationData?.date
-        ? new Date(consultationData.date).toLocaleDateString("fr-FR", {
-            weekday: "long",
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-          })
-        : "Non disponible";
-
-      addText("Date", dateStr);
-
-      const patientName = patient
-        ? patient.first_name && patient.last_name
-          ? `${patient.first_name} ${patient.last_name}`
-          : patient.username || "Patient"
-        : "Patient";
-
-      addText("Nom Complet", patientName);
-
-      addText("La Maladie", aiResults?.diagnosis || "Non disponible");
-
-      const confidence =
-        aiResults?.confidence?.percentage ||
-        aiResults?.confidence?.score ||
-        "—";
-      addText("Taux de Confiance", `${confidence}%`);
-
-      // Analysis section
-      yPosition += 5;
-      pdf.setFont(undefined, "bold");
-      pdf.text("L'Analyse:", margin, yPosition);
-      pdf.setFont(undefined, "normal");
-      yPosition += 5;
-
-      const analysisLines = pdf.splitTextToSize(
-        aiResults?.diagnosis || "Non disponible",
-        maxWidth,
-      );
-      pdf.text(analysisLines, margin, yPosition);
-      yPosition += analysisLines.length * 5 + 10;
-
-      // Questions section
-      if (
-        aiResults?.suggested_questions &&
-        aiResults.suggested_questions.length > 0
-      ) {
-        if (yPosition > pageHeight - 40) {
-          pdf.addPage();
-          yPosition = 10;
-        }
-
-        pdf.setFont(undefined, "bold");
-        pdf.text("Les Questions:", margin, yPosition);
-        pdf.setFont(undefined, "normal");
-        yPosition += 7;
-
-        aiResults.suggested_questions.forEach((q, idx) => {
-          if (yPosition > pageHeight - 20) {
-            pdf.addPage();
-            yPosition = 10;
-          }
-
-          const qText = `${idx + 1}. ${q.question}`;
-          const qLines = pdf.splitTextToSize(qText, maxWidth - 5);
-          pdf.text(qLines, margin + 5, yPosition);
-          yPosition += qLines.length * 5;
-
-          pdf.setFont(undefined, "italic");
-          const aText = `Reponse: ${q.selected_option}`;
-          const aLines = pdf.splitTextToSize(aText, maxWidth - 10);
-          pdf.text(aLines, margin + 10, yPosition);
-          pdf.setFont(undefined, "normal");
-          yPosition += aLines.length * 5 + 3;
-        });
-
-        yPosition += 5;
-      }
-
-      // Treatments section
-      if (
-        aiResults?.treatment_options &&
-        aiResults.treatment_options.length > 0
-      ) {
-        if (yPosition > pageHeight - 40) {
-          pdf.addPage();
-          yPosition = 10;
-        }
-
-        pdf.setFont(undefined, "bold");
-        pdf.text("Les Medicaments Proposes:", margin, yPosition);
-        pdf.setFont(undefined, "normal");
-        yPosition += 7;
-
-        aiResults.treatment_options.forEach((med, idx) => {
-          if (yPosition > pageHeight - 25) {
-            pdf.addPage();
-            yPosition = 10;
-          }
-
-          pdf.setFont(undefined, "bold");
-          pdf.text(`${idx + 1}. ${med.nom}`, margin + 5, yPosition);
-          yPosition += 5;
-
-          pdf.setFont(undefined, "normal");
-          pdf.setFontSize(9);
-          const classeLines = pdf.splitTextToSize(
-            `Classe: ${med.classe}`,
-            maxWidth - 15,
-          );
-          pdf.text(classeLines, margin + 10, yPosition);
-          yPosition += classeLines.length * 4;
-
-          const indicLines = pdf.splitTextToSize(
-            `Indication: ${med.indication}`,
-            maxWidth - 15,
-          );
-          pdf.text(indicLines, margin + 10, yPosition);
-          yPosition += indicLines.length * 4;
-
-          const posLines = pdf.splitTextToSize(
-            `Posologie: ${med.posologie}`,
-            maxWidth - 15,
-          );
-          pdf.text(posLines, margin + 10, yPosition);
-          yPosition += posLines.length * 4 + 2;
-
-          pdf.setFontSize(10);
-        });
-      }
-
-      // Footer
-      pdf.setFontSize(8);
-      pdf.setTextColor(100, 100, 100);
-      const footerText = `Rapport genere par DermaAssist le ${new Date().toLocaleDateString("fr-FR")}`;
-      pdf.text(footerText, pageWidth / 2, pageHeight - 5, { align: "center" });
-
-      const filename = `consultation-dermaassist-${Date.now()}.pdf`;
+      const pdf = buildConsultationPdf();
+      const filename = `consultation-skinplus-${Date.now()}.pdf`;
       pdf.save(filename);
 
       toast.dismiss();
@@ -323,6 +340,61 @@ export default function ConsultationPage() {
     }
   };
 
+  const printReport = () => {
+    if (!consultationData || !aiResults) {
+      toast.error("Donnees manquantes pour imprimer le rapport");
+      return;
+    }
+
+    try {
+      toast.loading("Preparation de l'impression...");
+      const pdf = buildConsultationPdf();
+      const pdfBlob = pdf.output("blob");
+      const blobUrl = URL.createObjectURL(pdfBlob);
+
+      const printFrame = document.createElement("iframe");
+      printFrame.style.position = "fixed";
+      printFrame.style.right = "0";
+      printFrame.style.bottom = "0";
+      printFrame.style.width = "0";
+      printFrame.style.height = "0";
+      printFrame.style.border = "0";
+      printFrame.src = blobUrl;
+
+      const cleanup = () => {
+        URL.revokeObjectURL(blobUrl);
+        if (printFrame.parentNode) {
+          printFrame.parentNode.removeChild(printFrame);
+        }
+      };
+
+      const handleAfterPrint = () => {
+        window.removeEventListener("afterprint", handleAfterPrint);
+        cleanup();
+      };
+
+      window.addEventListener("afterprint", handleAfterPrint);
+
+      printFrame.onload = () => {
+        try {
+          printFrame.contentWindow?.focus();
+          printFrame.contentWindow?.print();
+        } catch (error) {
+          cleanup();
+          throw error;
+        }
+      };
+
+      document.body.appendChild(printFrame);
+      toast.dismiss();
+      toast.success("Boite d'impression ouverte.");
+    } catch (error) {
+      console.error("❌ Erreur impression complete:", error);
+      toast.dismiss();
+      toast.error("Erreur impression: " + error.message);
+    }
+  };
+
   return (
     <div className="flex h-screen bg-gray-50">
       <Sidebar open={sidebarOpen} />
@@ -331,7 +403,10 @@ export default function ConsultationPage() {
         <NavBar onMenuToggle={() => setSidebarOpen(!sidebarOpen)} />
 
         <div className="flex-1 overflow-auto">
-          <div className="p-8 space-y-6 max-w-7xl mx-auto pb-12">
+          <div
+            id="consultation-screen-content"
+            className="p-8 space-y-6 max-w-7xl mx-auto pb-12"
+          >
             {/* Back Button */}
             <button
               onClick={() => navigate(-1)}
@@ -372,7 +447,7 @@ export default function ConsultationPage() {
                     </div>
                     <div className="flex gap-3">
                       <button
-                        onClick={() => window.print()}
+                        onClick={printReport}
                         className="flex items-center gap-2 bg-white text-[#0F6E56] px-4 py-2 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
                       >
                         <Printer size={18} />
@@ -685,10 +760,7 @@ export default function ConsultationPage() {
                 #pdf-report {
                   display: block !important;
                 }
-                .flex-1.overflow-auto {
-                  display: none !important;
-                }
-                .flex-1.flex.flex-col.overflow-hidden {
+                #consultation-screen-content {
                   display: none !important;
                 }
                 nav {
@@ -700,7 +772,7 @@ export default function ConsultationPage() {
             {/* Logo / Header */}
             <div className="text-center mb-8 border-b-2 border-[#0F6E56] pb-6">
               <h1 className="text-5xl font-bold text-[#0F6E56] mb-2">
-                DermaAssist
+                Skin+
               </h1>
               <p className="text-gray-600 text-sm">
                 Rapport de Consultation Dermatologique
@@ -737,9 +809,7 @@ export default function ConsultationPage() {
                   Nom Complet:{" "}
                   <span className="font-normal text-gray-700">
                     {patient
-                      ? patient.first_name && patient.last_name
-                        ? `${patient.first_name} ${patient.last_name}`
-                        : patient.username || "Non disponible"
+                      ? getPatientDisplayName(patient, "Non disponible")
                       : "Chargement..."}
                   </span>
                 </p>
@@ -832,7 +902,7 @@ export default function ConsultationPage() {
 
             {/* Footer */}
             <div className="text-center mt-12 pt-6 border-t-2 border-[#0F6E56] text-xs text-gray-600">
-              <p>Rapport genere par DermaAssist</p>
+              <p>Rapport genere par Skin+</p>
               <p>{new Date().toLocaleDateString("fr-FR")}</p>
             </div>
           </div>

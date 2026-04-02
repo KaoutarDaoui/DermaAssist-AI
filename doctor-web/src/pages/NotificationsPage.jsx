@@ -18,53 +18,53 @@ export default function NotificationsPage() {
     {
       id: 1,
       type: "alert",
-      title: "High Confidence Analysis Complete",
+      title: "Analyse a forte confiance terminee",
       message:
-        "Patient Maria Garcia's skin analysis is complete with 92% confidence for Acne Vulgaire",
-      timestamp: "2 hours ago",
+        "L'analyse cutanee de la patiente Maria Garcia est terminee avec 92% de confiance pour l'acne vulgaire",
+      timestamp: "il y a 2 heures",
       read: false,
     },
     {
       id: 2,
       type: "system",
-      title: "System Update Available",
-      message: "A new version of DermaAssist is available. Please update soon.",
-      timestamp: "5 hours ago",
+      title: "Mise a jour systeme disponible",
+      message:
+        "Une nouvelle version de Skin+ est disponible. Veuillez mettre a jour bientot.",
+      timestamp: "il y a 5 heures",
       read: false,
     },
     {
       id: 3,
       type: "analysis",
-      title: "Analysis Results Ready",
+      title: "Resultats d'analyse prets",
       message:
-        "John Doe's dermatology analysis has been processed and is ready for review.",
-      timestamp: "1 day ago",
+        "L'analyse dermatologique de John Doe a ete traitee et est prete pour revision.",
+      timestamp: "il y a 1 jour",
       read: true,
     },
     {
       id: 4,
       type: "info",
-      title: "Scheduled Maintenance",
-      message:
-        "Scheduled maintenance on March 31, 2026 from 2:00 AM to 4:00 AM UTC.",
-      timestamp: "2 days ago",
+      title: "Maintenance planifiee",
+      message: "Maintenance planifiee le 31 mars 2026 de 02:00 a 04:00 UTC.",
+      timestamp: "il y a 2 jours",
       read: true,
     },
     {
       id: 5,
       type: "alert",
-      title: "Urgent Medical Alert",
+      title: "Alerte medicale urgente",
       message:
-        "Patient Sarah Johnson requires urgent attention based on analysis results.",
-      timestamp: "3 days ago",
+        "La patiente Sarah Johnson requiert une attention urgente selon les resultats d'analyse.",
+      timestamp: "il y a 3 jours",
       read: true,
     },
     {
       id: 6,
       type: "success",
-      title: "Account Verification Complete",
-      message: "Your medical license has been verified successfully.",
-      timestamp: "1 week ago",
+      title: "Verification du compte terminee",
+      message: "Votre licence medicale a ete verifiee avec succes.",
+      timestamp: "il y a 1 semaine",
       read: true,
     },
   ]);
@@ -112,12 +112,12 @@ export default function NotificationsPage() {
         notif.id === id ? { ...notif, read: !notif.read } : notif,
       ),
     );
-    toast.success("Notification updated");
+    toast.success("Notification mise a jour");
   };
 
   const handleDelete = (id) => {
     setNotifications(notifications.filter((notif) => notif.id !== id));
-    toast.success("Notification deleted");
+    toast.success("Notification supprimee");
   };
 
   const handleClearAll = () => {
@@ -128,7 +128,7 @@ export default function NotificationsPage() {
           return notif.type !== filter;
         }),
       );
-      toast.success("Notifications cleared");
+      toast.success("Notifications effacees");
     }
   };
 
@@ -157,11 +157,11 @@ export default function NotificationsPage() {
                 <p className="text-gray-600">
                   {unreadCount > 0 ? (
                     <>
-                      You have <span className="font-bold">{unreadCount}</span>{" "}
-                      unread notifications
+                      Vous avez <span className="font-bold">{unreadCount}</span>{" "}
+                      notifications non lues
                     </>
                   ) : (
-                    "All notifications read"
+                    "Toutes les notifications sont lues"
                   )}
                 </p>
               </div>
@@ -171,7 +171,7 @@ export default function NotificationsPage() {
                   className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition-colors flex items-center gap-2"
                 >
                   <Trash2 size={18} />
-                  Clear {filter === "all" ? "All" : "Filter"}
+                  Effacer {filter === "all" ? "tout" : "ce filtre"}
                 </button>
               )}
             </div>
@@ -219,7 +219,7 @@ export default function NotificationsPage() {
                                     onClick={() => handleMarkAsRead(notif.id)}
                                     className="px-3 py-1 bg-[#0F6E56] text-white rounded text-xs hover:bg-teal-700 transition-colors font-medium"
                                   >
-                                    Mark Read
+                                    Marquer comme lue
                                   </button>
                                 )}
                                 <button
@@ -239,12 +239,12 @@ export default function NotificationsPage() {
                   <div className="bg-white rounded-lg shadow-md p-12 text-center">
                     <Bell className="w-12 h-12 text-gray-300 mx-auto mb-4" />
                     <h3 className="text-lg font-semibold text-gray-600 mb-2">
-                      No Notifications
+                      Aucune notification
                     </h3>
                     <p className="text-gray-500">
                       {filter === "all"
-                        ? "You're all caught up!"
-                        : `No ${filter} notifications`}
+                        ? "Vous etes a jour !"
+                        : "Aucune notification pour ce filtre"}
                     </p>
                   </div>
                 )}
@@ -255,7 +255,7 @@ export default function NotificationsPage() {
                 {/* Filter Card */}
                 <div className="bg-white rounded-lg shadow-md p-6">
                   <h3 className="text-lg font-bold text-gray-800 mb-4">
-                    Filter
+                    Filtrer
                   </h3>
 
                   <div className="space-y-2">
@@ -267,7 +267,7 @@ export default function NotificationsPage() {
                           : "text-gray-700 hover:bg-gray-100"
                       }`}
                     >
-                      All
+                      Toutes
                     </button>
                     <button
                       onClick={() => setFilter("alert")}
@@ -278,7 +278,7 @@ export default function NotificationsPage() {
                       }`}
                     >
                       <AlertCircle size={16} />
-                      Alerts
+                      Alertes
                     </button>
                     <button
                       onClick={() => setFilter("analysis")}
@@ -289,7 +289,7 @@ export default function NotificationsPage() {
                       }`}
                     >
                       <Bell size={16} />
-                      Analysis
+                      Analyses
                     </button>
                     <button
                       onClick={() => setFilter("system")}
@@ -300,7 +300,7 @@ export default function NotificationsPage() {
                       }`}
                     >
                       <AlertTriangle size={16} />
-                      System
+                      Systeme
                     </button>
                     <button
                       onClick={() => setFilter("success")}
@@ -311,7 +311,7 @@ export default function NotificationsPage() {
                       }`}
                     >
                       <CheckCircle size={16} />
-                      Success
+                      Succes
                     </button>
                     <button
                       onClick={() => setFilter("info")}
@@ -322,7 +322,7 @@ export default function NotificationsPage() {
                       }`}
                     >
                       <Info size={16} />
-                      Info
+                      Infos
                     </button>
                   </div>
                 </div>
@@ -330,7 +330,7 @@ export default function NotificationsPage() {
                 {/* Statistics Card */}
                 <div className="bg-white rounded-lg shadow-md p-6">
                   <h3 className="text-lg font-bold text-gray-800 mb-4">
-                    Statistics
+                    Statistiques
                   </h3>
 
                   <div className="space-y-3 text-sm">
@@ -341,13 +341,13 @@ export default function NotificationsPage() {
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Unread</span>
+                      <span className="text-gray-600">Non lues</span>
                       <span className="font-bold text-red-600">
                         {unreadCount}
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Read</span>
+                      <span className="text-gray-600">Lues</span>
                       <span className="font-bold text-green-600">
                         {notifications.length - unreadCount}
                       </span>
@@ -355,7 +355,7 @@ export default function NotificationsPage() {
 
                     <div className="border-t pt-3 mt-3">
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Alerts</span>
+                        <span className="text-gray-600">Alertes</span>
                         <span className="font-bold">
                           {
                             notifications.filter((n) => n.type === "alert")
@@ -364,7 +364,7 @@ export default function NotificationsPage() {
                         </span>
                       </div>
                       <div className="flex justify-between mt-2">
-                        <span className="text-gray-600">Analysis</span>
+                        <span className="text-gray-600">Analyses</span>
                         <span className="font-bold">
                           {
                             notifications.filter((n) => n.type === "analysis")
@@ -373,7 +373,7 @@ export default function NotificationsPage() {
                         </span>
                       </div>
                       <div className="flex justify-between mt-2">
-                        <span className="text-gray-600">System</span>
+                        <span className="text-gray-600">Systeme</span>
                         <span className="font-bold">
                           {
                             notifications.filter((n) => n.type === "system")

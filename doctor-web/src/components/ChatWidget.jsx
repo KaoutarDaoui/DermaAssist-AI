@@ -138,7 +138,7 @@ export default function ChatWidget() {
           {/* Header */}
           <div className="bg-gradient-to-r from-[#0F6E56] to-emerald-600 text-white p-4 flex items-center justify-between">
             <div>
-              <h3 className="font-bold text-lg">DermaAssist Chat</h3>
+              <h3 className="font-bold text-lg">Skin+ Chat</h3>
               <p className="text-xs text-white/80">
                 Assistant dermatologique IA
               </p>

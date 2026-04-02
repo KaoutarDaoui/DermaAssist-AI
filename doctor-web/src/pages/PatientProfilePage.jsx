@@ -15,7 +15,7 @@ export default function PatientProfilePage() {
   const [loading, setLoading] = useState(true);
   const [consultationsLoading, setConsultationsLoading] = useState(false);
 
-  const toDisplayText = (value, fallback = "N/A") => {
+  const toDisplayText = (value, fallback = "Non renseigne") => {
     if (value === null || value === undefined || value === "") return fallback;
 
     if (
@@ -80,7 +80,7 @@ export default function PatientProfilePage() {
         toast.error(
           error.response?.data?.detail ||
             error.message ||
-            "Failed to load patient details or AI results",
+            "Impossible de charger les details du patient ou les resultats IA",
         );
       } finally {
         setLoading(false);
@@ -207,14 +207,14 @@ export default function PatientProfilePage() {
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-bold text-gray-900">
-                  Historique des Analyses
+                  Historique des Consultations
                 </h2>
                 <button
                   onClick={handleAddConsultation}
                   className="flex items-center gap-2 bg-[#0F6E56] text-white px-4 py-2 rounded-lg font-semibold hover:bg-[#0d5a47] transition-colors"
                 >
                   <Plus size={18} />
-                  Ajouter une Analyse
+                  Ajouter une Consultation
                 </button>
                 <button
                   onClick={() => navigate(`/patients/${patientId}/comparison`)}

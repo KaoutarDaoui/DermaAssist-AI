@@ -10,51 +10,51 @@ export default function ContactPage() {
   const faqs = [
     {
       id: 1,
-      question: "What is DermaAssist?",
+      question: "Qu'est-ce que Skin+ ?",
       answer:
-        "DermaAssist is an AI-powered dermatology diagnostic platform that helps doctors make informed decisions about skin conditions using advanced image analysis and clinical recommendations.",
+        "Skin+ est une plateforme de diagnostic dermatologique alimentee par l'IA qui aide les medecins a prendre des decisions eclairees sur les affections cutanees grace a une analyse d'image avancee et des recommandations cliniques.",
     },
     {
       id: 2,
-      question: "How do I use the platform?",
+      question: "Comment utiliser la plateforme ?",
       answer:
-        "Upload a patient's skin image, click 'Start Analysis', and the system will provide AI-powered diagnosis insights, confidence levels, clinical recommendations, and medication alerts.",
+        "Televersez une image cutanee du patient, cliquez sur 'Demarrer l'analyse', et le systeme fournira des informations diagnostiques basees sur l'IA, des niveaux de confiance, des recommandations cliniques et des alertes medicamenteuses.",
     },
     {
       id: 3,
-      question: "Is my patient data secure?",
+      question: "Les donnees de mes patients sont-elles securisees ?",
       answer:
-        "Yes, all patient data is encrypted and stored securely on our HIPAA-compliant servers. We follow strict data protection protocols to ensure privacy.",
+        "Oui, toutes les donnees patient sont chiffrees et stockees de maniere securisee sur nos serveurs conformes HIPAA. Nous suivons des protocoles stricts de protection des donnees pour garantir la confidentialite.",
     },
     {
       id: 4,
-      question: "What skin conditions can DermaAssist diagnose?",
+      question: "Quelles affections cutanees Skin+ peut-il diagnostiquer ?",
       answer:
-        "DermaAssist can diagnose a wide range of common dermatological conditions including acne, eczema, psoriasis, melanoma, and many other skin conditions. Our database includes 20+ conditions.",
+        "Skin+ peut diagnostiquer un large eventail d'affections dermatologiques courantes, notamment l'acne, l'eczema, le psoriasis, le melanome et bien d'autres. Notre base de donnees inclut plus de 20 affections.",
     },
     {
       id: 5,
-      question: "How accurate is the diagnosis?",
+      question: "Quelle est la precision du diagnostic ?",
       answer:
-        "DermaAssist provides confidence levels for each diagnosis. Results should be used as a clinical support tool, not as a replacement for professional medical judgment.",
+        "Skin+ fournit un niveau de confiance pour chaque diagnostic. Les resultats doivent etre utilises comme outil d'aide clinique, et non comme remplacement du jugement medical professionnel.",
     },
     {
       id: 6,
-      question: "What image formats are supported?",
+      question: "Quels formats d'image sont pris en charge ?",
       answer:
-        "We support common image formats including JPG, PNG, and JPEG. Images should be clear, well-lit, and show the affected area clearly.",
+        "Nous prenons en charge les formats d'image courants, y compris JPG, PNG et JPEG. Les images doivent etre nettes, bien eclairees et montrer clairement la zone affectee.",
     },
     {
       id: 7,
-      question: "How long does analysis take?",
+      question: "Combien de temps prend l'analyse ?",
       answer:
-        "Analysis typically completes in seconds to minutes, depending on server load. You'll receive immediate feedback on the analysis results.",
+        "L'analyse se termine generalement en quelques secondes a quelques minutes, selon la charge du serveur. Vous recevrez un retour rapide sur les resultats de l'analyse.",
     },
     {
       id: 8,
-      question: "Is there a mobile app?",
+      question: "Existe-t-il une application mobile ?",
       answer:
-        "Currently, DermaAssist is available as a web application. Mobile app support is coming soon.",
+        "Actuellement, Skin+ est disponible en application web. Le support de l'application mobile arrive bientot.",
     },
   ];
 
@@ -74,11 +74,11 @@ export default function ContactPage() {
             {/* Header */}
             <div className="mb-12">
               <h1 className="text-4xl font-bold text-gray-800 mb-2">
-                Contact Us
+                Contactez-nous
               </h1>
               <p className="text-gray-600">
-                Get in touch with DermaAssist or explore our frequently asked
-                questions
+                Entrez en contact avec Skin+ ou consultez nos questions
+                frequentes
               </p>
             </div>
 
@@ -86,7 +86,7 @@ export default function ContactPage() {
               {/* Contact Info Card */}
               <div className="bg-white rounded-lg shadow-md p-8">
                 <h2 className="text-2xl font-bold text-gray-800 mb-6">
-                  Get in Touch
+                  Nous contacter
                 </h2>
 
                 <div className="space-y-6">
@@ -100,10 +100,10 @@ export default function ContactPage() {
                         Email
                       </h3>
                       <a
-                        href="mailto:contact@dermaassist.com"
+                        href="mailto:contact@skinplus.com"
                         className="text-[#0F6E56] hover:underline"
                       >
-                        contact@dermaassist.com
+                        contact@skinplus.com
                       </a>
                     </div>
                   </div>
@@ -115,7 +115,7 @@ export default function ContactPage() {
                     </div>
                     <div>
                       <h3 className="font-semibold text-gray-800 mb-1">
-                        Support
+                        Assistance
                       </h3>
                       <p className="text-gray-700">+213 662210203</p>
                     </div>
@@ -128,10 +128,10 @@ export default function ContactPage() {
                     </div>
                     <div>
                       <h3 className="font-semibold text-gray-800 mb-1">
-                        Address
+                        Adresse
                       </h3>
                       <p className="text-gray-700">
-                        Babezzouar Cite Universitaire Alia
+                        Bab Ezzouar Cite Universitaire Alia
                       </p>
                     </div>
                   </div>
@@ -140,39 +140,43 @@ export default function ContactPage() {
                 {/* Contact Hours */}
                 <div className="mt-8 pt-8 border-t border-gray-200">
                   <h3 className="font-semibold text-gray-800 mb-3">
-                    Business Hours
+                    Horaires d'ouverture
                   </h3>
                   <div className="space-y-2 text-sm text-gray-700">
-                    <p>Saturday - Thursday: 8:00 AM - 6:00 PM</p>
-                    <p>Friday: Closed</p>
+                    <p>Samedi - Jeudi : 08:00 - 18:00</p>
+                    <p>Vendredi : Ferme</p>
                   </div>
                 </div>
               </div>
 
               {/* Info Card */}
               <div className="bg-gradient-to-br from-[#0F6E56] to-teal-700 rounded-lg shadow-md p-8 text-white">
-                <h2 className="text-2xl font-bold mb-6">About DermaAssist</h2>
+                <h2 className="text-2xl font-bold mb-6">
+                  A propos de Skin+
+                </h2>
                 <p className="mb-4">
-                  DermaAssist is a cutting-edge AI-powered diagnostic platform
-                  designed to assist dermatologists and healthcare professionals
-                  in making accurate and informed decisions about skin health.
+                  Skin+ est une plateforme de diagnostic de nouvelle
+                  generation basee sur l'IA, concue pour aider les dermatologues
+                  et les professionnels de sante a prendre des decisions
+                  precises et eclairees sur la sante de la peau.
                 </p>
                 <p className="mb-4">
-                  Our mission is to democratize access to expert dermatological
-                  insights through advanced artificial intelligence and machine
-                  learning technologies.
+                  Notre mission est de democratiser l'acces a des analyses
+                  dermatologiques expertes grace a des technologies avancees
+                  d'intelligence artificielle et de machine learning.
                 </p>
                 <p>
-                  With over 20 recognized skin conditions and a comprehensive
-                  knowledge base, DermaAssist provides confidence levels,
-                  clinical recommendations, and personalized medication alerts.
+                  Avec plus de 20 affections cutanees reconnues et une base de
+                  connaissances complete, Skin+ fournit des niveaux de
+                  confiance, des recommandations cliniques et des alertes
+                  medicamenteuses personnalisees.
                 </p>
 
                 <div className="mt-8 pt-8 border-t border-teal-600">
-                  <h3 className="font-semibold mb-3">Response Time</h3>
+                  <h3 className="font-semibold mb-3">Delai de reponse</h3>
                   <p className="text-teal-100">
-                    We typically respond to inquiries within 24 hours during
-                    business hours.
+                    Nous repondons generalement aux demandes sous 24 heures
+                    pendant les heures d'ouverture.
                   </p>
                 </div>
               </div>
@@ -181,7 +185,7 @@ export default function ContactPage() {
             {/* FAQ Section */}
             <div className="bg-white rounded-lg shadow-md p-8">
               <h2 className="text-2xl font-bold text-gray-800 mb-6">
-                Frequently Asked Questions
+                Questions frequentes
               </h2>
 
               <div className="space-y-4">

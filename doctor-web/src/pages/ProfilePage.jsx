@@ -21,22 +21,22 @@ export default function ProfilePage() {
 
   const [profile, setProfile] = useState({
     fullName: "Dr. Ahmed Medina",
-    email: "dr.ahmed@dermaassist.com",
+    email: "dr.ahmed@skinplus.com",
     phone: "+213 662210203",
-    specialization: "Dermatology",
+    specialization: "Dermatologie",
     licenseNumber: "DRS-2025-12345",
     licenseExpiry: "2026-12-31",
-    city: "Algiers",
-    country: "Algeria",
-    bio: "Experienced dermatologist with 10+ years of practice in clinical and cosmetic dermatology.",
-    university: "Faculty of Medicine, University of Algiers",
+    city: "Alger",
+    country: "Algerie",
+    bio: "Dermatologue experimente avec plus de 10 ans de pratique en dermatologie clinique et esthetique.",
+    university: "Faculte de medecine, Universite d'Alger",
     graduationYear: "2014",
     certifications: [
-      "Board Certified in Dermatology",
-      "Advanced Skin Cancer Surgery",
-      "Cosmetic Dermatology Specialist",
+      "Certification du conseil en dermatologie",
+      "Chirurgie avancee du cancer de la peau",
+      "Specialiste en dermatologie esthetique",
     ],
-    experience: "10+ Years",
+    experience: "10+ ans",
     avatar: "DA",
   });
 
@@ -55,7 +55,7 @@ export default function ProfilePage() {
   const handleSaveChanges = () => {
     setProfile(editedProfile);
     setIsEditing(false);
-    toast.success("Profile updated successfully!");
+    toast.success("Profil mis a jour avec succes !");
   };
 
   const handleCancel = () => {
@@ -112,7 +112,7 @@ export default function ProfilePage() {
                     className="bg-[#0F6E56] hover:bg-teal-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
                   >
                     <Edit3 size={18} />
-                    Edit Profile
+                    Modifier le profil
                   </button>
                 )}
               </div>
@@ -126,14 +126,14 @@ export default function ProfilePage() {
                 <div className="bg-white rounded-lg shadow-md p-6">
                   <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
                     <Mail className="text-[#0F6E56]" />
-                    Contact Information
+                    Informations de contact
                   </h2>
 
                   {isEditing ? (
                     <div className="space-y-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Email
+                          E-mail
                         </label>
                         <input
                           type="email"
@@ -145,7 +145,7 @@ export default function ProfilePage() {
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Phone
+                          Telephone
                         </label>
                         <input
                           type="text"
@@ -158,7 +158,7 @@ export default function ProfilePage() {
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">
-                            City
+                            Ville
                           </label>
                           <input
                             type="text"
@@ -170,7 +170,7 @@ export default function ProfilePage() {
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Country
+                            Pays
                           </label>
                           <input
                             type="text"
@@ -187,7 +187,7 @@ export default function ProfilePage() {
                       <div className="flex items-center gap-3 pb-3 border-b">
                         <Mail className="text-[#0F6E56]" size={20} />
                         <div>
-                          <p className="text-sm text-gray-600">Email</p>
+                          <p className="text-sm text-gray-600">E-mail</p>
                           <p className="text-gray-800 font-medium">
                             {profile.email}
                           </p>
@@ -196,7 +196,7 @@ export default function ProfilePage() {
                       <div className="flex items-center gap-3 pb-3 border-b">
                         <Phone className="text-[#0F6E56]" size={20} />
                         <div>
-                          <p className="text-sm text-gray-600">Phone</p>
+                          <p className="text-sm text-gray-600">Telephone</p>
                           <p className="text-gray-800 font-medium">
                             {profile.phone}
                           </p>
@@ -205,7 +205,7 @@ export default function ProfilePage() {
                       <div className="flex items-center gap-3">
                         <MapPin className="text-[#0F6E56]" size={20} />
                         <div>
-                          <p className="text-sm text-gray-600">Location</p>
+                          <p className="text-sm text-gray-600">Localisation</p>
                           <p className="text-gray-800 font-medium">
                             {profile.city}, {profile.country}
                           </p>
@@ -219,14 +219,14 @@ export default function ProfilePage() {
                 <div className="bg-white rounded-lg shadow-md p-6">
                   <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
                     <Briefcase className="text-[#0F6E56]" />
-                    Professional Information
+                    Informations professionnelles
                   </h2>
 
                   {isEditing ? (
                     <div className="space-y-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Full Name
+                          Nom complet
                         </label>
                         <input
                           type="text"
@@ -238,7 +238,7 @@ export default function ProfilePage() {
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Specialization
+                          Specialite
                         </label>
                         <input
                           type="text"
@@ -251,7 +251,7 @@ export default function ProfilePage() {
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">
-                            License Number
+                            Numero de licence
                           </label>
                           <input
                             type="text"
@@ -263,7 +263,7 @@ export default function ProfilePage() {
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">
-                            License Expiry
+                            Expiration de la licence
                           </label>
                           <input
                             type="date"
@@ -276,7 +276,7 @@ export default function ProfilePage() {
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Bio
+                          Biographie
                         </label>
                         <textarea
                           name="bio"
@@ -290,9 +290,7 @@ export default function ProfilePage() {
                   ) : (
                     <div className="space-y-4">
                       <div className="pb-3 border-b">
-                        <p className="text-sm text-gray-600 mb-1">
-                          Specialization
-                        </p>
+                        <p className="text-sm text-gray-600 mb-1">Specialite</p>
                         <p className="text-gray-800 font-medium">
                           {profile.specialization}
                         </p>
@@ -301,18 +299,18 @@ export default function ProfilePage() {
                         <Award className="text-[#0F6E56] mt-1" size={20} />
                         <div>
                           <p className="text-sm text-gray-600 mb-1">
-                            License Number
+                            Numero de licence
                           </p>
                           <p className="text-gray-800 font-medium">
                             {profile.licenseNumber}
                           </p>
                           <p className="text-sm text-gray-500 mt-1">
-                            Expires: {profile.licenseExpiry}
+                            Expire : {profile.licenseExpiry}
                           </p>
                         </div>
                       </div>
                       <div>
-                        <p className="text-sm text-gray-600 mb-1">Bio</p>
+                        <p className="text-sm text-gray-600 mb-1">Biographie</p>
                         <p className="text-gray-800">{profile.bio}</p>
                       </div>
                     </div>
@@ -323,14 +321,14 @@ export default function ProfilePage() {
                 <div className="bg-white rounded-lg shadow-md p-6">
                   <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
                     <Calendar className="text-[#0F6E56]" />
-                    Education & Experience
+                    Formation et experience
                   </h2>
 
                   {isEditing ? (
                     <div className="space-y-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                          University
+                          Universite
                         </label>
                         <input
                           type="text"
@@ -343,7 +341,7 @@ export default function ProfilePage() {
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Graduation Year
+                            Annee d'obtention
                           </label>
                           <input
                             type="text"
@@ -370,12 +368,12 @@ export default function ProfilePage() {
                   ) : (
                     <div className="space-y-4">
                       <div className="pb-3 border-b">
-                        <p className="text-sm text-gray-600 mb-1">University</p>
+                        <p className="text-sm text-gray-600 mb-1">Universite</p>
                         <p className="text-gray-800 font-medium">
                           {profile.university}
                         </p>
                         <p className="text-sm text-gray-500 mt-1">
-                          Graduated: {profile.graduationYear}
+                          Diplome : {profile.graduationYear}
                         </p>
                       </div>
                       <div>
@@ -396,14 +394,14 @@ export default function ProfilePage() {
                       className="flex-1 bg-[#0F6E56] hover:bg-teal-700 text-white px-4 py-3 rounded-lg flex items-center justify-center gap-2 transition-colors font-medium"
                     >
                       <Save size={20} />
-                      Save Changes
+                      Enregistrer les modifications
                     </button>
                     <button
                       onClick={handleCancel}
                       className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-3 rounded-lg flex items-center justify-center gap-2 transition-colors font-medium"
                     >
                       <X size={20} />
-                      Cancel
+                      Annuler
                     </button>
                   </div>
                 )}
@@ -433,22 +431,26 @@ export default function ProfilePage() {
 
                 {/* Quick Stats */}
                 <div className="bg-gradient-to-br from-[#0F6E56] to-teal-700 rounded-lg shadow-md p-6 text-white">
-                  <h3 className="text-lg font-bold mb-4">Quick Stats</h3>
+                  <h3 className="text-lg font-bold mb-4">
+                    Statistiques rapides
+                  </h3>
 
                   <div className="space-y-4">
                     <div>
                       <p className="text-teal-100 text-sm mb-1">
-                        License Status
+                        Statut de la licence
                       </p>
                       <p className="text-xl font-bold">Active</p>
                     </div>
                     <div>
-                      <p className="text-teal-100 text-sm mb-1">Member Since</p>
+                      <p className="text-teal-100 text-sm mb-1">
+                        Membre depuis
+                      </p>
                       <p className="text-xl font-bold">Jan 2025</p>
                     </div>
                     <div>
                       <p className="text-teal-100 text-sm mb-1">
-                        Total Consultations
+                        Consultations totales
                       </p>
                       <p className="text-xl font-bold">156</p>
                     </div>
@@ -458,18 +460,18 @@ export default function ProfilePage() {
                 {/* Account Status */}
                 <div className="bg-white rounded-lg shadow-md p-6">
                   <h3 className="text-lg font-bold text-gray-800 mb-4">
-                    Account Status
+                    Statut du compte
                   </h3>
 
                   <div className="space-y-2 text-sm">
                     <div className="flex items-center justify-between pb-2 border-b">
                       <span className="text-gray-600">Verification</span>
                       <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-medium">
-                        Verified
+                        Verifie
                       </span>
                     </div>
                     <div className="flex items-center justify-between pb-2 border-b">
-                      <span className="text-gray-600">License</span>
+                      <span className="text-gray-600">Licence</span>
                       <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-medium">
                         Active
                       </span>
@@ -477,7 +479,7 @@ export default function ProfilePage() {
                     <div className="flex items-center justify-between">
                       <span className="text-gray-600">2FA</span>
                       <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs font-medium">
-                        Disabled
+                        Desactive
                       </span>
                     </div>
                   </div>

@@ -57,9 +57,13 @@ export default function QuickStatsCards() {
   };
 
   const stats = [
-    { label: "Total Patients", value: totalPatients.toString(), icon: Users },
     {
-      label: "Patients this month",
+      label: "Patients au total",
+      value: totalPatients.toString(),
+      icon: Users,
+    },
+    {
+      label: "Patients ce mois-ci",
       value: patientsThisMonth.toString(),
       icon: Clipboard,
     },
@@ -82,10 +86,10 @@ export default function QuickStatsCards() {
           >
             {/* Animated gradient background on hover */}
             <div className="absolute inset-0 bg-gradient-to-br from-emerald-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-            
+
             {/* Top accent line */}
             <div className="absolute top-0 left-0 h-0.5 bg-gradient-to-r from-emerald-400 via-emerald-500 to-emerald-600 w-0 group-hover:w-full transition-all duration-500"></div>
-            
+
             {/* Content */}
             <div className="relative z-10">
               <p className="text-emerald-600 text-sm font-semibold tracking-wider mb-3 uppercase opacity-80 group-hover:opacity-100 transition-opacity duration-300">
@@ -95,12 +99,12 @@ export default function QuickStatsCards() {
                 {stat.value}
               </p>
             </div>
-            
+
             {/* Icon */}
             <div className="relative z-10 flex flex-col items-center gap-3">
               <div className="p-3 rounded-xl bg-emerald-100 group-hover:bg-emerald-200 transition-all duration-500 group-hover:shadow-lg group-hover:shadow-emerald-300/30">
-                <IconComponent 
-                  size={40} 
+                <IconComponent
+                  size={40}
                   className={`text-emerald-600 transition-all duration-500 group-hover:scale-110`}
                 />
               </div>

@@ -4,7 +4,7 @@
     "slug": "dermassist-patient",
     "version": "1.0.0",
     "assetBundlePatterns": ["**/*"],
-    "platforms": ["ios", "android"],
+    "platforms": ["ios", "android", "web"],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.dermassist.patient"

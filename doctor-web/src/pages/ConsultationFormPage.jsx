@@ -896,15 +896,15 @@ export default function ConsultationFormPage() {
                   {imagePreview && !analyzing && !showAnalysis && (
                     <>
                       {/* Informations Cliniques pour Analyse */}
-                      <div className="space-y-4 mt-6 p-6 bg-gradient-to-r from-blue-50 to-green-50 rounded-xl border-2 border-[#0F6E56]">
-                        <h3 className="text-sm font-bold uppercase tracking-wider text-gray-800 mb-4">
+                      <div className="space-y-4 mt-6 p-6 bg-white rounded-xl border-2 border-[#0F6E56]/30 shadow-sm">
+                        <h3 className="text-sm font-bold uppercase tracking-wider text-[#0F6E56] mb-4">
                           Informations Cliniques
                         </h3>
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                           {/* Site (Body Location) */}
                           <div>
-                            <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-2">
+                            <label className="block text-xs font-semibold text-emerald-800 uppercase tracking-wider mb-2">
                               Site du Lésion
                             </label>
                             <select
@@ -915,7 +915,7 @@ export default function ConsultationFormPage() {
                                   site: e.target.value,
                                 }))
                               }
-                              className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#0F6E56] focus:border-[#0F6E56]"
+                              className="w-full px-4 py-2 border-2 border-emerald-200 bg-emerald-50/40 rounded-lg text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#0F6E56] focus:border-[#0F6E56]"
                             >
                               <option value="visage">Visage</option>
                               <option value="cou">Cou</option>
@@ -930,7 +930,7 @@ export default function ConsultationFormPage() {
 
                           {/* Season */}
                           <div>
-                            <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-2">
+                            <label className="block text-xs font-semibold text-emerald-800 uppercase tracking-wider mb-2">
                               Saison
                             </label>
                             <select
@@ -941,7 +941,7 @@ export default function ConsultationFormPage() {
                                   saison: e.target.value,
                                 }))
                               }
-                              className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#0F6E56] focus:border-[#0F6E56]"
+                              className="w-full px-4 py-2 border-2 border-emerald-200 bg-emerald-50/40 rounded-lg text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#0F6E56] focus:border-[#0F6E56]"
                             >
                               <option value="printemps">Printemps</option>
                               <option value="ete">Été</option>
@@ -952,7 +952,7 @@ export default function ConsultationFormPage() {
 
                           {/* Sex */}
                           <div>
-                            <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-2">
+                            <label className="block text-xs font-semibold text-emerald-800 uppercase tracking-wider mb-2">
                               Sexe du Patient
                             </label>
                             <select
@@ -963,7 +963,7 @@ export default function ConsultationFormPage() {
                                   sex: e.target.value,
                                 }))
                               }
-                              className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#0F6E56] focus:border-[#0F6E56]"
+                              className="w-full px-4 py-2 border-2 border-emerald-200 bg-emerald-50/40 rounded-lg text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#0F6E56] focus:border-[#0F6E56]"
                             >
                               <option value="male">Masculin</option>
                               <option value="female">Féminin</option>
@@ -1344,11 +1344,6 @@ export default function ConsultationFormPage() {
                                 <p className="text-xs tracking-widest uppercase font-bold text-slate-700">
                                   Interprétation clinique
                                 </p>
-                                {refinedAnalysis.llm_model && (
-                                  <p className="text-[11px] text-slate-500 font-medium">
-                                    {refinedAnalysis.llm_model}
-                                  </p>
-                                )}
                                 <span
                                   className={`px-3 py-1 rounded-full text-xs font-semibold ${getDecisionBadgeClass(
                                     refinedAnalysis.decision_diagnostique,

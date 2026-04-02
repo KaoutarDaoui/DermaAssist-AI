@@ -30,11 +30,11 @@ export default function DashboardPage() {
                 {/* Welcome Section */}
                 <div>
                   <h1 className="text-4xl font-black text-emerald-950 tracking-tight">
-                    Welcome back,{" "}
+                    Bonjour,{" "}
                     <span className="text-emerald-600">Dr. Ahmed Medina</span>
                   </h1>
                   <p className="text-emerald-600 font-medium mt-2">
-                    Here's what's happening with your practice today
+                    Voici ce qui se passe dans votre cabinet aujourd'hui
                   </p>
                 </div>
 
