@@ -6,7 +6,7 @@
     "assetBundlePatterns": ["**/*"],
     "platforms": ["ios", "android"],
     "ios": {
-      "supportsTabletMode": true,
+      "supportsTablet": true,
       "bundleIdentifier": "com.dermassist.patient"
     },
     "android": {

@@ -28,12 +28,12 @@ import authService from '../services/authService';
 import patientDataService from '../services/patientDataService';
 
 const COLORS = {
-  primary: "#2D4A85",
-  secondary: "#7A869A",
-  accent: "#4A90E2",
+  primary: "#0F6E56",    // Skin+ Green
+  secondary: "#6b7280",
+  accent: "#0F6E56",
   background: "#F9FBFF",
   white: "#FFFFFF",
-  textDark: "#333333",
+  textDark: "#1f2937",
   textLight: "#8E9AAF",
   success: "#10B981",
   danger: "#EF4444",
