@@ -9,6 +9,40 @@ import {
 } from "react-native";
 import { advice } from "../services/api";
 
+const MOCK_DATA = [
+  {
+    id: 1,
+    tips: [
+      "Use gentle, fragrance-free cleanser twice daily",
+      "Apply moisturizer within 3 minutes of cleansing",
+      "Use SPF 30+ every day, even on cloudy days",
+      "Avoid hot water - use lukewarm water when washing",
+    ],
+    products_to_avoid: [
+      "Fragranced soaps and body washes",
+      "Alcohol-based toners",
+      "Exfoliating products more than 2x per week",
+      "Heavy occlusive creams if prone to acne",
+    ],
+  },
+  {
+    id: 2,
+    tips: [
+      "Keep skin hydrated with hyaluronic acid serums",
+      "Get 7-9 hours of sleep nightly",
+      "Manage stress through meditation or yoga",
+      "Stay hydrated - drink at least 8 glasses of water daily",
+    ],
+    products_to_avoid: [
+      "Overly stripping cleansers",
+      "Products with high concentrations of actives",
+      "Skipping moisturizer",
+    ],
+  },
+];
+
+const USE_MOCK_DATA = true; // Set to false to use real API
+
 export default function AdviceScreen() {
   const [adviceList, setAdviceList] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -19,8 +53,14 @@ export default function AdviceScreen() {
 
   const loadAdvice = async () => {
     try {
-      const response = await advice.getMyAdvice();
-      setAdviceList(response.data);
+      if (USE_MOCK_DATA) {
+        // Simulate API delay
+        await new Promise(resolve => setTimeout(resolve, 500));
+        setAdviceList(MOCK_DATA);
+      } else {
+        const response = await advice.getMyAdvice();
+        setAdviceList(response.data);
+      }
     } catch (error) {
       Alert.alert("Error", "Failed to load advice");
       console.error(error);
@@ -48,7 +88,7 @@ export default function AdviceScreen() {
       ) : (
         <FlatList
           data={adviceList}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item.id.toString()}
           renderItem={({ item }) => (
             <View style={styles.adviceCard}>
               {item.tips && item.tips.length > 0 && (

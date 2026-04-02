@@ -34,6 +34,11 @@ export default function ConsultationFormPage() {
     EMPTY_TREATMENT_DRAFT,
   );
   const [showTreatmentAlerts, setShowTreatmentAlerts] = useState(false);
+  const [consultationDetails, setConsultationDetails] = useState({
+    sex: "unknown",
+    site: "unknown",
+    saison: "ete",
+  });
 
   const toDisplayText = (value, fallback = "N/A") => {
     if (value === null || value === undefined || value === "") return fallback;
@@ -347,22 +352,30 @@ export default function ConsultationFormPage() {
         throw new Error("Upload succeeded but image ID is missing");
       }
 
-<<<<<<< Updated upstream
-      // 2) Run Module 1 using stored image and persist cnn_label/cnn_confidence
-=======
       // Calculate age from birth_date
       const age = patient?.birth_date
         ? Math.floor(
             (new Date() - new Date(patient.birth_date)) /
               (365.25 * 24 * 60 * 60 * 1000),
+      // Calculate age from birth_date
+      const age = patient?.birth_date
+        ? Math.floor(
+            (new Date() - new Date(patient.birth_date)) / (365.25 * 24 * 60 * 60 * 1000)
           )
         : null;
 
       // 2) Run Module 1 WITH CLINICAL INFORMATION for accurate analysis
->>>>>>> Stashed changes
+
       const analysisResponse = await axios.post(
         `${API_URL}/patients/${patientId}/analyze-skin-image`,
-        { image_id: String(imageId) },
+        {
+          image_id: String(imageId),
+          age: age,
+          sex: consultationDetails.sex,
+          site: consultationDetails.site,
+          saison: consultationDetails.saison,
+          wilaya: patient?.city || "nord",
+        },
       );
 
       console.log("Analysis completed:", analysisResponse.data);
@@ -598,17 +611,98 @@ export default function ConsultationFormPage() {
                   )}
 
                   {imagePreview && !analyzing && !showAnalysis && (
-                    <div className="space-y-3 mt-6">
-                      <button
-                        onClick={handleAnalyze}
-                        className="w-full bg-[#0F6E56] text-white py-3 rounded-lg font-bold uppercase tracking-wider hover:bg-[#0d5a47] transition-colors"
-                      >
-                        Démarrer l'Analyse
-                      </button>
-                      <p className="text-xs text-gray-500 text-center">
-                        Analyse l'image pour détecter les maladies de peau
-                      </p>
-                    </div>
+                    <>
+                      {/* Informations Cliniques pour Analyse */}
+                      <div className="space-y-4 mt-6 p-6 bg-gradient-to-r from-blue-50 to-green-50 rounded-xl border-2 border-[#0F6E56]">
+                        <h3 className="text-sm font-bold uppercase tracking-wider text-gray-800 mb-4">
+                          Informations Cliniques
+                        </h3>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          {/* Site (Body Location) */}
+                          <div>
+                            <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-2">
+                              Site du Lésion
+                            </label>
+                            <select
+                              value={consultationDetails.site}
+                              onChange={(e) =>
+                                setConsultationDetails((prev) => ({
+                                  ...prev,
+                                  site: e.target.value,
+                                }))
+                              }
+                              className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#0F6E56] focus:border-[#0F6E56]"
+                            >
+                              <option value="visage">Visage</option>
+                              <option value="cou">Cou</option>
+                              <option value="tronc">Tronc</option>
+                              <option value="dos">Dos</option>
+                              <option value="bras">Bras</option>
+                              <option value="jambe">Jambe</option>
+                              <option value="pied">Pied</option>
+                              <option value="unknown">Non Spécifié</option>
+                            </select>
+                          </div>
+
+                          {/* Season */}
+                          <div>
+                            <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-2">
+                              Saison
+                            </label>
+                            <select
+                              value={consultationDetails.saison}
+                              onChange={(e) =>
+                                setConsultationDetails((prev) => ({
+                                  ...prev,
+                                  saison: e.target.value,
+                                }))
+                              }
+                              className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#0F6E56] focus:border-[#0F6E56]"
+                            >
+                              <option value="printemps">Printemps</option>
+                              <option value="ete">Été</option>
+                              <option value="automne">Automne</option>
+                              <option value="hiver">Hiver</option>
+                            </select>
+                          </div>
+
+                          {/* Sex */}
+                          <div>
+                            <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-2">
+                              Sexe du Patient
+                            </label>
+                            <select
+                              value={consultationDetails.sex}
+                              onChange={(e) =>
+                                setConsultationDetails((prev) => ({
+                                  ...prev,
+                                  sex: e.target.value,
+                                }))
+                              }
+                              className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#0F6E56] focus:border-[#0F6E56]"
+                            >
+                              <option value="male">Masculin</option>
+                              <option value="female">Féminin</option>
+                              <option value="unknown">Non Spécifié</option>
+                            </select>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Analyze Button */}
+                      <div className="space-y-3 mt-6">
+                        <button
+                          onClick={handleAnalyze}
+                          className="w-full bg-[#0F6E56] text-white py-3 rounded-lg font-bold uppercase tracking-wider hover:bg-[#0d5a47] transition-colors"
+                        >
+                          Démarrer l'Analyse
+                        </button>
+                        <p className="text-xs text-gray-500 text-center">
+                          Analyse l'image pour détecter les maladies de peau
+                        </p>
+                      </div>
+                    </>
                   )}
 
                   {imagePreview && showAnalysis && (

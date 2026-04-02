@@ -16,6 +16,8 @@ import NotificationsPage from "./pages/NotificationsPage";
 import ProfilePage from "./pages/ProfilePage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ChatWidget from "./components/ChatWidget";
+import SkinComparisonPage from "./pages/SkinComparisonPage";
+
 
 function App() {
   return (
@@ -95,7 +97,14 @@ function App() {
               </ProtectedRoute>
             }
           />
-
+          <Route
+            path="/patients/:patientId/comparison"
+            element={
+              <ProtectedRoute>
+                <SkinComparisonPage />
+              </ProtectedRoute>
+            }
+          />
           {/* 404 */}
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>

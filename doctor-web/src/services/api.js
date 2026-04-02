@@ -10,7 +10,6 @@ const apiClient = axios.create({
   },
 });
 
-// Intercepteur pour ajouter le JWT aux requêtes
 apiClient.interceptors.request.use((config) => {
   const token = useAuthStore.getState().token;
   if (token) {
@@ -19,7 +18,6 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
-// Intercepteur pour gérer les erreurs d'authentification
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -102,8 +100,6 @@ export const advice = {
   update: (adviceId, data) => apiClient.patch(`/advice/${adviceId}`, data),
 };
 
-<<<<<<< Updated upstream
-=======
 export const skinComparison = {
   getImages: (patientId) =>
     apiClient.get(`/patients/${patientId}/skin-images`),
@@ -131,5 +127,4 @@ export const skinComparison = {
     apiClient.get(`/patients/${patientId}/skin-images/progression`),
 };
 
->>>>>>> Stashed changes
 export default apiClient;
