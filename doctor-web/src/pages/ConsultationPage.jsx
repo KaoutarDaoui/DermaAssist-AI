@@ -103,14 +103,29 @@ export default function ConsultationPage() {
     );
   }
 
-  // Generate PDF content (reused for both download and print)
-  const generatePDF = () => {
+  const downloadReport = async () => {
+    console.log("🔴 downloadReport called!");
+    console.log("Current state:", {
+      consultationData: !!consultationData,
+      aiResults: !!aiResults,
+      patient: !!patient,
+    });
+
     if (!consultationData || !aiResults) {
       console.log("❌ Data missing:", { consultationData, aiResults });
-      return null;
+      toast.error("Donnees manquantes pour generer le PDF");
+      return;
     }
 
-    const pdf = new jsPDF("p", "mm", "a4");
+    try {
+      console.log("✅ Generating PDF with data:", {
+        consultationData,
+        aiResults,
+        patient,
+      });
+      toast.loading("Generation du PDF en cours...");
+
+      const pdf = new jsPDF("p", "mm", "a4");
 
       const pageWidth = pdf.internal.pageSize.getWidth();
       const pageHeight = pdf.internal.pageSize.getHeight();
@@ -295,112 +310,36 @@ export default function ConsultationPage() {
       const footerText = `Rapport genere par DermaAssist le ${new Date().toLocaleDateString("fr-FR")}`;
       pdf.text(footerText, pageWidth / 2, pageHeight - 5, { align: "center" });
 
-      return pdf;
-    };
+      const filename = `consultation-dermaassist-${Date.now()}.pdf`;
+      pdf.save(filename);
 
-    const downloadReport = async () => {
-      console.log("🔴 downloadReport called!");
-      console.log("Current state:", {
-        consultationData: !!consultationData,
-        aiResults: !!aiResults,
-        patient: !!patient,
-      });
+      toast.dismiss();
+      toast.success("PDF telecharge avec succes!");
+      console.log("✅ PDF saved as:", filename);
+    } catch (error) {
+      console.error("❌ Erreur PDF complete:", error);
+      toast.dismiss();
+      toast.error("Erreur PDF: " + error.message);
+    }
+  };
 
-      if (!consultationData || !aiResults) {
-        toast.error("Donnees manquantes pour generer le PDF");
-        return;
-      }
+  return (
+    <div className="flex h-screen bg-gray-50">
+      <Sidebar open={sidebarOpen} />
 
-      try {
-        console.log("✅ Generating PDF for download...");
-        toast.loading("Generation du PDF en cours...");
+      <div className="flex-1 flex flex-col overflow-hidden min-w-0">
+        <NavBar onMenuToggle={() => setSidebarOpen(!sidebarOpen)} />
 
-        const pdf = generatePDF();
-        if (!pdf) {
-          toast.error("Erreur: Impossible de generer le PDF");
-          return;
-        }
-
-        const filename = `consultation-dermaassist-${Date.now()}.pdf`;
-        pdf.save(filename);
-
-        toast.dismiss();
-        toast.success("PDF telecharge avec succes!");
-        console.log("✅ PDF saved as:", filename);
-      } catch (error) {
-        console.error("❌ Erreur PDF complete:", error);
-        toast.dismiss();
-        toast.error("Erreur PDF: " + error.message);
-      }
-    };
-
-    const printReport = async () => {
-      console.log("🔴 printReport called!");
-      console.log("Current state:", {
-        consultationData: !!consultationData,
-        aiResults: !!aiResults,
-        patient: !!patient,
-      });
-
-      if (!consultationData || !aiResults) {
-        toast.error("Donnees manquantes pour imprimer le PDF");
-        return;
-      }
-
-      try {
-        console.log("✅ Generating PDF for print...");
-        toast.loading("Generation du PDF en cours...");
-
-        const pdf = generatePDF();
-        if (!pdf) {
-          toast.error("Erreur: Impossible de generer le PDF");
-          return;
-        }
-
-        // Convert PDF to blob and create URL
-        const pdfBlob = pdf.output("blob");
-        const pdfUrl = URL.createObjectURL(pdfBlob);
-
-        // Open in new window and print
-        const printWindow = window.open(pdfUrl, "_blank");
-        if (printWindow) {
-          printWindow.addEventListener("load", () => {
-            printWindow.print();
-            // Clean up after a short delay
-            setTimeout(() => {
-              URL.revokeObjectURL(pdfUrl);
-            }, 250);
-          });
-        } else {
-          toast.error("Impossible d'ouvrir la fenetre d'impression");
-        }
-
-        toast.dismiss();
-        console.log("✅ PDF opened for printing");
-      } catch (error) {
-        console.error("❌ Erreur impression:", error);
-        toast.dismiss();
-        toast.error("Erreur impression: " + error.message);
-      }
-    };
-
-    return (
-      <div className="flex h-screen bg-gray-50">
-        <Sidebar open={sidebarOpen} />
-
-        <div className="flex-1 flex flex-col overflow-hidden min-w-0">
-          <NavBar onMenuToggle={() => setSidebarOpen(!sidebarOpen)} />
-
-          <div className="flex-1 overflow-auto">
-            <div className="p-8 space-y-6 max-w-7xl mx-auto pb-12">
-              {/* Back Button */}
-              <button
-                onClick={() => navigate(-1)}
-                className="flex items-center gap-2 text-[#0F6E56] hover:text-[#0d5a47] transition-colors font-semibold text-sm mb-4"
-              >
-                <ArrowLeft size={18} />
-                Retour
-              </button>
+        <div className="flex-1 overflow-auto">
+          <div className="p-8 space-y-6 max-w-7xl mx-auto pb-12">
+            {/* Back Button */}
+            <button
+              onClick={() => navigate(-1)}
+              className="flex items-center gap-2 text-[#0F6E56] hover:text-[#0d5a47] transition-colors font-semibold text-sm mb-4"
+            >
+              <ArrowLeft size={18} />
+              Retour
+            </button>
 
             {!consultationData ? (
               <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
@@ -433,7 +372,7 @@ export default function ConsultationPage() {
                     </div>
                     <div className="flex gap-3">
                       <button
-                        onClick={printReport}
+                        onClick={() => window.print()}
                         className="flex items-center gap-2 bg-white text-[#0F6E56] px-4 py-2 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
                       >
                         <Printer size={18} />
@@ -608,45 +547,117 @@ export default function ConsultationPage() {
                             Traitements Recommandés
                           </h2>
 
-                          <div className="overflow-x-auto">
-                            <table className="min-w-full text-sm">
-                              <thead className="bg-[#0F6E56] text-white">
-                                <tr className="text-left text-xs tracking-widest uppercase font-bold">
-                                  <th className="px-6 py-4">#</th>
-                                  <th className="px-6 py-4">Médicament</th>
-                                  <th className="px-6 py-4">Classe</th>
-                                  <th className="px-6 py-4">Indication</th>
-                                  <th className="px-6 py-4">Posologie</th>
-                                </tr>
-                              </thead>
+                          <div className="space-y-6">
+                            {aiResults.treatment_options.map(
+                              (treatment, idx) => {
+                                // Extrait les alertes pour ce médicament
+                                const medicationAlerts = (
+                                  aiResults.rag?.alertes_patient || []
+                                ).filter((a) => a.medicament === treatment.nom);
 
-                              <tbody className="divide-y divide-gray-100">
-                                {aiResults.treatment_options.map(
-                                  (treatment, idx) => (
-                                    <tr
-                                      key={idx}
-                                      className="bg-white hover:bg-gray-50 transition-colors"
-                                    >
-                                      <td className="px-6 py-4 align-top text-gray-800 font-bold">
-                                        {idx + 1}
-                                      </td>
-                                      <td className="px-6 py-4 align-top text-gray-800 font-semibold">
-                                        {treatment.nom || "—"}
-                                      </td>
-                                      <td className="px-6 py-4 align-top text-gray-600">
-                                        {treatment.classe || "—"}
-                                      </td>
-                                      <td className="px-6 py-4 align-top text-gray-600">
-                                        {treatment.indication || "—"}
-                                      </td>
-                                      <td className="px-6 py-4 align-top text-gray-600">
-                                        {treatment.posologie || "—"}
-                                      </td>
-                                    </tr>
-                                  ),
-                                )}
-                              </tbody>
-                            </table>
+                                return (
+                                  <div
+                                    key={idx}
+                                    className="border border-gray-200 rounded-lg p-6"
+                                  >
+                                    <div className="flex items-start justify-between mb-4">
+                                      <div>
+                                        <div className="flex items-center gap-3 mb-2">
+                                          <span className="inline-block w-8 h-8 bg-[#0F6E56] text-white rounded-full text-center font-bold">
+                                            {idx + 1}
+                                          </span>
+                                          <h3 className="text-lg font-bold text-gray-900">
+                                            {treatment.nom || "—"}
+                                          </h3>
+                                        </div>
+                                        <p className="text-sm text-gray-600">
+                                          <span className="font-semibold">
+                                            Classe:
+                                          </span>{" "}
+                                          {treatment.classe || "—"}
+                                        </p>
+                                      </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-4 mb-4 text-sm">
+                                      <div>
+                                        <p className="text-gray-600">
+                                          <span className="font-semibold">
+                                            Indication:
+                                          </span>{" "}
+                                          {treatment.indication || "—"}
+                                        </p>
+                                      </div>
+                                      <div>
+                                        <p className="text-gray-600">
+                                          <span className="font-semibold">
+                                            Posologie:
+                                          </span>{" "}
+                                          {treatment.posologie || "—"}
+                                        </p>
+                                      </div>
+                                    </div>
+
+                                    {/* Alertes du médicament */}
+                                    {medicationAlerts.length > 0 && (
+                                      <div className="space-y-2">
+                                        {medicationAlerts.map(
+                                          (alert, alertIdx) => (
+                                            <div
+                                              key={alertIdx}
+                                              className={`p-3 rounded-lg border-l-4 ${
+                                                alert.severite === "danger"
+                                                  ? "bg-red-50 border-red-400"
+                                                  : "bg-amber-50 border-amber-400"
+                                              }`}
+                                            >
+                                              <div className="flex items-start gap-2">
+                                                <span
+                                                  className={`text-lg font-bold ${
+                                                    alert.severite === "danger"
+                                                      ? "text-red-600"
+                                                      : "text-amber-600"
+                                                  }`}
+                                                >
+                                                  {alert.severite === "danger"
+                                                    ? "⛔"
+                                                    : "⚠️"}
+                                                </span>
+                                                <div>
+                                                  <p
+                                                    className={`text-sm font-semibold ${
+                                                      alert.severite ===
+                                                      "danger"
+                                                        ? "text-red-700"
+                                                        : "text-amber-700"
+                                                    }`}
+                                                  >
+                                                    {alert.type ===
+                                                    "question_requise"
+                                                      ? "Question requise:"
+                                                      : "Alerte:"}
+                                                  </p>
+                                                  <p
+                                                    className={`text-sm ${
+                                                      alert.severite ===
+                                                      "danger"
+                                                        ? "text-red-600"
+                                                        : "text-amber-600"
+                                                    }`}
+                                                  >
+                                                    {alert.message}
+                                                  </p>
+                                                </div>
+                                              </div>
+                                            </div>
+                                          ),
+                                        )}
+                                      </div>
+                                    )}
+                                  </div>
+                                );
+                              },
+                            )}
                           </div>
                         </div>
                       )}

@@ -102,4 +102,34 @@ export const advice = {
   update: (adviceId, data) => apiClient.patch(`/advice/${adviceId}`, data),
 };
 
+<<<<<<< Updated upstream
+=======
+export const skinComparison = {
+  getImages: (patientId) =>
+    apiClient.get(`/patients/${patientId}/skin-images`),
+
+  getImage: (patientId, imageId) =>
+    apiClient.get(`/patients/${patientId}/skin-images/${imageId}`),
+
+  upload: (patientId, file) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    return apiClient.post(`/patients/${patientId}/skin-images`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+  },
+
+  compare: (patientId, imageRefId, imageNewId) =>
+    apiClient.post(`/patients/${patientId}/skin-images/compare`, null, {
+      params: {
+        image_ref_id: imageRefId,
+        image_new_id: imageNewId,
+      },
+    }),
+
+  getProgression: (patientId) =>
+    apiClient.get(`/patients/${patientId}/skin-images/progression`),
+};
+
+>>>>>>> Stashed changes
 export default apiClient;
