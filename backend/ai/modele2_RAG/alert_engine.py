@@ -263,7 +263,7 @@ def build_patient_alerts(medicaments: list[dict], patient: PatientContext) -> li
                 q_info = CONDITION_QUESTIONS.get(condition)
                 if q_info and q_key not in seen_questions:
                     seen_questions.add(q_key)
-                    # Collecter tous les médicaments concernés par cette question
+                    # Collecter tous los médicaments concernés par cette question
                     concerned_meds = [
                         m["nom"] for m in medicaments
                         if any(a["condition"] == condition for a in m.get("alertes", []))
@@ -274,7 +274,7 @@ def build_patient_alerts(medicaments: list[dict], patient: PatientContext) -> li
                         "question": q_info["texte"],
                         "options": q_info["options"],
                         "medicaments_concernes": concerned_meds,
-                        "message": f"Cette information est nécessaire avant de prescrire : {', '.join(concerned_meds)}",
+                        "message": f"{q_info['texte']} (Concerne : {', '.join(concerned_meds)})",
                         "severite": severite,
                     })
 

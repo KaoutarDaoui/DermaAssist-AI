@@ -355,11 +355,17 @@ export default function ConsultationFormPage() {
       // Calculate age from birth_date
       const age = patient?.birth_date
         ? Math.floor(
+            (new Date() - new Date(patient.birth_date)) /
+              (365.25 * 24 * 60 * 60 * 1000),
+      // Calculate age from birth_date
+      const age = patient?.birth_date
+        ? Math.floor(
             (new Date() - new Date(patient.birth_date)) / (365.25 * 24 * 60 * 60 * 1000)
           )
         : null;
 
       // 2) Run Module 1 WITH CLINICAL INFORMATION for accurate analysis
+
       const analysisResponse = await axios.post(
         `${API_URL}/patients/${patientId}/analyze-skin-image`,
         {
@@ -1174,31 +1180,67 @@ export default function ConsultationFormPage() {
                           Valider les Traitements
                         </button>
                       </div>
+                    </div>
 
-                      {/* Treatment Alerts Section - From RAG */}
-                      {showTreatmentAlerts && (
-                        <div className="mt-6 space-y-4 border-t border-gray-200 pt-6">
-                          <h4 className="text-lg font-bold text-gray-900 mb-4">
+                    {/* Treatment Alerts Section - Separate Frame */}
+                    {showTreatmentAlerts && (
+                      <div className="rounded-xl border border-gray-200 bg-white overflow-hidden shadow-sm">
+                        <div className="px-8 py-4 border-b border-gray-200 bg-[#0F6E56]">
+                          <p className="text-xs tracking-widest uppercase font-bold text-white">
                             Alertes et Contre-indications
-                          </h4>
+                          </p>
+                        </div>
 
+                        <div className="p-8 space-y-4">
                           {/* Warnings from RAG */}
-                          {advancedResults?.alertes &&
-                            advancedResults.alertes.length > 0 && (
+                          {advancedResults?.alertes_patient &&
+                            advancedResults.alertes_patient.length > 0 && (
                               <div className="space-y-3">
-                                {advancedResults.alertes.map((alerte, idx) => (
-                                  <div
-                                    key={idx}
-                                    className="p-4 border-l-4 border-red-400 bg-red-50 rounded-lg"
-                                  >
-                                    <p className="font-bold text-red-800 mb-2">
-                                      Alerte Importante
-                                    </p>
-                                    <p className="text-sm text-red-700">
-                                      {alerte}
-                                    </p>
-                                  </div>
-                                ))}
+                                {advancedResults.alertes_patient.map(
+                                  (alerte, idx) => (
+                                    <div
+                                      key={idx}
+                                      className={`p-4 border-l-4 rounded-lg ${
+                                        alerte.severite === "danger"
+                                          ? "border-red-400 bg-red-50"
+                                          : "border-amber-400 bg-amber-50"
+                                      }`}
+                                    >
+                                      <p
+                                        className={`font-bold mb-2 ${
+                                          alerte.severite === "danger"
+                                            ? "text-red-800"
+                                            : "text-amber-800"
+                                        }`}
+                                      >
+                                        {alerte.severite === "danger"
+                                          ? "⛔ Alerte Importante"
+                                          : "⚠️ Attention"}
+                                      </p>
+                                      <p
+                                        className={`text-sm ${
+                                          alerte.severite === "danger"
+                                            ? "text-red-700"
+                                            : "text-amber-700"
+                                        }`}
+                                      >
+                                        {alerte.message}
+                                      </p>
+                                      {alerte.medicament && (
+                                        <p
+                                          className={`text-xs mt-2 ${
+                                            alerte.severite === "danger"
+                                              ? "text-red-600"
+                                              : "text-amber-600"
+                                          }`}
+                                        >
+                                          <strong>Médicament concerné:</strong>{" "}
+                                          {alerte.medicament}
+                                        </p>
+                                      )}
+                                    </div>
+                                  ),
+                                )}
                               </div>
                             )}
 
@@ -1267,25 +1309,18 @@ export default function ConsultationFormPage() {
                             )}
 
                           {/* Default message if no alerts from RAG */}
-                          {(!advancedResults?.alertes ||
-                            advancedResults.alertes.length === 0) &&
-                            (!advancedResults?.contre_indications ||
-                              advancedResults.contre_indications.length ===
-                                0) &&
-                            (!advancedResults?.dangers ||
-                              advancedResults.dangers.length === 0) &&
-                            (!advancedResults?.interactions ||
-                              advancedResults.interactions.length === 0) && (
-                              <div className="p-4 border-l-4 border-green-400 bg-green-50 rounded-lg">
-                                <p className="text-green-800 text-sm font-medium">
-                                  Aucune alerte majeure détectée dans la base de
-                                  connaissances.
-                                </p>
-                              </div>
-                            )}
+                          {(!advancedResults?.alertes_patient ||
+                            advancedResults.alertes_patient.length === 0) && (
+                            <div className="p-4 border-l-4 border-green-400 bg-green-50 rounded-lg">
+                              <p className="text-green-800 text-sm font-medium">
+                                ✅ Aucune alerte majeure détectée pour les
+                                traitements sélectionnés.
+                              </p>
+                            </div>
+                          )}
                         </div>
-                      )}
-                    </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

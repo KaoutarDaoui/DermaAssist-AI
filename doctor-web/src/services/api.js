@@ -87,6 +87,10 @@ export const ai = {
     apiClient.get(`/patients/${patientId}/ai-results-history`),
   getEnvSnapshot: (city) =>
     apiClient.get("/ai/env-snapshot", { params: { city } }),
+  // Chat endpoints
+  sendChatMessage: (data) => apiClient.post("/chat/send-message", data),
+  getChatHistory: () => apiClient.get("/chat/history"),
+  clearChatHistory: () => apiClient.delete("/chat/history"),
 };
 
 export const advice = {
