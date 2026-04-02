@@ -27,7 +27,48 @@ export default function ConsultationPage() {
   const [patient, setPatient] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const getPatientDisplayName = (patientData, fallback = "Patient") => {
+  const normalizePatientName = (value) => {
+    if (typeof value !== "string") {
+      return "";
+    }
+
+    return value
+      .trim()
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/\s+/g, " ");
+  };
+
+  const isGenericPatientLabel = (value) => {
+    const normalized = normalizePatientName(value);
+
+    if (!normalized) {
+      return true;
+    }
+
+    return [
+      "patient",
+      "patient inconnu",
+      "inconnu",
+      "unknown patient",
+      "non disponible",
+      "n/a",
+      "na",
+      "null",
+      "undefined",
+    ].includes(normalized);
+  };
+
+  const getFirstValidPatientName = (values = []) => {
+    const normalizedValues = values
+      .map((value) => (typeof value === "string" ? value.trim() : ""))
+      .filter((value) => value && !isGenericPatientLabel(value));
+
+    return normalizedValues[0] || "";
+  };
+
+  const getPatientDisplayName = (patientData, fallback = "Non disponible") => {
     if (!patientData) return fallback;
 
     const rootFirstName = patientData.first_name || patientData.firstName;
@@ -36,19 +77,17 @@ export default function ConsultationPage() {
     const userLastName = patientData.user?.last_name || patientData.user?.lastName;
 
     const candidates = [
+      rootFirstName && rootLastName ? `${rootFirstName} ${rootLastName}` : "",
+      userFirstName && userLastName ? `${userFirstName} ${userLastName}` : "",
       patientData.user?.full_name,
       patientData.user?.fullName,
       patientData.full_name,
       patientData.fullName,
       patientData.patient_name,
       patientData.patientFullName,
-      rootFirstName && rootLastName ? `${rootFirstName} ${rootLastName}` : "",
-      userFirstName && userLastName ? `${userFirstName} ${userLastName}` : "",
-    ]
-      .map((value) => (typeof value === "string" ? value.trim() : ""))
-      .filter(Boolean);
+    ];
 
-    return candidates[0] || fallback;
+    return getFirstValidPatientName(candidates) || fallback;
   };
 
   const getResolvedPatientName = () => {
@@ -57,22 +96,22 @@ export default function ConsultationPage() {
       return fromPatient;
     }
 
+    if (routedPatientName && !isGenericPatientLabel(routedPatientName)) {
+      return routedPatientName;
+    }
+
     const aiCandidates = [
       aiResults?.patient_name,
       aiResults?.patient_full_name,
       aiResults?.env_snapshot?.patient_name,
       aiResults?.env_snapshot?.full_name,
       aiResults?.env_snapshot?.patient_full_name,
-    ]
-      .map((value) => (typeof value === "string" ? value.trim() : ""))
-      .filter(Boolean);
+    ];
 
-    if (aiCandidates.length > 0) {
-      return aiCandidates[0];
-    }
+    const fromAi = getFirstValidPatientName(aiCandidates);
 
-    if (routedPatientName) {
-      return routedPatientName;
+    if (fromAi) {
+      return fromAi;
     }
 
     return "Non disponible";
@@ -839,9 +878,7 @@ export default function ConsultationPage() {
                 <p className="font-semibold text-gray-900">
                   Nom Complet:{" "}
                   <span className="font-normal text-gray-700">
-                    {patient
-                      ? getResolvedPatientName()
-                      : routedPatientName || "Chargement..."}
+                    {getResolvedPatientName()}
                   </span>
                 </p>
               </div>

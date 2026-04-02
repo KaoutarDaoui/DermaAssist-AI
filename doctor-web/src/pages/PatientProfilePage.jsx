@@ -15,26 +15,59 @@ export default function PatientProfilePage() {
   const [loading, setLoading] = useState(true);
   const [consultationsLoading, setConsultationsLoading] = useState(false);
 
+  const normalizePatientName = (value) => {
+    if (typeof value !== "string") {
+      return "";
+    }
+
+    return value
+      .trim()
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/\s+/g, " ");
+  };
+
+  const isGenericPatientLabel = (value) => {
+    const normalized = normalizePatientName(value);
+
+    if (!normalized) {
+      return true;
+    }
+
+    return [
+      "patient",
+      "patient inconnu",
+      "inconnu",
+      "unknown patient",
+      "non disponible",
+      "n/a",
+      "na",
+      "null",
+      "undefined",
+    ].includes(normalized);
+  };
+
   const getPatientDisplayName = (patientData) => {
     if (!patientData) {
       return "";
     }
 
     const candidates = [
-      patientData.user?.full_name,
-      patientData.user?.fullName,
-      patientData.full_name,
-      patientData.fullName,
-      patientData.patient_name,
       patientData.first_name && patientData.last_name
         ? `${patientData.first_name} ${patientData.last_name}`
         : "",
       patientData.user?.first_name && patientData.user?.last_name
         ? `${patientData.user.first_name} ${patientData.user.last_name}`
         : "",
+      patientData.user?.full_name,
+      patientData.user?.fullName,
+      patientData.full_name,
+      patientData.fullName,
+      patientData.patient_name,
     ]
       .map((value) => (typeof value === "string" ? value.trim() : ""))
-      .filter(Boolean);
+      .filter((value) => value && !isGenericPatientLabel(value));
 
     return candidates[0] || "";
   };
@@ -164,7 +197,7 @@ export default function PatientProfilePage() {
                 {/* Top Section */}
                 <div className="mb-8">
                   <h1 className="text-4xl font-bold text-gray-900 mb-1">
-                    {patient.user?.full_name || "Patient"}
+                    {getPatientDisplayName(patient) || "Patient"}
                   </h1>
                   <p className="text-[#0F6E56] font-medium text-sm">
                     {patient.user?.email}
