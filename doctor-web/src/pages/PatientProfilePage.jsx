@@ -15,6 +15,30 @@ export default function PatientProfilePage() {
   const [loading, setLoading] = useState(true);
   const [consultationsLoading, setConsultationsLoading] = useState(false);
 
+  const getPatientDisplayName = (patientData) => {
+    if (!patientData) {
+      return "";
+    }
+
+    const candidates = [
+      patientData.user?.full_name,
+      patientData.user?.fullName,
+      patientData.full_name,
+      patientData.fullName,
+      patientData.patient_name,
+      patientData.first_name && patientData.last_name
+        ? `${patientData.first_name} ${patientData.last_name}`
+        : "",
+      patientData.user?.first_name && patientData.user?.last_name
+        ? `${patientData.user.first_name} ${patientData.user.last_name}`
+        : "",
+    ]
+      .map((value) => (typeof value === "string" ? value.trim() : ""))
+      .filter(Boolean);
+
+    return candidates[0] || "";
+  };
+
   const toDisplayText = (value, fallback = "Non renseigne") => {
     if (value === null || value === undefined || value === "") return fallback;
 
@@ -316,6 +340,7 @@ export default function PatientProfilePage() {
                                 patientId,
                                 consultationId: result.consultation_id,
                                 sequentialNumber: idx + 1,
+                                patientName: getPatientDisplayName(patient),
                               },
                             })
                           }

@@ -15,6 +15,10 @@ export default function ConsultationPage() {
   const patientId = location.state?.patientId;
   const consultationNumber = location.state?.consultationId;
   const sequentialNumber = location.state?.sequentialNumber;
+  const routedPatientName =
+    typeof location.state?.patientName === "string"
+      ? location.state.patientName.trim()
+      : "";
 
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [consultationData, setConsultationData] = useState(null);
@@ -36,15 +40,42 @@ export default function ConsultationPage() {
       patientData.user?.fullName,
       patientData.full_name,
       patientData.fullName,
+      patientData.patient_name,
+      patientData.patientFullName,
       rootFirstName && rootLastName ? `${rootFirstName} ${rootLastName}` : "",
       userFirstName && userLastName ? `${userFirstName} ${userLastName}` : "",
-      patientData.user?.username,
-      patientData.username,
     ]
       .map((value) => (typeof value === "string" ? value.trim() : ""))
       .filter(Boolean);
 
     return candidates[0] || fallback;
+  };
+
+  const getResolvedPatientName = () => {
+    const fromPatient = getPatientDisplayName(patient, "");
+    if (fromPatient) {
+      return fromPatient;
+    }
+
+    const aiCandidates = [
+      aiResults?.patient_name,
+      aiResults?.patient_full_name,
+      aiResults?.env_snapshot?.patient_name,
+      aiResults?.env_snapshot?.full_name,
+      aiResults?.env_snapshot?.patient_full_name,
+    ]
+      .map((value) => (typeof value === "string" ? value.trim() : ""))
+      .filter(Boolean);
+
+    if (aiCandidates.length > 0) {
+      return aiCandidates[0];
+    }
+
+    if (routedPatientName) {
+      return routedPatientName;
+    }
+
+    return "Non disponible";
   };
 
   useEffect(() => {
@@ -188,7 +219,7 @@ export default function ConsultationPage() {
 
     addText("Date", dateStr);
 
-    const patientName = getPatientDisplayName(patient, "Patient");
+    const patientName = getResolvedPatientName();
 
     addText("Nom Complet", patientName);
 
@@ -809,8 +840,8 @@ export default function ConsultationPage() {
                   Nom Complet:{" "}
                   <span className="font-normal text-gray-700">
                     {patient
-                      ? getPatientDisplayName(patient, "Non disponible")
-                      : "Chargement..."}
+                      ? getResolvedPatientName()
+                      : routedPatientName || "Chargement..."}
                   </span>
                 </p>
               </div>

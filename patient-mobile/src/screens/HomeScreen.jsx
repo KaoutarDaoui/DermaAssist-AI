@@ -1,250 +1,724 @@
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
-  View,
-  Text,
+  SafeAreaView,
   ScrollView,
   StyleSheet,
+  Text,
   TouchableOpacity,
-  Image,
-  SafeAreaView,
+  View,
 } from "react-native";
-import { LinearGradient } from 'expo-linear-gradient';
-import { Home, MessageSquare, Activity, User, Camera, Video, ChevronRight } from 'lucide-react-native';
+import { LinearGradient } from "expo-linear-gradient";
+import {
+  TriangleAlert as AlertTriangle,
+  Bell,
+  ChevronRight,
+  Clock,
+  Droplets,
+  GitCompare,
+  Stethoscope,
+  Sun,
+  Wind,
+  Upload,
+} from "lucide-react-native/icons";
+import patientDataService from "../services/patientDataService";
 
 const COLORS = {
-  primary: "#2D4A85",
-  secondary: "#7A869A",
-  accent: "#4A90E2",
-  background: "#F9FBFF",
-  white: "#FFFFFF",
-  textDark: "#333333",
-  textLight: "#8E9AAF",
-  cardShadow: "rgba(0, 0, 0, 0.05)",
+  background: "#F2F6F7",
+  surface: "#FFFFFF",
+  textPrimary: "#14222F",
+  textSecondary: "#5E6B76",
+  textMuted: "#8D99A4",
+  accent: "#0B7D6E",
+  accentSoft: "#D5EFEA",
+  warning: "#D97706",
+  warningSoft: "#FEEFD8",
+  info: "#3B82F6",
+  infoSoft: "#DDEBFF",
+  danger: "#E65B5B",
+  dangerSoft: "#FCE4E4",
+  success: "#2F9E60",
+  successSoft: "#DBF3E4",
 };
 
-export default function HomeScreen() {
+const adviceItems = [
+  {
+    id: "a1",
+    category: "Médication",
+    title: "Appliquer la crème de bétaméthasone",
+    subtitle: "Une fois par jour après la douche",
+    time: "08:00",
+    categoryStyle: "medication",
+  },
+  {
+    id: "a2",
+    category: "Mode de vie",
+    title: "Éviter les douches chaudes",
+    subtitle: "Peut aggraver l'inflammation cutanée",
+    time: "À tout moment",
+    categoryStyle: "lifestyle",
+  },
+];
+
+const metrics = [
+  { id: "m1", label: "UV ÉLEVÉ 7", icon: Sun, tone: "warning" },
+  { id: "m2", label: "IQA 42", icon: Wind, tone: "warning" },
+  { id: "m3", label: "Humidité 65%", icon: Droplets, tone: "info" },
+];
+
+const getPatientDisplayName = (profile) => {
+  if (!profile) {
+    return "Patient";
+  }
+
+  return profile.full_name || profile.user?.full_name || "Patient";
+};
+
+const getPatientInitials = (fullName) => {
+  const initials = String(fullName || "")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join("")
+    .toUpperCase();
+
+  return initials || "PT";
+};
+
+const formatConsultationDate = (dateValue) => {
+  if (!dateValue) {
+    return "Date inconnue";
+  }
+
+  const date = new Date(dateValue);
+  if (Number.isNaN(date.getTime())) {
+    return "Date inconnue";
+  }
+
+  return date.toLocaleDateString("fr-FR", { day: "2-digit", month: "short" });
+};
+
+const formatConsultationStatus = (status) => {
+  if (!status) {
+    return "Statut inconnu";
+  }
+
+  return String(status)
+    .toLowerCase()
+    .replace(/_/g, " ")
+    .replace(/^./, (char) => char.toUpperCase());
+};
+
+export default function HomeScreen({ navigation }) {
+  const [patientProfile, setPatientProfile] = useState(null);
+  const [consultations, setConsultations] = useState([]);
+  const [dashboardError, setDashboardError] = useState(null);
+
+  useEffect(() => {
+    let isActive = true;
+
+    const loadDashboardData = async () => {
+      try {
+        const [profile, consultationsData] = await Promise.all([
+          patientDataService.getPatientProfile(),
+          patientDataService.getConsultations(),
+        ]);
+
+        if (!isActive) {
+          return;
+        }
+
+        setPatientProfile(profile);
+        setConsultations(Array.isArray(consultationsData) ? consultationsData : []);
+        setDashboardError(null);
+      } catch (error) {
+        console.error("Error loading dashboard data:", error);
+        if (!isActive) {
+          return;
+        }
+        setDashboardError("Impossible de charger les données du patient.");
+      }
+    };
+
+    loadDashboardData();
+
+    return () => {
+      isActive = false;
+    };
+  }, []);
+
+  const patientFullName = useMemo(() => getPatientDisplayName(patientProfile), [patientProfile]);
+  const patientInitials = useMemo(() => getPatientInitials(patientFullName), [patientFullName]);
+
+  const recentConsultations = useMemo(() => {
+    return [...consultations]
+      .sort((a, b) => {
+        const firstDate = a?.date ? new Date(a.date).getTime() : 0;
+        const secondDate = b?.date ? new Date(b.date).getTime() : 0;
+        return secondDate - firstDate;
+      })
+      .slice(0, 6);
+  }, [consultations]);
+
+  const handleOpenTreatment = () => {
+    navigation.navigate("Treatment");
+  };
+
+  const handleOpenConsultationHistory = () => {
+    navigation.navigate("Consultations");
+  };
+
+  const handleOpenComparison = () => {
+    navigation.navigate("Comparison");
+  };
+
+  const handleOpenNotifications = () => {
+    navigation.navigate("Notifications");
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView 
-        style={styles.container} 
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 100 }}
+      <LinearGradient
+        colors={["#F6FBFA", "#EDF3F5"]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.backgroundGradient}
       >
-        {/* --- HEADER --- */}
-        <View style={styles.header}>
-          <View>
-            <Text style={styles.greetingText}>Bonjour, Sarah 👋</Text>
-            <Text style={styles.subGreeting}>Suivi Dermatologique</Text>
-          </View>
-          <Image 
-            source={{ uri: 'https://randomuser.me/api/portraits/women/44.jpg' }} 
-            style={styles.profileImage} 
-          />
-        </View>
-
-        {/* --- APPOINTMENT CARD --- */}
-        <View style={styles.card}>
-          <View style={styles.cardTopRow}>
-            <View style={styles.videoIconContainer}>
-              <Video size={20} color={COLORS.accent} fill={COLORS.accent} fillOpacity={0.1} />
-            </View>
-            <Text style={styles.cardHeaderTitle}>Prochain Rendez-vous</Text>
-          </View>
-          
-          <View style={styles.divider} />
-
-          <View style={styles.doctorInfoRow}>
-            <View style={styles.doctorTextContainer}>
-              <Text style={styles.consultType}>Consultation à Distance</Text>
-              <Text style={styles.doctorName}>Dr. Benali</Text>
-              <Text style={styles.appointmentTime}>Lundi 28 Mars • 14:30</Text>
-            </View>
-            <Image 
-              source={{ uri: 'https://randomuser.me/api/portraits/men/32.jpg' }} 
-              style={styles.doctorThumb} 
-            />
-          </View>
-
-          <TouchableOpacity style={styles.detailsButton}>
-            <Text style={styles.detailsButtonText}>Voir Détails</Text>
-            <ChevronRight size={14} color={COLORS.accent} />
-          </TouchableOpacity>
-        </View>
-
-        {/* --- TREATMENT HISTORY SECTION --- */}
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Historique de Traitement</Text>
-          <TouchableOpacity><Text style={styles.viewAllText}>Voir tout ›</Text></TouchableOpacity>
-        </View>
-
-        <View style={styles.historyRow}>
-          {/* Diagnosis Card */}
-          <View style={styles.smallCard}>
-            <Text style={styles.smallCardTitle}>Diagnostic</Text>
-            <Image 
-              source={{ uri: 'https://images.unsplash.com/photo-1584634731339-252c581abfc5?q=80&w=200&auto=format&fit=crop' }} 
-              style={styles.skinImageMain} 
-            />
-            <Text style={styles.diagnosisName}>Eczéma</Text>
-            <Text style={styles.lastConsult}>Dernière consultation: 12 Mars</Text>
-          </View>
-
-          {/* Photos Suivi Card */}
-          <View style={styles.smallCard}>
-            <Text style={styles.smallCardTitle}>Photos de Suivi</Text>
-            <View style={styles.photoGrid}>
-              <Image source={{ uri: 'https://picsum.photos/id/100/50' }} style={styles.gridThumb} />
-              <Image source={{ uri: 'https://picsum.photos/id/101/50' }} style={styles.gridThumb} />
-              <Image source={{ uri: 'https://picsum.photos/id/102/50' }} style={styles.gridThumb} />
-            </View>
-            <Text style={styles.photoCount}>3 Photos ajoutées</Text>
-          </View>
-        </View>
-
-        {/* --- PREMIUM BANNER --- */}
-        <LinearGradient
-          colors={['#4A90E2', '#357ABD']}
-          start={{x: 0, y: 0}} end={{x: 1, y: 0}}
-          style={styles.premiumBanner}
+        <ScrollView
+          style={styles.container}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.contentContainer}
         >
-          <View style={styles.premiumLeft}>
-            <Text style={styles.premiumTitle}>Télédermatologie Premium</Text>
-            <Text style={styles.premiumSub}>Envoyez une photo à votre médecin</Text>
-            <TouchableOpacity style={styles.uploadButton}>
-              <Camera size={18} color={COLORS.accent} style={{marginRight: 8}} />
-              <Text style={styles.uploadText}>Envoyer une Image</Text>
+          <View style={styles.headerRow}>
+            <View>
+              <Text style={styles.headerGreeting}>Bonjour,</Text>
+              <Text style={styles.headerName}>{patientFullName}</Text>
+            </View>
+            <View style={styles.headerActions}>
+              <View style={styles.avatarBadge}>
+                <Text style={styles.avatarText}>{patientInitials}</Text>
+              </View>
+              <TouchableOpacity
+                style={styles.notificationButton}
+                activeOpacity={0.8}
+                onPress={handleOpenNotifications}
+              >
+                <Bell size={18} color={COLORS.textSecondary} />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {dashboardError ? <Text style={styles.dataErrorText}>{dashboardError}</Text> : null}
+
+          <View style={styles.alertCard}>
+            <View style={styles.alertPill}>
+              <Text style={styles.alertPillText}>Du Dr Karim Benali</Text>
+            </View>
+            <View style={styles.alertTitleRow}>
+              <Text style={styles.alertTitle}>Évitez l'exposition au soleil aujourd'hui</Text>
+              <AlertTriangle size={18} color={COLORS.accent} />
+            </View>
+            <Text style={styles.alertSubtitle}>L'indice UV est ÉLEVÉ à Boumerdès - appliquez SPF 50+</Text>
+            <Text style={styles.alertDate}>Mis à jour aujourd'hui</Text>
+          </View>
+
+          <View style={styles.metricRow}>
+            {metrics.map((metric) => {
+              const Icon = metric.icon;
+              const chipStyle = metric.tone === "warning" ? styles.metricWarning : styles.metricInfo;
+              return (
+                <View key={metric.id} style={[styles.metricChip, chipStyle]}>
+                  <Icon size={14} color={metric.tone === "warning" ? COLORS.warning : COLORS.info} />
+                  <Text
+                    style={[
+                      styles.metricChipText,
+                      { color: metric.tone === "warning" ? "#9A5A0A" : "#1F5FB8" },
+                    ]}
+                  >
+                    {metric.label}
+                  </Text>
+                </View>
+              );
+            })}
+          </View>
+
+          <Text style={styles.sectionLabel}>Comparaison photo</Text>
+          <TouchableOpacity
+            style={styles.comparisonCard}
+            activeOpacity={0.9}
+            onPress={handleOpenComparison}
+          >
+            <View style={styles.comparisonIconWrap}>
+              <GitCompare size={20} color={COLORS.accent} />
+            </View>
+            <View style={styles.comparisonBody}>
+              <Text style={styles.comparisonTitle}>Comparer mes photos de suivi</Text>
+              <Text style={styles.comparisonSubtitle}>Sélectionnez 2 photos et lancez une comparaison</Text>
+            </View>
+            <ChevronRight size={16} color={COLORS.accent} />
+          </TouchableOpacity>
+
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionLabel}>Mes conseils</Text>
+            <TouchableOpacity onPress={handleOpenTreatment}>
+              <Text style={styles.sectionAction}>Voir tout</Text>
             </TouchableOpacity>
           </View>
-          {/* Background illustration effect */}
-          <View style={styles.bottleContainer}>
-             <View style={[styles.bottle, {height: 60, width: 25, right: 30, opacity: 0.6}]} />
-             <View style={[styles.bottle, {height: 80, width: 30, right: 0}]} />
-          </View>
-        </LinearGradient>
-      </ScrollView>
 
-     
+          {adviceItems.map((item) => (
+            <TouchableOpacity
+              key={item.id}
+              style={styles.adviceCard}
+              activeOpacity={0.9}
+              onPress={handleOpenTreatment}
+            >
+              <View style={styles.adviceHeader}>
+                <View
+                  style={[
+                    styles.adviceTag,
+                    item.categoryStyle === "medication"
+                      ? styles.adviceTagMedication
+                      : styles.adviceTagLifestyle,
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.adviceTagText,
+                      item.categoryStyle === "medication"
+                        ? styles.adviceTagTextMedication
+                        : styles.adviceTagTextLifestyle,
+                    ]}
+                  >
+                    {item.category}
+                  </Text>
+                </View>
+                <View style={styles.adviceTimeRow}>
+                  <Clock size={14} color={COLORS.textMuted} />
+                  <Text style={styles.adviceTime}>{item.time}</Text>
+                </View>
+              </View>
+              <Text style={styles.adviceTitle}>{item.title}</Text>
+              <Text style={styles.adviceSubtitle}>{item.subtitle}</Text>
+            </TouchableOpacity>
+          ))}
+
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionLabel}>Mes consultations</Text>
+            <View style={styles.recentLegend}>
+              <Stethoscope size={13} color={COLORS.textMuted} />
+              <Text style={styles.recentLegendText}>{recentConsultations.length} résultat(s)</Text>
+            </View>
+          </View>
+
+          <View style={styles.recentCard}>
+            {recentConsultations.length === 0 ? (
+              <Text style={styles.emptyStateText}>Aucune consultation disponible pour le moment.</Text>
+            ) : (
+              recentConsultations.map((consultation, index) => {
+                const doctorName = consultation?.doctor?.full_name || "Médecin";
+                const status = formatConsultationStatus(consultation?.status);
+                const dateLabel = formatConsultationDate(consultation?.date);
+                const noteText = consultation?.notes || "Sans note clinique";
+                const rowKey = consultation?.id || consultation?.consultation_id || `consultation-${index}`;
+
+                return (
+                  <TouchableOpacity
+                    key={rowKey}
+                    style={styles.recentRow}
+                    activeOpacity={0.85}
+                    onPress={handleOpenConsultationHistory}
+                  >
+                    <View style={[styles.scoreBadge, styles.consultationBadge]}>
+                      <Stethoscope size={14} color="#FFFFFF" />
+                    </View>
+
+                    <View style={styles.consultationInfo}>
+                      <Text style={styles.recentNote} numberOfLines={1}>
+                        {doctorName}
+                      </Text>
+                      <Text style={styles.consultationSubtext} numberOfLines={1}>
+                        {noteText}
+                      </Text>
+                    </View>
+
+                    <View style={styles.consultationMeta}>
+                      <Text style={styles.recentDate}>{dateLabel}</Text>
+                      <Text style={styles.consultationStatus}>{status}</Text>
+                    </View>
+                  </TouchableOpacity>
+                );
+              })
+            )}
+          </View>
+
+          <TouchableOpacity style={styles.footerCta} activeOpacity={0.9} onPress={handleOpenTreatment}>
+            <Upload size={16} color={COLORS.accent} />
+            <Text style={styles.footerCtaText}>Ouvrir le plan de traitement</Text>
+            <ChevronRight size={14} color={COLORS.accent} />
+          </TouchableOpacity>
+        </ScrollView>
+      </LinearGradient>
     </SafeAreaView>
   );
 }
 
-// Helper component for Tabs
-const TabItem = ({ icon, label, active }) => (
-  <TouchableOpacity style={styles.tabItem}>
-    {icon}
-    <Text style={[styles.tabLabel, active && {color: COLORS.accent}]}>{label}</Text>
-  </TouchableOpacity>
-);
-
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: COLORS.background },
-  container: { flex: 1, paddingHorizontal: 20 },
-  header: {
+  safeArea: {
+    flex: 1,
+    backgroundColor: COLORS.background,
+  },
+  backgroundGradient: {
+    flex: 1,
+  },
+  container: {
+    flex: 1,
+    paddingHorizontal: 16,
+  },
+  contentContainer: {
+    paddingTop: 12,
+    paddingBottom: 110,
+  },
+  headerRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginTop: 30,
-    marginBottom: 30,
+    marginBottom: 14,
   },
-  greetingText: { fontSize: 22, fontWeight: "bold", color: COLORS.textDark },
-  subGreeting: { fontSize: 14, color: COLORS.textLight, marginTop: 4 },
-  profileImage: { width: 55, height: 55, borderRadius: 27.5, borderWidth: 2, borderColor: '#fff' },
-  
-  // Appointment Card
-  card: {
-    backgroundColor: COLORS.white,
+  headerGreeting: {
+    fontSize: 18,
+    color: COLORS.textSecondary,
+    fontWeight: "500",
+  },
+  headerName: {
+    marginTop: 2,
+    fontSize: 30,
+    lineHeight: 34,
+    color: COLORS.textPrimary,
+    fontWeight: "800",
+  },
+  dataErrorText: {
+    color: COLORS.danger,
+    fontSize: 13,
+    fontWeight: "600",
+    marginBottom: 10,
+  },
+  headerActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  avatarBadge: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#3FA08E",
+  },
+  avatarText: {
+    color: "#FFFFFF",
+    fontWeight: "700",
+    fontSize: 14,
+  },
+  notificationButton: {
+    width: 36,
+    height: 36,
     borderRadius: 18,
-    padding: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 2,
-    marginBottom: 30,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#E3EBEE",
   },
-  cardTopRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 15 },
-  videoIconContainer: { backgroundColor: '#EBF2FF', padding: 10, borderRadius: 12, marginRight: 12 },
-  cardHeaderTitle: { fontSize: 15, fontWeight: '600', color: COLORS.textDark },
-  divider: { height: 1, backgroundColor: '#F1F3F7', width: '100%', marginBottom: 15 },
-  doctorInfoRow: { flexDirection: "row", justifyContent: 'space-between', alignItems: "center" },
-  doctorTextContainer: { flex: 1 },
-  consultType: { fontSize: 16, fontWeight: "bold", color: COLORS.textDark, marginBottom: 4 },
-  doctorName: { fontSize: 14, color: COLORS.secondary, marginBottom: 4 },
-  appointmentTime: { fontSize: 13, color: COLORS.textLight },
-  doctorThumb: { width: 50, height: 50, borderRadius: 25 },
-  detailsButton: { 
-    alignSelf: 'flex-end', 
-    flexDirection: 'row', 
-    alignItems: 'center', 
-    backgroundColor: '#F7F9FC', 
-    paddingVertical: 8, 
-    paddingHorizontal: 15, 
-    borderRadius: 10,
-    marginTop: 10
+  alertCard: {
+    backgroundColor: "#CFEAE5",
+    borderRadius: 16,
+    padding: 14,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: "#B7DDD6",
   },
-  detailsButtonText: { color: COLORS.accent, fontSize: 13, fontWeight: "bold", marginRight: 5 },
-
-  // History Section
-  sectionHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: 'center', marginBottom: 15 },
-  sectionTitle: { fontSize: 17, fontWeight: "bold", color: COLORS.textDark },
-  viewAllText: { color: COLORS.accent, fontWeight: "600", fontSize: 13 },
-  historyRow: { flexDirection: "row", justifyContent: 'space-between', marginBottom: 25 },
-  smallCard: { 
-    width: '48%',
-    backgroundColor: COLORS.white, 
-    borderRadius: 15, 
+  alertPill: {
+    alignSelf: "flex-start",
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 999,
+    backgroundColor: "rgba(11,125,110,0.12)",
+    marginBottom: 10,
+  },
+  alertPillText: {
+    color: "#236A60",
+    fontWeight: "600",
+    fontSize: 12,
+  },
+  alertTitleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 10,
+  },
+  alertTitle: {
+    flex: 1,
+    color: COLORS.textPrimary,
+    fontSize: 28,
+    lineHeight: 31,
+    fontWeight: "800",
+  },
+  alertSubtitle: {
+    marginTop: 6,
+    color: "#315A55",
+    fontSize: 15,
+    fontWeight: "500",
+  },
+  alertDate: {
+    marginTop: 4,
+    color: "#6B837F",
+    fontSize: 12,
+    fontWeight: "500",
+  },
+  metricRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    marginBottom: 12,
+  },
+  metricChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 999,
+  },
+  metricWarning: {
+    backgroundColor: COLORS.warningSoft,
+  },
+  metricInfo: {
+    backgroundColor: COLORS.infoSoft,
+  },
+  metricChipText: {
+    fontSize: 12,
+    fontWeight: "700",
+  },
+  sectionHeader: {
+    marginTop: 14,
+    marginBottom: 8,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  sectionLabel: {
+    fontSize: 33,
+    lineHeight: 35,
+    color: COLORS.textPrimary,
+    fontWeight: "800",
+    marginTop: 4,
+    marginBottom: 8,
+  },
+  sectionAction: {
+    color: COLORS.accent,
+    fontWeight: "700",
+    fontSize: 14,
+  },
+  comparisonCard: {
+    backgroundColor: COLORS.surface,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: "#E2E8EC",
     padding: 12,
-    shadowColor: "#000",
-    shadowOpacity: 0.03,
-    shadowRadius: 8,
-    elevation: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
   },
-  smallCardTitle: { fontSize: 14, fontWeight: "bold", color: COLORS.textDark, marginBottom: 10 },
-  skinImageMain: { width: '100%', height: 70, borderRadius: 8, marginBottom: 8 },
-  diagnosisName: { fontSize: 13, fontWeight: "bold", color: COLORS.textDark },
-  lastConsult: { fontSize: 10, color: COLORS.textLight, marginTop: 2 },
-  photoGrid: { flexDirection: "row", justifyContent: 'space-between', marginBottom: 10 },
-  gridThumb: { width: 45, height: 45, borderRadius: 6 },
-  photoCount: { fontSize: 11, color: COLORS.textLight },
-
-  // Premium Banner
-  premiumBanner: { 
-    borderRadius: 20, 
-    padding: 20, 
-    flexDirection: 'row', 
-    height: 160,
-    overflow: 'hidden'
+  comparisonIconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    backgroundColor: COLORS.accentSoft,
+    alignItems: "center",
+    justifyContent: "center",
   },
-  premiumLeft: { flex: 2, justifyContent: 'center' },
-  premiumTitle: { color: COLORS.white, fontSize: 18, fontWeight: 'bold', marginBottom: 6 },
-  premiumSub: { color: 'rgba(255,255,255,0.8)', fontSize: 12, marginBottom: 15 },
-  uploadButton: { 
-    backgroundColor: COLORS.white, 
-    flexDirection: 'row', 
-    alignItems: 'center', 
-    paddingVertical: 12, 
-    paddingHorizontal: 15, 
-    borderRadius: 12,
-    alignSelf: 'flex-start'
+  comparisonBody: {
+    flex: 1,
   },
-  uploadText: { color: COLORS.accent, fontWeight: 'bold', fontSize: 13 },
-  bottleContainer: { position: 'absolute', right: 10, bottom: -10, flexDirection: 'row', alignItems: 'flex-end' },
-  bottle: { backgroundColor: 'rgba(255,255,255,0.2)', borderTopLeftRadius: 5, borderTopRightRadius: 5 },
-
-  // Bottom Navigation
-  tabBar: { 
-    position: 'absolute', 
-    bottom: 0, 
-    left: 0, 
-    right: 0, 
-    height: 85, 
-    backgroundColor: COLORS.white, 
-    flexDirection: 'row', 
-    justifyContent: 'space-around', 
-    paddingTop: 10,
-    borderTopWidth: 1,
-    borderTopColor: '#F1F3F7'
+  comparisonTitle: {
+    color: COLORS.textPrimary,
+    fontSize: 18,
+    lineHeight: 22,
+    fontWeight: "800",
   },
-  tabItem: { alignItems: 'center' },
-  tabLabel: { fontSize: 11, color: COLORS.textLight, marginTop: 5 }
+  comparisonSubtitle: {
+    marginTop: 3,
+    color: COLORS.textSecondary,
+    fontSize: 13,
+    fontWeight: "500",
+  },
+  adviceCard: {
+    backgroundColor: COLORS.surface,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: "#E2E8EC",
+    padding: 12,
+    marginBottom: 10,
+  },
+  adviceHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  adviceTag: {
+    borderRadius: 999,
+    paddingHorizontal: 9,
+    paddingVertical: 4,
+  },
+  adviceTagMedication: {
+    backgroundColor: "#D8F2EA",
+  },
+  adviceTagLifestyle: {
+    backgroundColor: "#FBE8B6",
+  },
+  adviceTagText: {
+    fontSize: 11,
+    fontWeight: "700",
+  },
+  adviceTagTextMedication: {
+    color: "#187E6D",
+  },
+  adviceTagTextLifestyle: {
+    color: "#9A6808",
+  },
+  adviceTimeRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+  },
+  adviceTime: {
+    color: COLORS.textMuted,
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  adviceTitle: {
+    color: COLORS.textPrimary,
+    fontSize: 28,
+    lineHeight: 30,
+    fontWeight: "800",
+  },
+  adviceSubtitle: {
+    marginTop: 3,
+    color: COLORS.textSecondary,
+    fontSize: 16,
+    fontWeight: "500",
+  },
+  recentLegend: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    marginTop: 8,
+  },
+  recentLegendText: {
+    color: COLORS.textMuted,
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  recentCard: {
+    backgroundColor: COLORS.surface,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: "#E2E8EC",
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+  },
+  recentRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    minHeight: 44,
+    borderBottomColor: "#EEF2F4",
+    borderBottomWidth: 1,
+    gap: 8,
+    paddingVertical: 6,
+  },
+  scoreBadge: {
+    minWidth: 48,
+    borderRadius: 10,
+    paddingVertical: 5,
+    paddingHorizontal: 8,
+    alignItems: "center",
+  },
+  consultationBadge: {
+    minWidth: 34,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: COLORS.accent,
+    justifyContent: "center",
+  },
+  scoreGood: {
+    backgroundColor: COLORS.success,
+  },
+  scoreBad: {
+    backgroundColor: COLORS.danger,
+  },
+  scoreAverage: {
+    backgroundColor: "#C58A12",
+  },
+  scoreBadgeText: {
+    color: "#FFFFFF",
+    fontWeight: "800",
+    fontSize: 13,
+  },
+  recentNote: {
+    color: COLORS.textPrimary,
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  consultationInfo: {
+    flex: 1,
+  },
+  consultationSubtext: {
+    marginTop: 2,
+    color: COLORS.textMuted,
+    fontSize: 12,
+    fontWeight: "500",
+  },
+  consultationMeta: {
+    alignItems: "flex-end",
+    gap: 2,
+  },
+  recentDate: {
+    color: COLORS.textPrimary,
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  consultationStatus: {
+    color: COLORS.accent,
+    fontSize: 11,
+    fontWeight: "700",
+  },
+  emptyStateText: {
+    color: COLORS.textSecondary,
+    fontSize: 14,
+    fontWeight: "500",
+    textAlign: "center",
+    paddingVertical: 14,
+  },
+  footerCta: {
+    marginTop: 12,
+    alignSelf: "center",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    backgroundColor: "#E8F5F2",
+    borderColor: "#B8DCD5",
+    borderWidth: 1,
+    borderRadius: 999,
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+  },
+  footerCtaText: {
+    color: COLORS.accent,
+    fontWeight: "700",
+    fontSize: 13,
+  },
 });

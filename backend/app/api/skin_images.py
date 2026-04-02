@@ -3,11 +3,9 @@ from sqlalchemy.orm import Session
 from app.db.database import get_db
 from app.models.skin_image import SkinImage, ImageSource
 from app.models.patient import Patient
-from app.schemas.skin_image import SkinImageCreate, SkinImageResponse
+from app.schemas.skin_image import SkinImageResponse
 from typing import List
 import base64
-from datetime import datetime, timedelta
-from sqlalchemy import desc
 import sys
 import tempfile
 import os
@@ -45,16 +43,6 @@ async def upload_skin_image(patient_id: str, file: UploadFile = File(...), db: S
     patient = db.query(Patient).filter(Patient.id == patient_id).first()
     if not patient:
         raise HTTPException(status_code=404, detail="Patient not found")
-
-    last_image = db.query(SkinImage).filter(
-        SkinImage.patient_id == patient_id
-    ).order_by(desc(SkinImage.uploaded_at)).first()
-
-    if last_image:
-        diff = datetime.utcnow().replace(tzinfo=None) - last_image.uploaded_at.replace(tzinfo=None)
-        if diff < timedelta(minutes=1):
-            secs = int((timedelta(minutes=1) - diff).total_seconds())
-            raise HTTPException(status_code=429, detail=f"Please wait {secs} more seconds before uploading another image")
 
     if not file.content_type.startswith("image/"):
         raise HTTPException(status_code=400, detail="File must be an image")
@@ -194,6 +182,7 @@ def delete_skin_image(patient_id: str, image_id: str, db: Session = Depends(get_
 @router.post("/{patient_id}/skin-images/compare")
 async def compare_skin_images(
     patient_id: str, image_ref_id: str, image_new_id: str,
+    include_overlay: bool = True,
     db: Session = Depends(get_db)
 ):
     patient = db.query(Patient).filter(Patient.id == patient_id).first()
@@ -257,18 +246,20 @@ async def compare_skin_images(
 
         print(f"[compare] cnn_label='{cnn_label}'")
 
-        try:
-            generate_overlay = _get_overlay_fn()
-            overlay_b64 = generate_overlay(
-                ref_source=tmp_ref.name,
-                new_source=tmp_new.name,
-                verdict=result.get("verdict", ""),
-                cnn_label=cnn_label,
-            )
-        except Exception as ov_err:
-            print(f"⚠️ Overlay failed: {ov_err}")
-            import traceback; traceback.print_exc()
-            overlay_b64 = None
+        overlay_b64 = None
+        if include_overlay:
+            try:
+                generate_overlay = _get_overlay_fn()
+                overlay_b64 = generate_overlay(
+                    ref_source=tmp_ref.name,
+                    new_source=tmp_new.name,
+                    verdict=result.get("verdict", ""),
+                    cnn_label=cnn_label,
+                )
+            except Exception as ov_err:
+                print(f"⚠️ Overlay failed: {ov_err}")
+                import traceback; traceback.print_exc()
+                overlay_b64 = None
 
         return {
             "patient_id":    patient_id,

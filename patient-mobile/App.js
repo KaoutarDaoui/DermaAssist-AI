@@ -1,20 +1,23 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, AppRegistry, ActivityIndicator } from "react-native";
+import { View, Text, AppRegistry, ActivityIndicator, TouchableOpacity, Image } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { Home, BookOpen, Activity, User } from 'lucide-react-native';
+import { House as Home, BookOpen, FileText, GitCompare, User } from "lucide-react-native/icons";
 
 // Import screens
 import WelcomeScreen from './src/screens/WelcomeScreen';
 import HomeScreen from "./src/screens/HomeScreen";
 import TreatmentScreen from "./src/screens/TreatmentScreen";
-import CheckInScreen from "./src/screens/CheckInScreen";
 import ProfileScreen from "./src/screens/ProfileScreen";
 import LoginScreen from "./src/screens/LoginScreen";
 import RegisterScreen from "./src/screens/RegisterScreen";
 import ConsultationHistoryScreen from "./src/screens/ConsultationHistoryScreen";
+import ConsultationDetailsScreen from "./src/screens/ConsultationDetailsScreen";
 import PhotoUploadScreen from "./src/screens/PhotoUploadScreen";
+import ComparisonScreen from "./src/screens/ComparisonScreen";
+import HelpSupportScreen from "./src/screens/HelpSupportScreen";
+import NotificationsScreen from "./src/screens/NotificationsScreen";
 
 // Import colors
 import { colors } from "./src/constants/theme";
@@ -25,6 +28,50 @@ const Tab = createBottomTabNavigator();
 
 const ICON_COLOR = "#4A90E2";
 const INACTIVE_COLOR = "#8E9AAF";
+
+class ScreenErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error) {
+    console.error("Comparison screen crash:", error);
+  }
+
+  handleRetry = () => {
+    this.setState({ hasError: false });
+  };
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <View style={{ flex: 1, justifyContent: "center", alignItems: "center", paddingHorizontal: 24, backgroundColor: "#F9FBFF" }}>
+          <Text style={{ fontSize: 18, fontWeight: "700", color: "#1F2A33", textAlign: "center" }}>Erreur d'affichage de la comparaison</Text>
+          <Text style={{ marginTop: 8, fontSize: 13, color: "#6B7280", textAlign: "center" }}>Veuillez recharger cet ecran.</Text>
+          <TouchableOpacity
+            onPress={this.handleRetry}
+            style={{ marginTop: 14, backgroundColor: "#0F6E56", paddingHorizontal: 14, paddingVertical: 10, borderRadius: 10 }}
+          >
+            <Text style={{ color: "#FFFFFF", fontWeight: "700", fontSize: 13 }}>Recharger</Text>
+          </TouchableOpacity>
+        </View>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
+const ComparisonScreenSafe = (props) => (
+  <ScreenErrorBoundary>
+    <ComparisonScreen {...props} />
+  </ScreenErrorBoundary>
+);
 
 // Tab Navigator with all app screens
 const TabNavigator = () => {
@@ -37,8 +84,10 @@ const TabNavigator = () => {
             return <Home size={24} color={focused ? ICON_COLOR : INACTIVE_COLOR} />;
           } else if (route.name === "Treatment") {
             return <BookOpen size={24} color={focused ? ICON_COLOR : INACTIVE_COLOR} />;
-          } else if (route.name === "CheckIn") {
-            return <Activity size={24} color={focused ? ICON_COLOR : INACTIVE_COLOR} />;
+          } else if (route.name === "Consultations") {
+            return <FileText size={24} color={focused ? ICON_COLOR : INACTIVE_COLOR} />;
+          } else if (route.name === "Comparison") {
+            return <GitCompare size={24} color={focused ? ICON_COLOR : INACTIVE_COLOR} />;
           } else if (route.name === "Profile") {
             return <User size={24} color={focused ? ICON_COLOR : INACTIVE_COLOR} />;
           }
@@ -49,8 +98,10 @@ const TabNavigator = () => {
             label = "Accueil";
           } else if (route.name === "Treatment") {
             label = "Traitement";
-          } else if (route.name === "CheckIn") {
-            label = "Check-in";
+          } else if (route.name === "Consultations") {
+            label = "Consultations";
+          } else if (route.name === "Comparison") {
+            label = "Comparaison";
           } else if (route.name === "Profile") {
             label = "Profil";
           }
@@ -80,9 +131,14 @@ const TabNavigator = () => {
         options={{ title: "Traitement" }}
       />
       <Tab.Screen 
-        name="CheckIn" 
-        component={CheckInScreen} 
-        options={{ title: "Check-in" }}
+        name="Consultations" 
+        component={ConsultationHistoryScreen} 
+        options={{ title: "Consultations" }}
+      />
+      <Tab.Screen
+        name="Comparison"
+        component={ComparisonScreenSafe}
+        options={{ title: "Comparaison" }}
       />
       <Tab.Screen 
         name="Profile" 
@@ -126,9 +182,21 @@ const AppNavigator = () => {
         name="ConsultationHistory" 
         component={ConsultationHistoryScreen}
       />
+      <Stack.Screen
+        name="ConsultationDetails"
+        component={ConsultationDetailsScreen}
+      />
       <Stack.Screen 
         name="PhotoUpload" 
         component={PhotoUploadScreen}
+      />
+      <Stack.Screen
+        name="HelpSupport"
+        component={HelpSupportScreen}
+      />
+      <Stack.Screen
+        name="Notifications"
+        component={NotificationsScreen}
       />
     </Stack.Navigator>
   );
@@ -146,7 +214,11 @@ const App = () => {
   if (!ready) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#F9FBFF" }}>
-        <Text style={{ fontSize: 40, marginBottom: 24 }}>🏥</Text>
+        <Image
+          source={require("./assets/logo/green_logoSkin.png")}
+          style={{ width: 130, height: 130, marginBottom: 18 }}
+          resizeMode="contain"
+        />
         <ActivityIndicator size="large" color={ICON_COLOR} />
         <Text style={{ marginTop: 16, color: "#8E9AAF" }}>Chargement...</Text>
       </View>

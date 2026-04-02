@@ -1,58 +1,38 @@
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   View,
   Text,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
-  Image,
   SafeAreaView,
+  ActivityIndicator,
 } from "react-native";
-import { BookOpen, AlertCircle, CheckCircle, Clock, Pill } from 'lucide-react-native';
+import {
+  BookOpen,
+  CircleAlert as AlertCircle,
+  CircleCheck as CheckCircle,
+  Pill,
+} from "lucide-react-native/icons";
+import patientDataService from "../services/patientDataService";
 
 const COLORS = {
-  primary: "#2D4A85",
-  secondary: "#7A869A",
-  accent: "#4A90E2",
-  background: "#F9FBFF",
+  primary: "#16634D",
+  secondary: "#6F7F78",
+  accent: "#1B8F6B",
+  background: "#F3FBF7",
   white: "#FFFFFF",
   textDark: "#333333",
-  textLight: "#8E9AAF",
-  success: "#10B981",
+  textLight: "#7E8F88",
+  success: "#17996E",
   warning: "#F59E0B",
   danger: "#EF4444",
 };
 
 export default function TreatmentScreen() {
-  const treatments = [
-    {
-      id: 1,
-      name: "Crème Dermatologique",
-      status: "active",
-      duration: "2 semaines",
-      dosage: "2x par jour",
-      icon: Pill,
-      color: COLORS.success,
-    },
-    {
-      id: 2,
-      name: "Lotion Hydratante",
-      status: "completed",
-      duration: "Complété",
-      dosage: "Tous les jours",
-      icon: CheckCircle,
-      color: COLORS.success,
-    },
-    {
-      id: 3,
-      name: "Soin Spécialisé",
-      status: "pending",
-      duration: "3 semaines",
-      dosage: "1x par jour",
-      icon: Clock,
-      color: COLORS.warning,
-    },
-  ];
+  const [medications, setMedications] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const tips = [
     "Appliquez la crème sur peau propre et sèche",
@@ -60,6 +40,58 @@ export default function TreatmentScreen() {
     "Utilisez un SPF 30 minimum quotidiennement",
     "Consultez votre médecin si irritation persiste",
   ];
+
+  useEffect(() => {
+    let isActive = true;
+
+    const loadMedications = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const aiMedications = await patientDataService.getAIMedications();
+        if (!isActive) {
+          return;
+        }
+
+        setMedications(Array.isArray(aiMedications) ? aiMedications : []);
+      } catch (fetchError) {
+        console.error("Error loading AI medications:", fetchError);
+        if (!isActive) {
+          return;
+        }
+        setError("Impossible de charger les médicaments proposés.");
+      } finally {
+        if (isActive) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadMedications();
+
+    return () => {
+      isActive = false;
+    };
+  }, []);
+
+  const treatmentRows = useMemo(() => {
+    return medications.map((medication) => {
+      const rawStatus = String(medication?.status || "propose").toLowerCase();
+      const mappedStatus = rawStatus === "completed" ? "completed" : rawStatus === "pending" ? "pending" : "active";
+
+      return {
+        id: medication.id,
+        name: medication.name || "Médicament",
+        status: mappedStatus,
+        duration: medication.drug_class || "Prescription issue de AI results",
+        dosage: medication.dosage || "Posologie non précisée",
+        indication: medication.indication || "Indication non précisée",
+        icon: mappedStatus === "completed" ? CheckCircle : Pill,
+        color: mappedStatus === "completed" ? COLORS.success : mappedStatus === "pending" ? COLORS.warning : COLORS.accent,
+      };
+    });
+  }, [medications]);
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -80,29 +112,59 @@ export default function TreatmentScreen() {
         </View>
 
         {/* Active Treatments */}
-        <Text style={styles.sectionTitle}>Traitements Actifs</Text>
-        {treatments.map((treatment) => (
-          <TouchableOpacity key={treatment.id} style={styles.treatmentCard}>
-            <View style={styles.treatmentHeader}>
-              <View style={[styles.statusIcon, { backgroundColor: `${treatment.color}20` }]}>
-                <treatment.icon size={20} color={treatment.color} />
-              </View>
-              <View style={styles.treatmentInfo}>
-                <Text style={styles.treatmentName}>{treatment.name}</Text>
-                <Text style={styles.treatmentDuration}>{treatment.duration}</Text>
-              </View>
-              <View style={[styles.statusBadge, { backgroundColor: `${treatment.color}20` }]}>
-                <Text style={[styles.statusText, { color: treatment.color }]}>
-                  {treatment.status === 'active' ? 'Actif' : treatment.status === 'completed' ? '✓ Fait' : 'Attente'}
-                </Text>
-              </View>
-            </View>
-            <View style={styles.dosageInfo}>
-              <Text style={styles.dosageLabel}>Posologie:</Text>
-              <Text style={styles.dosageValue}>{treatment.dosage}</Text>
-            </View>
-          </TouchableOpacity>
-        ))}
+        <Text style={styles.sectionTitle}>Médicaments proposés par le médecin</Text>
+
+        {loading ? (
+          <View style={styles.loadingBlock}>
+            <ActivityIndicator size="small" color={COLORS.accent} />
+            <Text style={styles.loadingText}>Chargement des traitements...</Text>
+          </View>
+        ) : null}
+
+        {error ? <Text style={styles.errorText}>{error}</Text> : null}
+
+        {!loading && !error && treatmentRows.length === 0 ? (
+          <View style={styles.emptyTreatmentsCard}>
+            <Text style={styles.emptyTreatmentsText}>
+              Aucun médicament trouvé dans la base AI Results pour ce patient.
+            </Text>
+          </View>
+        ) : null}
+
+        {!loading && !error
+          ? treatmentRows.map((treatment) => (
+              <TouchableOpacity key={treatment.id} style={styles.treatmentCard} activeOpacity={0.9}>
+                <View style={styles.treatmentHeader}>
+                  <View style={[styles.statusIcon, { backgroundColor: `${treatment.color}20` }]}>
+                    <treatment.icon size={20} color={treatment.color} />
+                  </View>
+                  <View style={styles.treatmentInfo}>
+                    <Text style={styles.treatmentName}>{treatment.name}</Text>
+                    <Text style={styles.treatmentDuration}>{treatment.duration}</Text>
+                  </View>
+                  <View style={[styles.statusBadge, { backgroundColor: `${treatment.color}20` }]}>
+                    <Text style={[styles.statusText, { color: treatment.color }]}>
+                      {treatment.status === "active"
+                        ? "Actif"
+                        : treatment.status === "completed"
+                          ? "✓ Fait"
+                          : "Attente"}
+                    </Text>
+                  </View>
+                </View>
+
+                <View style={styles.dosageInfo}>
+                  <Text style={styles.dosageLabel}>Posologie:</Text>
+                  <Text style={styles.dosageValue}>{treatment.dosage}</Text>
+                </View>
+
+                <View style={styles.indicationRow}>
+                  <Text style={styles.indicationLabel}>Indication:</Text>
+                  <Text style={styles.indicationValue}>{treatment.indication}</Text>
+                </View>
+              </TouchableOpacity>
+            ))
+          : null}
 
         {/* Treatment Tips */}
         <Text style={styles.sectionTitle}>Conseils Importants</Text>
@@ -156,7 +218,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   headerIcon: {
-    backgroundColor: "#EBF2FF",
+    backgroundColor: "#E6F6EF",
     padding: 12,
     borderRadius: 12,
   },
@@ -166,6 +228,37 @@ const styles = StyleSheet.create({
     color: COLORS.textDark,
     marginBottom: 15,
     marginTop: 10,
+  },
+  loadingBlock: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 12,
+  },
+  loadingText: {
+    marginTop: 8,
+    color: COLORS.textLight,
+    fontSize: 13,
+    fontWeight: "500",
+  },
+  errorText: {
+    color: COLORS.danger,
+    fontSize: 13,
+    fontWeight: "600",
+    marginBottom: 12,
+  },
+  emptyTreatmentsCard: {
+    backgroundColor: COLORS.white,
+    borderRadius: 15,
+    padding: 16,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: "#EEF2F6",
+  },
+  emptyTreatmentsText: {
+    color: COLORS.textLight,
+    fontSize: 13,
+    lineHeight: 18,
+    fontWeight: "500",
   },
   treatmentCard: {
     backgroundColor: COLORS.white,
@@ -229,6 +322,22 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: COLORS.textDark,
     marginLeft: 8,
+  },
+  indicationRow: {
+    flexDirection: "row",
+    paddingTop: 8,
+  },
+  indicationLabel: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: COLORS.textLight,
+  },
+  indicationValue: {
+    flex: 1,
+    fontSize: 12,
+    color: COLORS.textDark,
+    marginLeft: 8,
+    lineHeight: 17,
   },
   tipsContainer: {
     backgroundColor: COLORS.white,

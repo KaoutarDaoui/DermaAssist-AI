@@ -21,7 +21,7 @@ import {
   Calendar,
   MapPin,
   ChevronLeft,
-} from "lucide-react-native";
+} from "lucide-react-native/icons";
 
 const COLORS = {
   primary: "#2D4A85",

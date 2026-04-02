@@ -1,23 +1,25 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Platform } from 'react-native';
 
-// For Android Emulator: 10.0.2.2
-// For Physical Device: Use your machine's IP address (e.g., http://192.168.x.x:8000)
-//const API_URL = 'http://10.21.138.178:8000';
-const API_URL = 'http://10.0.2.2:8000';
+const API_URL =
+  process.env.EXPO_PUBLIC_API_URL ||
+  (Platform.OS === 'android' ? 'http://10.0.2.2:8000' : 'http://localhost:8000');
 
 
 class AuthService {
-  async login(username, password) {
+  async login(identifier, password) {
     try {
+      const normalizedIdentifier = (identifier || '').trim();
+      const loginPayload = normalizedIdentifier.includes('@')
+        ? { email: normalizedIdentifier, password }
+        : { username: normalizedIdentifier, password };
+
       const response = await fetch(`${API_URL}/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          username,
-          password,
-        }),
+        body: JSON.stringify(loginPayload),
       });
 
       if (!response.ok) {

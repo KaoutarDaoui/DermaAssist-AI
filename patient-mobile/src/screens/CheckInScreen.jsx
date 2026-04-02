@@ -8,7 +8,7 @@ import {
   TextInput,
   SafeAreaView,
 } from "react-native";
-import { Activity, Calendar, Smile, TrendingUp } from "lucide-react-native";
+import { Activity, Calendar, Smile, TrendingUp } from "lucide-react-native/icons";
 
 const COLORS = {
   primary: "#2D4A85",

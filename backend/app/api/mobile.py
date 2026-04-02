@@ -1,6 +1,9 @@
 """
 Mobile App API endpoints for fetching patient data
 """
+import base64
+import uuid
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.db.database import get_db
@@ -10,9 +13,88 @@ from app.models.patient import Patient
 from app.models.consultation import Consultation
 from app.models.patient_advice import PatientAdvice
 from app.models.checkin import CheckIn
+from app.models.ai_result import AIResult
+from app.models.skin_image import SkinImage
 from typing import List, Dict, Any
 
 router = APIRouter(prefix="/mobile", tags=["Mobile App"])
+
+
+def _resolve_current_user_id(current_user: dict) -> str:
+    """Resolve authenticated user id from token payload returned by get_current_user."""
+    user_id = current_user.get("user_id") or current_user.get("sub")
+    if not user_id:
+        raise HTTPException(status_code=401, detail="Invalid token payload")
+    return user_id
+
+
+def _normalize_treatment_options(treatment_options: Any) -> List[Any]:
+    """Normalize ai_results.treatment_options to a list for robust parsing."""
+    if not treatment_options:
+        return []
+
+    if isinstance(treatment_options, list):
+        return treatment_options
+
+    if isinstance(treatment_options, dict):
+        for key in ("treatment_options", "medicaments_recommandes", "medications", "items", "options"):
+            nested = treatment_options.get(key)
+            if isinstance(nested, list):
+                return nested
+        return [treatment_options]
+
+    if isinstance(treatment_options, str):
+        return [treatment_options]
+
+    return []
+
+
+def _extract_medication_fields(option: Any) -> Dict[str, Any]:
+    """Extract common medication fields from a treatment option object."""
+    if isinstance(option, str):
+        return {
+            "name": option,
+            "drug_class": None,
+            "indication": None,
+            "dosage": None,
+            "status": "propose",
+        }
+
+    if not isinstance(option, dict):
+        return {}
+
+    return {
+        "name": option.get("nom") or option.get("name") or option.get("medicament") or option.get("medication"),
+        "drug_class": option.get("classe") or option.get("class"),
+        "indication": option.get("indication") or option.get("usage") or option.get("description"),
+        "dosage": option.get("posologie") or option.get("dosage") or option.get("dose"),
+        "status": option.get("status") or "propose",
+    }
+
+
+def _serialize_skin_photo(skin_image: SkinImage) -> Dict[str, Any]:
+    """Serialize skin image with either URL or base64 data URI."""
+    if not skin_image:
+        return {
+            "image_url": None,
+            "image_data": None,
+            "source": None,
+            "uploaded_at": None,
+        }
+
+    image_data = None
+    if skin_image.image_data:
+        encoded_image = base64.b64encode(skin_image.image_data).decode("utf-8")
+        image_data = f"data:image/jpeg;base64,{encoded_image}"
+
+    source = skin_image.source.value if skin_image.source else None
+
+    return {
+        "image_url": skin_image.minio_url,
+        "image_data": image_data,
+        "source": source,
+        "uploaded_at": skin_image.uploaded_at.isoformat() if skin_image.uploaded_at else None,
+    }
 
 
 @router.get("/patient/profile")
@@ -22,7 +104,7 @@ def get_patient_profile(
 ) -> Dict[str, Any]:
     """Récupérer le profil complet du patient connecté"""
     
-    user_id = current_user.get("sub")
+    user_id = _resolve_current_user_id(current_user)
     user = db.query(User).filter(User.id == user_id).first()
     
     if not user:
@@ -61,7 +143,7 @@ def get_patient_consultations(
 ) -> List[Dict[str, Any]]:
     """Récupérer l'historique des consultations du patient"""
     
-    user_id = current_user.get("sub")
+    user_id = _resolve_current_user_id(current_user)
     patient = db.query(Patient).filter(Patient.user_id == user_id).first()
     
     if not patient:
@@ -96,7 +178,7 @@ def get_patient_advice(
 ) -> List[Dict[str, Any]]:
     """Récupérer les conseils et traitements recommandés du patient"""
     
-    user_id = current_user.get("sub")
+    user_id = _resolve_current_user_id(current_user)
     patient = db.query(Patient).filter(Patient.user_id == user_id).first()
     
     if not patient:
@@ -124,6 +206,164 @@ def get_patient_advice(
     return result
 
 
+@router.get("/patient/ai-results-history")
+def get_patient_ai_results_history(
+    current_user: dict = Depends(get_current_user),
+    db: Session = Depends(get_db)
+) -> List[Dict[str, Any]]:
+    """Récupérer l'historique AI du patient (format proche du site web)."""
+
+    user_id = _resolve_current_user_id(current_user)
+    patient = db.query(Patient).filter(Patient.user_id == user_id).first()
+
+    if not patient:
+        raise HTTPException(status_code=404, detail="Patient not found")
+
+    ai_results = (
+        db.query(AIResult)
+        .filter(AIResult.patient_id == patient.id)
+        .order_by(AIResult.generated_at.desc())
+        .all()
+    )
+
+    return [
+        {
+            "id": str(result.id),
+            "patient_id": str(result.patient_id),
+            "consultation_id": result.consultation_id,
+            "diagnosis": result.diagnosis,
+            "confidence": result.confidence,
+            "generated_at": result.generated_at.isoformat() if result.generated_at else None,
+        }
+        for result in ai_results
+    ]
+
+
+@router.get("/patient/ai-results/{ai_result_id}")
+def get_patient_ai_result_details(
+    ai_result_id: str,
+    current_user: dict = Depends(get_current_user),
+    db: Session = Depends(get_db)
+) -> Dict[str, Any]:
+    """Récupérer les détails d'une consultation AI (diagnostic, traitement, photo)."""
+
+    user_id = _resolve_current_user_id(current_user)
+    patient = db.query(Patient).filter(Patient.user_id == user_id).first()
+
+    if not patient:
+        raise HTTPException(status_code=404, detail="Patient not found")
+
+    try:
+        ai_result_uuid = uuid.UUID(ai_result_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail="Invalid ai_result_id") from exc
+
+    ai_result = (
+        db.query(AIResult)
+        .filter(AIResult.id == ai_result_uuid, AIResult.patient_id == patient.id)
+        .first()
+    )
+
+    if not ai_result:
+        raise HTTPException(status_code=404, detail="AI result not found")
+
+    medications: List[Dict[str, Any]] = []
+    options = _normalize_treatment_options(ai_result.treatment_options)
+    for option in options:
+        parsed = _extract_medication_fields(option)
+        name = str(parsed.get("name") or "").strip()
+        if not name:
+            continue
+
+        medications.append({
+            "name": name,
+            "drug_class": parsed.get("drug_class"),
+            "indication": parsed.get("indication"),
+            "dosage": parsed.get("dosage"),
+            "status": parsed.get("status") or "propose",
+        })
+
+    skin_image = None
+    if ai_result.skin_image_id:
+        skin_image = db.query(SkinImage).filter(SkinImage.id == ai_result.skin_image_id).first()
+
+    if not skin_image and ai_result.consultation_id:
+        consultation = (
+            db.query(Consultation)
+            .filter(Consultation.consultation_id == ai_result.consultation_id)
+            .first()
+        )
+        if consultation:
+            skin_image = (
+                db.query(SkinImage)
+                .filter(SkinImage.consultation_id == consultation.id)
+                .order_by(SkinImage.uploaded_at.desc())
+                .first()
+            )
+
+    return {
+        "id": str(ai_result.id),
+        "consultation_id": ai_result.consultation_id,
+        "diagnosis": ai_result.diagnosis,
+        "confidence": ai_result.confidence,
+        "generated_at": ai_result.generated_at.isoformat() if ai_result.generated_at else None,
+        "medications": medications,
+        "skin_photo": _serialize_skin_photo(skin_image),
+    }
+
+
+@router.get("/patient/ai-medications")
+def get_patient_ai_medications(
+    current_user: dict = Depends(get_current_user),
+    db: Session = Depends(get_db)
+) -> List[Dict[str, Any]]:
+    """Récupérer les médicaments proposés depuis ai_results.treatment_options."""
+
+    user_id = _resolve_current_user_id(current_user)
+    patient = db.query(Patient).filter(Patient.user_id == user_id).first()
+
+    if not patient:
+        raise HTTPException(status_code=404, detail="Patient not found")
+
+    ai_results = (
+        db.query(AIResult)
+        .filter(AIResult.patient_id == patient.id)
+        .order_by(AIResult.generated_at.desc())
+        .all()
+    )
+
+    medications: List[Dict[str, Any]] = []
+    seen = set()
+
+    for ai_result in ai_results:
+        options = _normalize_treatment_options(ai_result.treatment_options)
+        for option in options:
+            parsed = _extract_medication_fields(option)
+            name = str(parsed.get("name") or "").strip()
+            if not name:
+                continue
+
+            dedupe_key = (name.lower(), str(parsed.get("dosage") or "").strip().lower())
+            if dedupe_key in seen:
+                continue
+
+            seen.add(dedupe_key)
+            medications.append({
+                "id": f"{ai_result.id}-{len(medications)}",
+                "ai_result_id": str(ai_result.id),
+                "consultation_id": ai_result.consultation_id,
+                "name": name,
+                "drug_class": parsed.get("drug_class"),
+                "indication": parsed.get("indication"),
+                "dosage": parsed.get("dosage"),
+                "status": parsed.get("status") or "propose",
+                "recommended_by": "Médecin",
+                "recommended_at": ai_result.generated_at.isoformat() if ai_result.generated_at else None,
+            })
+
+    return medications
+
+
 @router.get("/patient/checkins")
 def get_patient_checkins(
     current_user: dict = Depends(get_current_user),
@@ -131,7 +371,7 @@ def get_patient_checkins(
 ) -> List[Dict[str, Any]]:
     """Récupérer l'historique des check-ins du patient"""
     
-    user_id = current_user.get("sub")
+    user_id = _resolve_current_user_id(current_user)
     patient = db.query(Patient).filter(Patient.user_id == user_id).first()
     
     if not patient:

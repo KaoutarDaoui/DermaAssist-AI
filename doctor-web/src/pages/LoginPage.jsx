@@ -47,7 +47,7 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
       <div className="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
         <h1 className="text-3xl font-bold text-center mb-8 text-gray-800">
-          DermAssist AI
+          Skin+
         </h1>
         
         <form onSubmit={handleSubmit} className="space-y-4">

@@ -1,4 +1,4 @@
-# DermAssist Patient Mobile App
+# Skin+ Patient Mobile App
 
 Application mobile React Native pour les patients - Suivi des conseils médicaux, check-ins quotidiens, et upload de photos.
 

@@ -15,13 +15,14 @@ import {
   ChevronLeft,
   Camera,
   Upload,
-  ImageIcon,
-  CheckCircle,
+  Image as ImageIcon,
+  CircleCheck as CheckCircle,
   Lightbulb,
-  AlertCircle,
+  CircleAlert as AlertCircle,
   Send,
   X,
-} from "lucide-react-native";
+} from "lucide-react-native/icons";
+import patientDataService from "../services/patientDataService";
 
 const COLORS = {
   primary: "#2D4A85",
@@ -81,13 +82,13 @@ export default function PhotoUploadScreen({ navigation }) {
 
     setUploading(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      Alert.alert("Succès", "Photo envoyée avec succès à votre médecin");
+      await patientDataService.uploadSkinImage(selectedImage);
+      Alert.alert("Succès", "Photo enregistrée avec succès dans votre suivi");
       setSelectedImage(null);
       setNotes("");
       setTimeout(() => navigation.goBack(), 500);
     } catch (error) {
-      Alert.alert("Erreur", "Échec de l'envoi");
+      Alert.alert("Erreur", error?.message || "Échec de l'envoi");
     } finally {
       setUploading(false);
     }

@@ -1,4 +1,4 @@
-# DermAssist Doctor Web
+# Skin+ Doctor Web
 
 Interface web pour les dermatologues - Gestion des dossiers patients, analyse d'images cutanées, et assistance AI.
 

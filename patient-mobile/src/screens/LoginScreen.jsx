@@ -9,21 +9,26 @@ import {
   KeyboardAvoidingView,
   Platform,
   Dimensions,
-  Image,
   SafeAreaView,
-  ActivityIndicator
+  ActivityIndicator,
 } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
+import { Mail, Shield, ChevronLeft } from "lucide-react-native/icons";
 import authService from '../services/authService';
 
 const { width } = Dimensions.get('window');
 
 const COLORS = {
-  primary: '#1565D8',
-  textDark: '#2D3748',
-  textGray: '#718096',
-  border: '#E2E8F0',
+  accent: '#0F6E56',
+  accentDark: '#0A4D3D',
+  accentSoft: '#D6EFE8',
+  textPrimary: '#14222F',
+  textSecondary: '#5E6B76',
+  textMuted: '#8D99A4',
+  border: '#DCE6EB',
   white: '#FFFFFF',
-  background: '#F0F4F8',
+  background: '#EEF4F6',
+  danger: '#E65B5B',
 };
 
 export default function LoginScreen({ navigation }) {
@@ -42,15 +47,13 @@ export default function LoginScreen({ navigation }) {
       const result = await authService.login(username, password);
       
       if (result && result.access_token) {
-        // Navigation will be replaced by the app's auth state management
-        // The app should check for stored token on startup
         navigation.replace("MainApp");
       } else {
-        Alert.alert("Erreur", "Login failed");
+        Alert.alert("Erreur", "Echec de la connexion");
       }
     } catch (error) {
       console.error('Login error:', error);
-      Alert.alert("Erreur", error.message || "Échec de la connexion");
+      Alert.alert("Erreur", error.message || "Echec de la connexion");
     } finally {
       setLoading(false);
     }
@@ -62,63 +65,90 @@ export default function LoginScreen({ navigation }) {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.container}
       >
-        <View style={styles.card}>
-          <Text style={styles.title}>Connexion</Text>
+        <LinearGradient
+          colors={["#F6FBFA", "#EAF2F4"]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.gradientBackground}
+        >
+          <View style={styles.decorCircleTop} />
+          <View style={styles.decorCircleBottom} />
 
-          {/* Doctor Visual */}
-          <View style={styles.visualContainer}>
-            <Image 
-              source={{ uri: 'https://cdn-icons-png.flaticon.com/512/2785/2785482.png' }}
-              style={styles.visualImage}
-              resizeMode="contain"
-            />
+          <View style={styles.card}>
+            <TouchableOpacity
+              style={styles.backButton}
+              onPress={() => navigation.goBack()}
+              activeOpacity={0.8}
+            >
+              <ChevronLeft size={18} color={COLORS.accent} />
+              <Text style={styles.backButtonText}>Retour</Text>
+            </TouchableOpacity>
+
+            <View style={styles.brandPill}>
+              <Text style={styles.brandPillText}>Skin+</Text>
+            </View>
+
+            <Text style={styles.title}>Connexion</Text>
+            <Text style={styles.subtitle}>Accédez a votre espace patient sécurisé.</Text>
+
+            <View style={styles.inputContainer}>
+              <View style={styles.inputRow}>
+                <View style={styles.inputIconBox}>
+                  <Mail size={16} color={COLORS.accent} />
+                </View>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Email ou nom d'utilisateur"
+                  placeholderTextColor={COLORS.textMuted}
+                  value={username}
+                  onChangeText={setUsername}
+                  autoCapitalize="none"
+                  editable={!loading}
+                />
+              </View>
+
+              <View style={styles.inputRow}>
+                <View style={styles.inputIconBox}>
+                  <Shield size={16} color={COLORS.accent} />
+                </View>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Mot de passe"
+                  placeholderTextColor={COLORS.textMuted}
+                  secureTextEntry
+                  value={password}
+                  onChangeText={setPassword}
+                  editable={!loading}
+                />
+              </View>
+            </View>
+
+            <TouchableOpacity style={styles.forgotPass} activeOpacity={0.8}>
+              <Text style={styles.forgotText}>Mot de passe oublié ?</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={[styles.loginButton, loading && { opacity: 0.7 }]} 
+              onPress={handleLogin}
+              disabled={loading}
+              activeOpacity={0.9}
+            >
+              {loading ? (
+                <ActivityIndicator color={COLORS.white} size="small" />
+              ) : (
+                <Text style={styles.loginButtonText}>Se connecter</Text>
+              )}
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.registerButton}
+              onPress={() => navigation.navigate("Register")}
+              activeOpacity={0.9}
+            >
+              <Text style={styles.registerButtonText}>Créer un compte</Text>
+            </TouchableOpacity>
           </View>
-
-          {/* Input Fields */}
-          <View style={styles.inputContainer}>
-            <TextInput 
-              style={styles.input} 
-              placeholder="Nom d'utilisateur" 
-              placeholderTextColor={COLORS.textGray}
-              value={username}
-              onChangeText={setUsername}
-              autoCapitalize="none"
-              editable={!loading}
-            />
-            <TextInput 
-              style={styles.input} 
-              placeholder="Mot de passe" 
-              placeholderTextColor={COLORS.textGray}
-              secureTextEntry
-              value={password}
-              onChangeText={setPassword}
-              editable={!loading}
-            />
-          </View>
-
-          {/* Forgot Password */}
-          <TouchableOpacity style={styles.forgotPass}>
-            <Text style={styles.forgotText}>Mot de passe oublié ?</Text>
-          </TouchableOpacity>
-
-          {/* Login Button */}
-          <TouchableOpacity 
-            style={[styles.loginButton, loading && { opacity: 0.7 }]} 
-            onPress={handleLogin}
-            disabled={loading}
-            activeOpacity={0.8}
-          >
-            {loading ? (
-              <ActivityIndicator color={COLORS.white} size="small" />
-            ) : (
-              <Text style={styles.loginButtonText}>Se Connecter</Text>
-            )}
-          </TouchableOpacity>
-
-          
-
-      
-        </View>
+        </LinearGradient>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -131,116 +161,186 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
+  },
+  gradientBackground: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: COLORS.background,
+    paddingHorizontal: 16,
+  },
+  decorCircleTop: {
+    position: 'absolute',
+    top: -70,
+    right: -35,
+    width: 180,
+    height: 180,
+    borderRadius: 90,
+    backgroundColor: 'rgba(15, 110, 86, 0.09)',
+  },
+  decorCircleBottom: {
+    position: 'absolute',
+    bottom: -90,
+    left: -50,
+    width: 220,
+    height: 220,
+    borderRadius: 110,
+    backgroundColor: 'rgba(15, 110, 86, 0.08)',
   },
   card: {
-    width: width * 0.88,
+    width: width * 0.9,
     backgroundColor: COLORS.white,
-    borderRadius: 28,
-    paddingVertical: 40,
-    paddingHorizontal: 25,
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    paddingVertical: 22,
+    paddingHorizontal: 20,
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 14 },
+    shadowOpacity: 0.09,
+    shadowRadius: 24,
+    elevation: 8,
+  },
+  backButton: {
+    flexDirection: 'row',
     alignItems: 'center',
-    shadowColor: '#1E293B',
-    shadowOffset: { width: 0, height: 15 },
-    shadowOpacity: 0.12,
-    shadowRadius: 25,
-    elevation: 10,
+    alignSelf: 'flex-start',
+    backgroundColor: '#F3F8F9',
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    marginBottom: 10,
+    gap: 4,
+  },
+  backButtonText: {
+    color: COLORS.accent,
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  brandPill: {
+    alignSelf: 'flex-start',
+    backgroundColor: COLORS.accentSoft,
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    marginBottom: 10,
+  },
+  brandPillText: {
+    color: COLORS.accent,
+    fontSize: 12,
+    fontWeight: '800',
+    letterSpacing: 0.4,
   },
   title: {
-    fontSize: 32,
+    fontSize: 34,
     fontWeight: '800',
-    color: COLORS.textDark,
-    marginBottom: 24,
+    color: COLORS.textPrimary,
+    marginBottom: 4,
   },
-  visualContainer: {
-    width: 120,
-    height: 120,
-    marginBottom: 24,
-    borderRadius: 60,
-    backgroundColor: COLORS.background,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  visualImage: {
-    width: 100,
-    height: 100,
+  subtitle: {
+    fontSize: 14,
+    color: COLORS.textSecondary,
+    marginBottom: 18,
   },
   inputContainer: {
     width: '100%',
-    marginBottom: 20,
+    marginBottom: 14,
+    gap: 10,
   },
-  input: {
+  inputRow: {
     width: '100%',
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    marginBottom: 12,
+    minHeight: 52,
     borderRadius: 12,
     borderWidth: 1,
     borderColor: COLORS.border,
+    backgroundColor: '#F8FBFC',
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+  },
+  inputIconBox: {
+    width: 30,
+    height: 30,
+    borderRadius: 9,
+    backgroundColor: COLORS.accentSoft,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 8,
+  },
+  input: {
+    flex: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 4,
     fontSize: 14,
-    color: COLORS.textDark,
-    backgroundColor: COLORS.background,
+    color: COLORS.textPrimary,
   },
   forgotPass: {
     alignSelf: 'flex-end',
-    marginBottom: 20,
+    marginBottom: 18,
   },
   forgotText: {
-    color: COLORS.primary,
+    color: COLORS.accent,
     fontSize: 13,
     fontWeight: '600',
   },
   loginButton: {
     width: '100%',
-    paddingVertical: 14,
+    minHeight: 50,
     borderRadius: 12,
-    backgroundColor: COLORS.primary,
+    backgroundColor: COLORS.accent,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: COLORS.primary,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.3,
+    shadowColor: COLORS.accent,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.25,
     shadowRadius: 12,
-    elevation: 4,
-    marginBottom: 16,
+    elevation: 5,
+    marginBottom: 10,
   },
   loginButtonText: {
     color: COLORS.white,
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '700',
   },
-  socialSection: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 20,
+  registerButton: {
     width: '100%',
+    minHeight: 48,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    backgroundColor: '#F8FBFC',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  registerButtonText: {
+    color: COLORS.accentDark,
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  registerText: {
+    color: COLORS.textSecondary,
+    fontSize: 13,
+    textAlign: 'center',
+    marginTop: 12,
+  },
+  errorInline: {
+    color: COLORS.danger,
+    fontSize: 12,
+    marginBottom: 8,
+  },
+  socialSection: {
+    display: 'none',
   },
   divider: {
-    flex: 1,
-    height: 1,
+    display: 'none',
     backgroundColor: COLORS.border,
   },
   socialText: {
-    marginHorizontal: 12,
-    color: COLORS.textGray,
-    fontSize: 12,
-    fontWeight: '500',
+    display: 'none',
   },
   registerSection: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  registerText: {
-    color: COLORS.textGray,
-    fontSize: 14,
+    display: 'none',
   },
   registerLink: {
-    color: COLORS.primary,
-    fontSize: 14,
-    fontWeight: '700',
+    display: 'none',
   },
 });

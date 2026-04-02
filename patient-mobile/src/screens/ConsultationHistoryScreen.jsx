@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
+  ActivityIndicator,
   View,
   Text,
-  ScrollView,
   StyleSheet,
   TouchableOpacity,
   SafeAreaView,
@@ -10,146 +10,240 @@ import {
 } from "react-native";
 import {
   ChevronLeft,
+  FileText,
   Calendar,
-  Stethoscope,
-  CheckCircle,
-  Clock,
-  ImageIcon,
   ChevronRight,
-} from "lucide-react-native";
+} from "lucide-react-native/icons";
+import patientDataService from "../services/patientDataService";
 
 const COLORS = {
-  primary: "#2D4A85",
-  secondary: "#7A869A",
-  accent: "#4A90E2",
-  background: "#F9FBFF",
+  primary: "#0F6E56",
+  secondary: "#6B7280",
+  accent: "#0F6E56",
+  background: "#F8FAFC",
   white: "#FFFFFF",
-  textDark: "#333333",
-  textLight: "#8E9AAF",
+  textDark: "#111827",
+  textLight: "#6B7280",
   success: "#10B981",
-  lightBg: "#EBF2FF",
-  warning: "#F59E0B",
+  lightBg: "#ECFDF5",
   border: "#E5E7EB",
 };
 
-const statusColors = {
-  "Conseils envoyés": { bgColor: "#D1FAE5", textColor: COLORS.success, icon: CheckCircle },
-  "Diagnostic posé": { bgColor: "#DBEAFE", textColor: COLORS.accent, icon: CheckCircle },
-  "Suivi en cours": { bgColor: "#FEF3C7", textColor: COLORS.warning, icon: Clock },
+const formatLongDate = (value) => {
+  if (!value) return "Date non disponible";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "Date non disponible";
+  return date.toLocaleDateString("fr-FR", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+};
+
+const formatTime = (value) => {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toLocaleTimeString("fr-FR", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
+
+const formatConfidence = (confidence) => {
+  if (confidence === null || confidence === undefined) {
+    return "—";
+  }
+
+  if (typeof confidence === "number") {
+    return String(Math.round(confidence * (confidence <= 1 ? 100 : 1)));
+  }
+
+  if (typeof confidence === "string") {
+    return confidence;
+  }
+
+  if (typeof confidence === "object") {
+    const preferred = confidence.percentage ?? confidence.score ?? confidence.value;
+    if (preferred !== null && preferred !== undefined && preferred !== "") {
+      return String(preferred);
+    }
+  }
+
+  return "—";
 };
 
 export default function ConsultationHistoryScreen({ navigation }) {
-  const [consultations] = useState([
-    {
-      id: 1,
-      date: "28 Mars 2026",
-      doctorName: "Dr. Benali",
-      specialty: "Dermatologie",
-      treatment: "Consultation à Distance",
-      notes: "Traitement prescrit pour Eczéma",
-      status: "Conseils envoyés",
-      photos: 3,
-    },
-    {
-      id: 2,
-      date: "12 Mars 2026",
-      doctorName: "Dr. Benali",
-      specialty: "Dermatologie",
-      treatment: "Diagnostic Initial",
-      notes: "Eczéma identifié, plan de traitement en cours",
-      status: "Diagnostic posé",
-      photos: 5,
-    },
-    {
-      id: 3,
-      date: "28 Février 2026",
-      doctorName: "Dr. Benali",
-      specialty: "Dermatologie",
-      treatment: "Follow-up",
-      notes: "Évolution positive du traitement",
-      status: "Suivi en cours",
-      photos: 2,
-    },
-  ]);
+  const [consultations, setConsultations] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const isMountedRef = useRef(true);
+  const showBackButton = navigation.canGoBack();
 
-  const renderConsultationCard = ({ item }) => {
-    const statusInfo = statusColors[item.status] || statusColors["Suivi en cours"];
+  const loadHistory = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const history = await patientDataService.getAIResultsHistory();
 
-    return (
-      <TouchableOpacity style={styles.consultationCard} activeOpacity={0.85}>
-        {/* Header with Date and Status */}
-        <View style={styles.cardHeader}>
-          <View style={styles.dateSection}>
-            <View style={styles.dateIcon}>
-              <Calendar size={16} color={COLORS.accent} />
-            </View>
-            <Text style={styles.date}>{item.date}</Text>
-          </View>
-          <View style={[styles.statusBadge, { backgroundColor: statusInfo.bgColor }]}>
-            <Text style={[styles.statusText, { color: statusInfo.textColor }]}>
-              {item.status}
-            </Text>
-          </View>
-        </View>
+      if (!isMountedRef.current) {
+        return;
+      }
 
-        {/* Treatment Title */}
-        <Text style={styles.treatmentTitle}>{item.treatment}</Text>
-
-        {/* Doctor Info */}
-        <View style={styles.doctorSection}>
-          <View style={styles.doctorIconBg}>
-            <Stethoscope size={18} color={COLORS.accent} />
-          </View>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.doctorName}>{item.doctorName}</Text>
-            <Text style={styles.specialty}>{item.specialty}</Text>
-          </View>
-        </View>
-
-        {/* Notes */}
-        <View style={styles.notesSection}>
-          <Text style={styles.notes}>{item.notes}</Text>
-        </View>
-
-        {/* Photo Count */}
-        <View style={styles.photoSection}>
-          <View style={styles.photoIconBg}>
-            <ImageIcon size={14} color={COLORS.accent} />
-          </View>
-          <Text style={styles.photoCount}>{item.photos} photos</Text>
-        </View>
-
-        {/* View Details Link */}
-        <View style={styles.detailsLink}>
-          <Text style={styles.detailsText}>Voir tous les détails</Text>
-          <ChevronRight size={16} color={COLORS.accent} />
-        </View>
-      </TouchableOpacity>
-    );
+      setConsultations(Array.isArray(history) ? history : []);
+    } catch (loadError) {
+      console.error("Error loading consultation history:", loadError);
+      if (!isMountedRef.current) {
+        return;
+      }
+      setError("Impossible de charger l'historique des consultations.");
+    } finally {
+      if (isMountedRef.current) {
+        setLoading(false);
+      }
+    }
   };
 
-  return (
-    <SafeAreaView style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
+  const renderHeader = () => (
+    <View style={styles.header}>
+      {showBackButton ? (
         <TouchableOpacity
           onPress={() => navigation.goBack()}
           style={styles.backButton}
         >
-          <ChevronLeft size={24} color={COLORS.accent} />
+          <ChevronLeft size={22} color={COLORS.accent} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Consultations</Text>
+      ) : (
         <View style={{ width: 36 }} />
-      </View>
+      )}
+      <Text style={styles.headerTitle}>Consultations</Text>
+      <View style={{ width: 36 }} />
+    </View>
+  );
 
-      {/* Consultation List */}
+  useEffect(() => {
+    isMountedRef.current = true;
+    loadHistory();
+
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+
+  const normalizedConsultations = useMemo(() => {
+    return [...consultations].sort((a, b) => {
+      const first = a?.generated_at ? new Date(a.generated_at).getTime() : 0;
+      const second = b?.generated_at ? new Date(b.generated_at).getTime() : 0;
+      return second - first;
+    });
+  }, [consultations]);
+
+  const handleViewDetails = (item, index) => {
+    if (!item?.id) {
+      return;
+    }
+
+    navigation.navigate("ConsultationDetails", {
+      aiResultId: item.id,
+      consultationId: item?.consultation_id,
+      sequentialNumber: index + 1,
+    });
+  };
+
+  const renderConsultationCard = ({ item, index }) => {
+    const diagnosis = item?.diagnosis || "Diagnostic non disponible";
+    const confidence = formatConfidence(item?.confidence);
+    const dateLabel = formatLongDate(item?.generated_at);
+    const timeLabel = formatTime(item?.generated_at);
+
+    return (
+      <View style={styles.consultationCard}>
+        <View style={styles.analysisHeader}>
+          <View>
+            <Text style={styles.analysisLabel}>Analyse</Text>
+            <Text style={styles.analysisNumber}>#{index + 1}</Text>
+          </View>
+        </View>
+
+        <View style={styles.dateBlock}>
+          <Text style={styles.blockTitle}>Date</Text>
+          <View style={styles.dateRow}>
+            <View style={styles.dateIconBox}>
+              <Calendar size={14} color={COLORS.accent} />
+            </View>
+            <View style={styles.dateTexts}>
+              <Text style={styles.dateText}>{dateLabel}</Text>
+              {timeLabel ? <Text style={styles.timeText}>{timeLabel}</Text> : null}
+            </View>
+          </View>
+        </View>
+
+        <View style={styles.diagnosisBlock}>
+          <Text style={styles.blockTitle}>Diagnostic</Text>
+          <Text style={styles.diagnosisText}>{diagnosis}</Text>
+          <Text style={styles.confidenceText}>Confiance: {confidence}%</Text>
+        </View>
+
+        <TouchableOpacity
+          style={styles.detailsButton}
+          onPress={() => handleViewDetails(item, index)}
+          activeOpacity={0.9}
+        >
+          <Text style={styles.detailsButtonText}>Voir Détails</Text>
+          <ChevronRight size={14} color={COLORS.white} />
+        </TouchableOpacity>
+      </View>
+    );
+  };
+
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        {renderHeader()}
+
+        <View style={styles.stateContainer}>
+          <ActivityIndicator size="large" color={COLORS.accent} />
+          <Text style={styles.stateText}>Chargement des analyses...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (error) {
+    return (
+      <SafeAreaView style={styles.container}>
+        {renderHeader()}
+
+        <View style={styles.stateContainer}>
+          <Text style={styles.errorText}>{error}</Text>
+          <TouchableOpacity style={styles.retryButton} onPress={loadHistory}>
+            <Text style={styles.retryButtonText}>Réessayer</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  return (
+    <SafeAreaView style={styles.container}>
+      {renderHeader()}
+
       <FlatList
-        data={consultations}
-        keyExtractor={(item) => item.id.toString()}
+        data={normalizedConsultations}
+        keyExtractor={(item, index) => item.id || `consultation-${index}`}
         renderItem={renderConsultationCard}
         contentContainerStyle={styles.listContent}
-        scrollEnabled={true}
         showsVerticalScrollIndicator={false}
+        ListEmptyComponent={
+          <View style={styles.emptyContainer}>
+            <View style={styles.emptyIconCircle}>
+              <FileText size={24} color={COLORS.textLight} />
+            </View>
+            <Text style={styles.emptyTitle}>Aucune consultation trouvée</Text>
+            <Text style={styles.emptySubtitle}>Ajoutez une analyse pour voir l'historique ici.</Text>
+          </View>
+        }
       />
     </SafeAreaView>
   );
@@ -183,105 +277,92 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: COLORS.textDark,
   },
+  stateContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 24,
+    gap: 12,
+  },
+  stateText: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: COLORS.textLight,
+  },
+  errorText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#DC2626",
+    textAlign: "center",
+  },
+  retryButton: {
+    backgroundColor: COLORS.accent,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 10,
+  },
+  retryButtonText: {
+    color: COLORS.white,
+    fontSize: 13,
+    fontWeight: "700",
+  },
   listContent: {
     paddingHorizontal: 20,
     paddingVertical: 16,
+    paddingBottom: 24,
   },
   consultationCard: {
-    backgroundColor: COLORS.white,
+    backgroundColor: "#FAFBFC",
     borderRadius: 16,
-    padding: 16,
-    marginBottom: 12,
+    padding: 18,
+    marginBottom: 14,
+    borderWidth: 1,
+    borderColor: COLORS.border,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
     elevation: 2,
   },
-  cardHeader: {
+  analysisHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 12,
+    alignItems: "flex-start",
+    marginBottom: 14,
   },
-  dateSection: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  dateIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 8,
-    backgroundColor: COLORS.lightBg,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  date: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: COLORS.textLight,
-  },
-  statusBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 20,
-  },
-  statusText: {
+  analysisLabel: {
     fontSize: 11,
     fontWeight: "700",
-  },
-  treatmentTitle: {
-    fontSize: 15,
-    fontWeight: "700",
-    color: COLORS.textDark,
-    marginBottom: 12,
-  },
-  doctorSection: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingBottom: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
-    marginBottom: 12,
-  },
-  doctorIconBg: {
-    width: 40,
-    height: 40,
-    borderRadius: 10,
-    backgroundColor: COLORS.lightBg,
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 12,
-  },
-  doctorName: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: COLORS.textDark,
-  },
-  specialty: {
-    fontSize: 12,
     color: COLORS.textLight,
-    marginTop: 2,
+    textTransform: "uppercase",
+    letterSpacing: 1,
+    marginBottom: 4,
   },
-  notesSection: {
-    marginBottom: 12,
+  analysisNumber: {
+    fontSize: 28,
+    fontWeight: "800",
+    color: COLORS.accent,
   },
-  notes: {
-    fontSize: 13,
-    color: COLORS.textDark,
-    lineHeight: 18,
-  },
-  photoSection: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    marginBottom: 12,
-    paddingBottom: 12,
+  dateBlock: {
+    marginBottom: 14,
+    paddingBottom: 14,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.border,
   },
-  photoIconBg: {
+  blockTitle: {
+    fontSize: 11,
+    fontWeight: "700",
+    color: COLORS.textLight,
+    textTransform: "uppercase",
+    letterSpacing: 1,
+    marginBottom: 8,
+  },
+  dateRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  dateIconBox: {
     width: 32,
     height: 32,
     borderRadius: 8,
@@ -289,20 +370,77 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  photoCount: {
+  dateTexts: {
+    flex: 1,
+  },
+  dateText: {
     fontSize: 13,
     fontWeight: "600",
     color: COLORS.textDark,
   },
-  detailsLink: {
+  timeText: {
+    marginTop: 2,
+    fontSize: 12,
+    color: COLORS.textLight,
+  },
+  diagnosisBlock: {
+    marginBottom: 14,
+    paddingBottom: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
+  },
+  diagnosisText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: COLORS.textDark,
+    lineHeight: 20,
+  },
+  confidenceText: {
+    marginTop: 6,
+    fontSize: 12,
+    fontWeight: "500",
+    color: COLORS.textLight,
+  },
+  detailsButton: {
+    width: "100%",
+    backgroundColor: COLORS.accent,
+    paddingVertical: 11,
+    borderRadius: 10,
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
-    paddingTop: 12,
+    justifyContent: "center",
+    gap: 6,
   },
-  detailsText: {
+  detailsButtonText: {
     fontSize: 13,
     fontWeight: "700",
-    color: COLORS.accent,
+    color: COLORS.white,
+  },
+  emptyContainer: {
+    marginTop: 40,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 24,
+  },
+  emptyIconCircle: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#F3F4F6",
+    marginBottom: 14,
+  },
+  emptyTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: COLORS.textDark,
+    marginBottom: 6,
+  },
+  emptySubtitle: {
+    fontSize: 13,
+    color: COLORS.textLight,
+    textAlign: "center",
+    lineHeight: 18,
   },
 });
