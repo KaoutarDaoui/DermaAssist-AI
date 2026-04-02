@@ -1,12 +1,25 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, AppRegistry, ActivityIndicator, TouchableOpacity, Image } from "react-native";
+import {
+  View,
+  Text,
+  AppRegistry,
+  ActivityIndicator,
+  TouchableOpacity,
+  Image,
+} from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { House as Home, BookOpen, FileText, GitCompare, User } from "lucide-react-native/icons";
+import {
+  House as Home,
+  BookOpen,
+  FileText,
+  GitCompare,
+  User,
+} from "lucide-react-native/icons";
 
 // Import screens
-import WelcomeScreen from './src/screens/WelcomeScreen';
+import WelcomeScreen from "./src/screens/WelcomeScreen";
 import HomeScreen from "./src/screens/HomeScreen";
 import TreatmentScreen from "./src/screens/TreatmentScreen";
 import ProfileScreen from "./src/screens/ProfileScreen";
@@ -50,14 +63,48 @@ class ScreenErrorBoundary extends React.Component {
   render() {
     if (this.state.hasError) {
       return (
-        <View style={{ flex: 1, justifyContent: "center", alignItems: "center", paddingHorizontal: 24, backgroundColor: "#F9FBFF" }}>
-          <Text style={{ fontSize: 18, fontWeight: "700", color: "#1F2A33", textAlign: "center" }}>Erreur d'affichage de la comparaison</Text>
-          <Text style={{ marginTop: 8, fontSize: 13, color: "#6B7280", textAlign: "center" }}>Veuillez recharger cet ecran.</Text>
+        <View
+          style={{
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+            paddingHorizontal: 24,
+            backgroundColor: "#F9FBFF",
+          }}
+        >
+          <Text
+            style={{
+              fontSize: 18,
+              fontWeight: "700",
+              color: "#1F2A33",
+              textAlign: "center",
+            }}
+          >
+            Erreur d'affichage de la comparaison
+          </Text>
+          <Text
+            style={{
+              marginTop: 8,
+              fontSize: 13,
+              color: "#6B7280",
+              textAlign: "center",
+            }}
+          >
+            Veuillez recharger cet ecran.
+          </Text>
           <TouchableOpacity
             onPress={this.handleRetry}
-            style={{ marginTop: 14, backgroundColor: "#0F6E56", paddingHorizontal: 14, paddingVertical: 10, borderRadius: 10 }}
+            style={{
+              marginTop: 14,
+              backgroundColor: "#0F6E56",
+              paddingHorizontal: 14,
+              paddingVertical: 10,
+              borderRadius: 10,
+            }}
           >
-            <Text style={{ color: "#FFFFFF", fontWeight: "700", fontSize: 13 }}>Recharger</Text>
+            <Text style={{ color: "#FFFFFF", fontWeight: "700", fontSize: 13 }}>
+              Recharger
+            </Text>
           </TouchableOpacity>
         </View>
       );
@@ -81,15 +128,34 @@ const TabNavigator = () => {
         tabBarIcon: ({ focused, color }) => {
           let icon;
           if (route.name === "Home") {
-            return <Home size={24} color={focused ? ICON_COLOR : INACTIVE_COLOR} />;
+            return (
+              <Home size={24} color={focused ? ICON_COLOR : INACTIVE_COLOR} />
+            );
           } else if (route.name === "Treatment") {
-            return <BookOpen size={24} color={focused ? ICON_COLOR : INACTIVE_COLOR} />;
+            return (
+              <BookOpen
+                size={24}
+                color={focused ? ICON_COLOR : INACTIVE_COLOR}
+              />
+            );
           } else if (route.name === "Consultations") {
-            return <FileText size={24} color={focused ? ICON_COLOR : INACTIVE_COLOR} />;
+            return (
+              <FileText
+                size={24}
+                color={focused ? ICON_COLOR : INACTIVE_COLOR}
+              />
+            );
           } else if (route.name === "Comparison") {
-            return <GitCompare size={24} color={focused ? ICON_COLOR : INACTIVE_COLOR} />;
+            return (
+              <GitCompare
+                size={24}
+                color={focused ? ICON_COLOR : INACTIVE_COLOR}
+              />
+            );
           } else if (route.name === "Profile") {
-            return <User size={24} color={focused ? ICON_COLOR : INACTIVE_COLOR} />;
+            return (
+              <User size={24} color={focused ? ICON_COLOR : INACTIVE_COLOR} />
+            );
           }
         },
         tabBarLabel: ({ focused }) => {
@@ -105,7 +171,18 @@ const TabNavigator = () => {
           } else if (route.name === "Profile") {
             label = "Profil";
           }
-          return <Text style={{ fontSize: 11, color: focused ? ICON_COLOR : INACTIVE_COLOR, marginTop: 3, fontWeight: "500" }}>{label}</Text>;
+          return (
+            <Text
+              style={{
+                fontSize: 11,
+                color: focused ? ICON_COLOR : INACTIVE_COLOR,
+                marginTop: 3,
+                fontWeight: "500",
+              }}
+            >
+              {label}
+            </Text>
+          );
         },
         tabBarActiveTintColor: ICON_COLOR,
         tabBarInactiveTintColor: INACTIVE_COLOR,
@@ -120,19 +197,19 @@ const TabNavigator = () => {
         headerShown: false,
       })}
     >
-      <Tab.Screen 
-        name="Home" 
-        component={HomeScreen} 
+      <Tab.Screen
+        name="Home"
+        component={HomeScreen}
         options={{ title: "Accueil" }}
       />
-      <Tab.Screen 
-        name="Treatment" 
-        component={TreatmentScreen} 
+      <Tab.Screen
+        name="Treatment"
+        component={TreatmentScreen}
         options={{ title: "Traitement" }}
       />
-      <Tab.Screen 
-        name="Consultations" 
-        component={ConsultationHistoryScreen} 
+      <Tab.Screen
+        name="Consultations"
+        component={ConsultationHistoryScreen}
         options={{ title: "Consultations" }}
       />
       <Tab.Screen
@@ -140,9 +217,9 @@ const TabNavigator = () => {
         component={ComparisonScreenSafe}
         options={{ title: "Comparaison" }}
       />
-      <Tab.Screen 
-        name="Profile" 
-        component={ProfileScreen} 
+      <Tab.Screen
+        name="Profile"
+        component={ProfileScreen}
         options={{ title: "Profil" }}
       />
     </Tab.Navigator>
@@ -158,46 +235,37 @@ const AppNavigator = () => {
         cardStyle: { backgroundColor: "#F9FBFF" },
       }}
     >
-      <Stack.Screen 
-        name="Welcome" 
+      <Stack.Screen
+        name="Welcome"
         component={WelcomeScreen}
         options={{ animationEnabled: false }}
       />
-      <Stack.Screen 
-        name="Login" 
+      <Stack.Screen
+        name="Login"
         component={LoginScreen}
         options={{ animationEnabled: false }}
       />
-      <Stack.Screen 
-        name="Register" 
+      <Stack.Screen
+        name="Register"
         component={RegisterScreen}
         options={{ animationEnabled: false }}
       />
-      <Stack.Screen 
-        name="MainApp" 
+      <Stack.Screen
+        name="MainApp"
         component={TabNavigator}
         options={{ animationEnabled: false }}
       />
-      <Stack.Screen 
-        name="ConsultationHistory" 
+      <Stack.Screen
+        name="ConsultationHistory"
         component={ConsultationHistoryScreen}
       />
       <Stack.Screen
         name="ConsultationDetails"
         component={ConsultationDetailsScreen}
       />
-      <Stack.Screen 
-        name="PhotoUpload" 
-        component={PhotoUploadScreen}
-      />
-      <Stack.Screen
-        name="HelpSupport"
-        component={HelpSupportScreen}
-      />
-      <Stack.Screen
-        name="Notifications"
-        component={NotificationsScreen}
-      />
+      <Stack.Screen name="PhotoUpload" component={PhotoUploadScreen} />
+      <Stack.Screen name="HelpSupport" component={HelpSupportScreen} />
+      <Stack.Screen name="Notifications" component={NotificationsScreen} />
     </Stack.Navigator>
   );
 };
@@ -213,7 +281,14 @@ const App = () => {
 
   if (!ready) {
     return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#F9FBFF" }}>
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: "#F9FBFF",
+        }}
+      >
         <Image
           source={require("./assets/logo/green_logoSkin.png")}
           style={{ width: 130, height: 130, marginBottom: 18 }}

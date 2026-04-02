@@ -73,8 +73,10 @@ export default function ConsultationPage() {
 
     const rootFirstName = patientData.first_name || patientData.firstName;
     const rootLastName = patientData.last_name || patientData.lastName;
-    const userFirstName = patientData.user?.first_name || patientData.user?.firstName;
-    const userLastName = patientData.user?.last_name || patientData.user?.lastName;
+    const userFirstName =
+      patientData.user?.first_name || patientData.user?.firstName;
+    const userLastName =
+      patientData.user?.last_name || patientData.user?.lastName;
 
     const candidates = [
       rootFirstName && rootLastName ? `${rootFirstName} ${rootLastName}` : "",
@@ -283,7 +285,10 @@ export default function ConsultationPage() {
     yPosition += analysisLines.length * 5 + 10;
 
     // Questions section
-    if (aiResults?.suggested_questions && aiResults.suggested_questions.length > 0) {
+    if (
+      aiResults?.suggested_questions &&
+      aiResults.suggested_questions.length > 0
+    ) {
       if (yPosition > pageHeight - 40) {
         pdf.addPage();
         yPosition = 10;
@@ -317,7 +322,10 @@ export default function ConsultationPage() {
     }
 
     // Treatments section
-    if (aiResults?.treatment_options && aiResults.treatment_options.length > 0) {
+    if (
+      aiResults?.treatment_options &&
+      aiResults.treatment_options.length > 0
+    ) {
       if (yPosition > pageHeight - 40) {
         pdf.addPage();
         yPosition = 10;
@@ -841,9 +849,7 @@ export default function ConsultationPage() {
 
             {/* Logo / Header */}
             <div className="text-center mb-8 border-b-2 border-[#0F6E56] pb-6">
-              <h1 className="text-5xl font-bold text-[#0F6E56] mb-2">
-                Skin+
-              </h1>
+              <h1 className="text-5xl font-bold text-[#0F6E56] mb-2">Skin+</h1>
               <p className="text-gray-600 text-sm">
                 Rapport de Consultation Dermatologique
               </p>

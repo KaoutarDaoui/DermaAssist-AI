@@ -37,7 +37,14 @@ const COLORS = {
 };
 
 const skinTypes = ["I", "II", "III", "IV", "V", "VI"];
-const fitzpatrickColors = ["#F4C4B4", "#E8B8A8", "#D0956E", "#A67C52", "#8B6F47", "#713E38"];
+const fitzpatrickColors = [
+  "#F4C4B4",
+  "#E8B8A8",
+  "#D0956E",
+  "#A67C52",
+  "#8B6F47",
+  "#713E38",
+];
 
 export default function RegisterScreen({ navigation }) {
   const [fullName, setFullName] = useState("");
@@ -50,7 +57,14 @@ export default function RegisterScreen({ navigation }) {
   const [showPassword, setShowPassword] = useState(false);
 
   const handleRegister = async () => {
-    if (!fullName || !email || !password || !dateOfBirth || !skinType || !city) {
+    if (
+      !fullName ||
+      !email ||
+      !password ||
+      !dateOfBirth ||
+      !skinType ||
+      !city
+    ) {
       Alert.alert("Erreur", "Veuillez remplir tous les champs");
       return;
     }
@@ -61,7 +75,10 @@ export default function RegisterScreen({ navigation }) {
     }
 
     if (password.length < 6) {
-      Alert.alert("Erreur", "Le mot de passe doit contenir au moins 6 caractères");
+      Alert.alert(
+        "Erreur",
+        "Le mot de passe doit contenir au moins 6 caractères",
+      );
       return;
     }
 
@@ -79,7 +96,10 @@ export default function RegisterScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={{ flex: 1 }}
+      >
         <ScrollView
           style={styles.container}
           showsVerticalScrollIndicator={false}

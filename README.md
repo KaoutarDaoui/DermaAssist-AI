@@ -1,261 +1,327 @@
-# DermAssist AI - Dermatology Assistant Platform
+# DermaAssist AI
 
-Platform intelligente pour assister les dermatologues en Algérie. Combine des modèles d'IA, des données environnementales en temps réel, et une interface médecin-patient intégrée.
+Plateforme complete d'assistance dermatologique avec:
 
-## 🏗️ Architecture
+- un backend FastAPI
+- un tableau de bord web medecin (React + Vite)
+- une application mobile patient (React Native + Expo)
 
-### Stack Technique
+Le projet couvre le parcours principal: comptes doctor/patient, consultations, resultats AI, suivi photo, conseils, check-ins et ecrans mobiles de comparaison.
 
-| Couche               | Technologie               |
-| -------------------- | ------------------------- |
-| **Frontend Médecin** | React + Vite              |
-| **Frontend Patient** | React Native (Expo)       |
-| **Backend**          | FastAPI (Python)          |
-| **Base de Données**  | PostgreSQL                |
-| **Stockage Images**  | MinIO (S3-compatible)     |
-| **Cache**            | Redis                     |
-| **Modèle CNN**       | EfficientNet-B0 (PyTorch) |
-| **LLM**              | Mistral / Gemini          |
+## Vue d'ensemble
 
-### Structure du Projet
+### Stack principale
 
-```
+| Couche               | Technologie                                          |
+| -------------------- | ---------------------------------------------------- |
+| Backend API          | FastAPI, SQLAlchemy, Pydantic                        |
+| Web medecin          | React 18, Vite, Tailwind, Zustand                    |
+| Mobile patient       | Expo 49, React Native 0.72, React Navigation         |
+| Auth                 | JWT access + refresh tokens                          |
+| Donnees              | PostgreSQL (prod) ou SQLite (dev)                    |
+| AI et enrichissement | pipeline AI, OpenWeather/OpenUV/OpenAQ, services LLM |
+
+### Structure du repo
+
+```text
 DermaAssist-AI/
-├── backend/                 # FastAPI server
+├── backend/
 │   ├── app/
-│   │   ├── api/            # Routes API REST
-│   │   ├── models/         # SQLAlchemy ORM
-│   │   ├── schemas/        # Pydantic validators
-│   │   ├── services/       # Business logic
-│   │   ├── core/           # Config, security
-│   │   ├── db/             # Database setup
-│   │   └── ai/             # Pipeline AI (CNN, NLP)
-│   ├── main.py             # Entry point
-│   └── requirements.txt     # Dependencies
-│
-├── doctor-web/              # Interface médecin (React)
+│   │   ├── api/           # Routers FastAPI (auth, mobile, consultations, AI, chat...)
+│   │   ├── services/      # Logique metier
+│   │   ├── models/        # SQLAlchemy models
+│   │   ├── schemas/       # Pydantic schemas
+│   │   ├── db/            # Session SQLAlchemy
+│   │   └── core/          # Config et securite
+│   ├── main.py            # Entree du serveur
+│   └── requirements.txt
+├── doctor-web/
 │   ├── src/
-│   │   ├── pages/          # Pages principales
-│   │   ├── components/     # Composants réutilisables
-│   │   └── services/       # API client, stores
-│   ├── vite.config.js
+│   │   ├── pages/
+│   │   ├── components/
+│   │   └── services/
+│   ├── public/logo/       # Logos web (ex: white_logoSkin.png)
 │   └── package.json
-│
-├── patient-mobile/          # App patient (React Native)
+├── patient-mobile/
 │   ├── src/
-│   │   ├── screens/        # Écrans de l'app
-│   │   └── services/       # API client, stores
+│   │   ├── screens/
+│   │   ├── services/
+│   │   └── constants/
+│   ├── assets/logo/       # Logos mobile (ex: green_logoSkin.png)
 │   ├── App.js
-│   ├── app.json
 │   └── package.json
-│
-└── docs/                    # Documentation
+├── docs/
+├── setup.bat
+├── setup.sh
+└── TROUBLESHOOTING.md
 ```
 
-## 🚀 Démarrage Rapide
+## Fonctionnalites actuelles
 
-### Prérequis
+### Backend
 
-- **Node.js** 18+
-- **Python** 3.10+
-- **PostgreSQL** 14+
-- **Redis** 7+
-- **MinIO** (optionnel, ou AWS S3)
+- Authentification complete: register, login (email ou username), refresh token
+- Gestion patient/consultation
+- Upload d'images de consultation et suivi patient
+- Comparaison d'images cutanees patient
+- Endpoints mobiles dedies (/mobile/patient/\*)
+- Resultats AI, historique AI, chat medecin
+- Endpoints health/docs
 
-### 1. Backend (FastAPI)
+### Web medecin
+
+- Dashboard, patients, profil patient, consultation, comparaison photo
+- Generation/telechargement/impression de rapport consultation
+- Correctif nom complet patient dans le rapport
+- Notification page, contact/settings/profile pages
+- Branding logo web via public/logo/white_logoSkin.png
+
+### Mobile patient
+
+- Auth, accueil, traitement, consultations, details
+- Upload photo + ecran comparaison avec selection de 2 images
+- Profil + aide/assistance + notifications
+- Splash startup avec logo local (assets/logo/green_logoSkin.png)
+
+## Demarrage rapide
+
+### Prerequis
+
+- Node.js 18+
+- Python 3.10+
+- npm
+
+Services optionnels pour un mode complet:
+
+- PostgreSQL
+- Redis
+- MinIO (ou S3 compatible)
+
+### Option A: setup automatique
+
+Windows:
+
+```bash
+setup.bat
+```
+
+Linux/macOS:
+
+```bash
+bash setup.sh
+```
+
+### Option B: setup manuel
+
+#### 1) Backend
 
 ```bash
 cd backend
 python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
+
+# Windows
+venv\Scripts\activate
+
+# Linux/macOS
+source venv/bin/activate
 
 pip install -r requirements.txt
+```
 
-# Configuration
-cp .env.example .env
-# Éditer .env avec vos clés API
+Creer backend/.env (exemple minimal dev):
 
-# Démarrer le serveur
+```env
+SECRET_KEY=change-this-secret
+DEBUG=True
+ENVIRONMENT=development
+
+# Option simple dev (sans Postgres):
+DATABASE_URL=sqlite:///./dermassist.db
+
+# Option complete:
+# DATABASE_URL=postgresql://user:password@localhost:5432/dermassist_db
+
+REDIS_URL=redis://localhost:6379/0
+MINIO_URL=localhost:9000
+MINIO_ACCESS_KEY=minioadmin
+MINIO_SECRET_KEY=minioadmin
+MINIO_BUCKET_IMAGES=dermassist-images
+MINIO_SECURE=False
+
+OPENWEATHERMAP_API_KEY=
+OPENUV_API_KEY=
+MISTRAL_API_KEY=
+CLAUDE_API_KEY=
+```
+
+Lancer le backend:
+
+```bash
 python main.py
 ```
 
-Le serveur tourne sur `http://localhost:8000`
+Backend disponible sur:
 
-- Documentation Swagger: `http://localhost:8000/docs`
-- Documentation ReDoc: `http://localhost:8000/redoc`
+- http://localhost:8000
+- http://localhost:8000/docs
+- http://localhost:8000/redoc
 
-### 2. Frontend Médecin (React)
+#### 2) Web medecin
 
 ```bash
 cd doctor-web
-
 npm install
-
-# Développement
-npm run dev
-
-# Production
-npm run build
+npm install chart.js react-chartjs-2
 ```
 
-L'app tourne sur `http://localhost:5173`
+Optionnel: creer doctor-web/.env.local
 
-### 3. Frontend Patient (React Native)
+```env
+VITE_API_URL=http://localhost:8000
+```
+
+Lancer:
+
+```bash
+npm run dev
+```
+
+Web dispo sur http://localhost:5173
+
+#### 3) Mobile patient
 
 ```bash
 cd patient-mobile
-
 npm install
-
-# Développement avec Expo
-npm start
-
-# Scanneur QR code avec Expo Go
-# ou
-npm run ios      # Simulator iOS
-npm run android  # Émulateur Android
 ```
 
-## 🔒 API Endpoints
+Optionnel: creer patient-mobile/.env
 
-### Authentification
+```env
+EXPO_PUBLIC_API_URL=http://localhost:8000
+```
 
-- `POST /auth/register` - Créer un compte
-- `POST /auth/login` - Obtenir JWT tokens
-- `POST /auth/refresh` - Renouveler token
+Pour emulateur Android, la valeur par defaut est deja 10.0.2.2:8000.
+Pour un telephone physique, utiliser l'IP LAN de votre machine.
 
-### Patients (Médecin)
+Lancer:
 
-- `GET /patients` - Liste mes patients
-- `POST /patients` - Créer dossier patient
-- `GET /patients/{id}` - Détails patient
-- `PATCH /patients/{id}` - Mettre à jour patient
+```bash
+npm start
+```
+
+Autres commandes utiles:
+
+```bash
+npm run web
+npm run android
+npm run ios
+```
+
+## Scripts utiles
+
+### Racine
+
+- setup.bat: bootstrap Windows
+- setup.sh: bootstrap Linux/macOS
+
+### backend/package.json
+
+- npm run dev: uvicorn reload
+- npm run start: uvicorn production-like
+
+### doctor-web/package.json
+
+- npm run dev
+- npm run build
+- npm run preview
+- npm run lint
+- npm run format
+
+### patient-mobile/package.json
+
+- npm start
+- npm run web
+- npm run android
+- npm run ios
+- npm run build
+
+## Endpoints API cles
+
+### Auth
+
+- POST /auth/register
+- POST /auth/login
+- POST /auth/refresh
+
+### Patients
+
+- GET /patients
+- POST /patients
+- GET /patients/{patient_id}
+- PATCH /patients/{patient_id}
+- DELETE /patients/{patient_id}
 
 ### Consultations
 
-- `POST /consultations` - Créer consultation
-- `GET /consultations/{id}` - Détails consultation
-- `PATCH /consultations/{id}/notes` - Ajouter notes
+- POST /consultations
+- GET /consultations/{consultation_id}
+- GET /consultations/by-patient/{patient_id}
+- PATCH /consultations/{consultation_id}/notes
 
-### Images Cutanées
+### Images et comparaison
 
-- `POST /consultations/{id}/images` - Upload photo (doctor)
-- `GET /consultations/{id}/images` - Liste photos
-- `POST /checkins/image` - Upload photo de suivi (patient)
+- POST /consultations/{consultation_id}/images
+- GET /consultations/{consultation_id}/images
+- POST /patients/{patient_id}/skin-images
+- GET /patients/{patient_id}/skin-images
+- GET /patients/{patient_id}/skin-images/progression
+- POST /patients/{patient_id}/skin-images/compare
 
-### Pipeline AI
+### Mobile
 
-- `POST /ai/analyze/{consultation_id}` - Lancer analyse AI
-- `GET /ai/result/{consultation_id}` - Résultat AI
-- `GET /ai/env-snapshot` - Données env. temps réel
+- GET /mobile/patient/profile
+- GET /mobile/patient/consultations
+- GET /mobile/patient/advice
+- GET /mobile/patient/ai-results-history
+- GET /mobile/patient/ai-results/{ai_result_id}
+- GET /mobile/patient/ai-medications
+- GET /mobile/patient/checkins
 
-### Conseils Patient
+### AI et chat
 
-- `POST /consultations/{id}/advice` - Créer conseil (doctor)
-- `GET /advice/me` - Mes conseils (patient)
-- `PATCH /advice/{id}` - Modifier conseil (doctor)
+- POST /ai/analyze
+- GET /ai/result/{consultation_id}
+- GET /ai/env-snapshot
+- POST /chat/send-message
+- GET /chat/history
+- DELETE /chat/history
 
-### Check-ins Patient
+## Branding et assets logo
 
-- `POST /checkins` - Soumettre check-in
-- `GET /checkins/me` - Mon historique
+- Logo web: doctor-web/public/logo/white_logoSkin.png
+- Logo mobile startup: patient-mobile/assets/logo/green_logoSkin.png
 
-## 🤖 Pipeline AI Complet
+## Docs complementaires
 
-```
-1. Image Loader    → Récupère images depuis MinIO
-                    ↓
-2. CNN Classifier  → EfficientNet-B0 prédit classe cutanée
-                    ↓
-3. Patient Context → Charge âge, phototype, antécédents
-                    ↓
-4. Env. Fetcher    → OpenWeatherMap, OpenUV, OpenAQ
-                    ↓
-5. NLP Engine      → LLM génère questions cliniques
-                    ↓
-6. Fusion          → Combine résultats en AI_RESULT
-```
+- backend/README.md
+- doctor-web/README.md
+- patient-mobile/README.md
+- docs/ARCHITECTURE.md
+- docs/AI_IMPLEMENTATION_GUIDE.md
+- docs/MINIO_IMPLEMENTATION_GUIDE.md
+- TROUBLESHOOTING.md
 
-## 🗄️ Schéma Base de Données
+## Etat actuel
 
-8 entités principales :
+Le projet est activement en evolution avec des ameliorations recentes sur:
 
-- **USER** - Authentification (role: doctor/patient)
-- **DOCTOR** - Profil médecin (speciality, clinic)
-- **PATIENT** - Profil patient (Fitzpatrick, city)
-- **CONSULTATION** - Séance médicale (status: open/ai_done/advice_sent)
-- **SKIN_IMAGE** - Photos cutanées (source: doctor/patient)
-- **AI_RESULT** - Résultats d'analyse (diagnosis, confidence)
-- **PATIENT_ADVICE** - Conseils transmis (tips, reminders, products_to_avoid)
-- **CHECKIN** - Suivi quotidien patient (skin_score, notes)
+- le flux comparaison mobile
+- les pages aide/notifications
+- l'integration branding logo web/mobile
+- la fiabilite du rapport consultation (nom complet patient)
 
-[Voir le schéma détaillé dans la documentation]
+## Contribution
 
-## 🔐 Sécurité
-
-- **Authentification JWT** avec access token (30 min) + refresh token (7 jours)
-- **Hachage bcrypt** des mots de passe
-- **CORS** configuré pour les deux frontends
-- **Rôles d'accès** (doctor/patient) vérifiés sur chaque endpoint
-- **Chiffrement TLS/SSL** en production
-
-## 📊 Données Environnementales
-
-Intégrées en temps réel pour chaque consultation :
-
-| Source             | Données                    | Usage               |
-| ------------------ | -------------------------- | ------------------- |
-| **OpenWeatherMap** | Temp, humidité, conditions | Contexte clinique   |
-| **OpenUV**         | UV index                   | Alertes solaires    |
-| **OpenAQ**         | AQI, pollution             | Facteurs aggravants |
-
-Cache Redis: **30 minutes** par ville
-
-## 🎯 Cas d'Usage
-
-### Médecin
-
-1. Crée/accède dossier patient
-2. Prend photos cutanées haute résolution
-3. Lance pipeline AI (CNN + NLP)
-4. Reçoit diagnostic assisté + questions suggérées
-5. Valide conseils personnalisés
-6. Patient reçoit notification + conseils simplifiés
-
-### Patient
-
-1. Se connecte à l'app mobile
-2. Voit conseils du médecin (langage simple)
-3. Reçoit rappels de médicaments
-4. Soumet check-in quotidien (skin_score)
-5. Upload optionnellement photos de suivi
-6. Reçoit alertes UV/pollution contextualisées
-
-## 📱 Spécificités Algérie
-
-- **Datasets** : HAM10000 + DermNet (psoriasis, eczéma)
-- **Limitation** : Leishmaniose cutanée (2e foyer mondial) sans dataset open-source
-- **Future** : Création dataset algérien en collaboration avec CHU
-
-## 📚 Documentation
-
-- [Backend API Docs](./backend/README.md)
-- [Doctor Web App](./doctor-web/README.md)
-- [Patient Mobile App](./patient-mobile/README.md)
-
-## 🛠️ Contribution
-
-Les contributions sont bienvenues ! Consultez les issues et proposez des améliorations.
-
-## 📄 Licence
-
-MIT License - Voir [LICENSE](./LICENSE)
-
-## 👥 Équipe
-
-Projet créé pour l'assistance médicale en dermatologie.
-
----
-
-**Status**: Version initiale avec architecture complète et endpoints de base.
-**Prochaines étapes**: Implémentation du pipeline AI, intégration images, tests.
+Contributions bienvenue.
+Ouvrez une issue ou une PR avec contexte, reproduction et proposition claire.

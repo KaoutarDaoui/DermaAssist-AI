@@ -14,7 +14,14 @@ import {
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { useFocusEffect } from "@react-navigation/native";
-import { Camera, CircleCheck as CheckCircle, GitCompare, Upload, X, ZoomIn } from "lucide-react-native/icons";
+import {
+  Camera,
+  CircleCheck as CheckCircle,
+  GitCompare,
+  Upload,
+  X,
+  ZoomIn,
+} from "lucide-react-native/icons";
 import patientDataService from "../services/patientDataService";
 
 const COLORS = {
@@ -73,7 +80,9 @@ const normalizeCompareResult = (payload) => {
   const source = payload && typeof payload === "object" ? payload : {};
 
   return {
-    verdict: source.verdict ? String(source.verdict) : "Resultat de comparaison",
+    verdict: source.verdict
+      ? String(source.verdict)
+      : "Resultat de comparaison",
     explication: source.explication
       ? String(source.explication)
       : "Aucune explication fournie.",
@@ -100,13 +109,17 @@ export default function ComparisonScreen() {
   const selectableIds = useMemo(() => {
     return new Set(
       images
-        .filter((item) => item && item.id && !String(item.id).startsWith("local-"))
+        .filter(
+          (item) => item && item.id && !String(item.id).startsWith("local-"),
+        )
         .map((item) => String(item.id)),
     );
   }, [images]);
 
   const selectedReadyIds = useMemo(() => {
-    return selectedIds.filter((id) => selectableIds.has(String(id))).slice(0, 2);
+    return selectedIds
+      .filter((id) => selectableIds.has(String(id)))
+      .slice(0, 2);
   }, [selectedIds, selectableIds]);
 
   const loadImages = useCallback(async () => {
@@ -124,7 +137,11 @@ export default function ComparisonScreen() {
 
       setImages(normalized);
       setSelectedIds((previous) =>
-        previous.filter((id) => normalized.some((img) => String(img.id) === String(id))).slice(0, 2),
+        previous
+          .filter((id) =>
+            normalized.some((img) => String(img.id) === String(id)),
+          )
+          .slice(0, 2),
       );
     } catch (error) {
       console.error("Failed to load images:", error);
@@ -149,37 +166,38 @@ export default function ComparisonScreen() {
     }
   }, [loadImages]);
 
-  const uploadImageUri = useCallback(async (uri) => {
-    if (!uri) {
-      return;
-    }
+  const uploadImageUri = useCallback(
+    async (uri) => {
+      if (!uri) {
+        return;
+      }
 
-    const temporary = makeTemporaryImage(uri);
-    setImages((previous) => [temporary, ...previous]);
+      const temporary = makeTemporaryImage(uri);
+      setImages((previous) => [temporary, ...previous]);
 
-    try {
-      setUploading(true);
-      await patientDataService.uploadSkinImage(uri);
-      await loadImages();
-    } catch (error) {
-      console.error("Upload failed:", error);
-      setImages((previous) =>
-        previous.map((item) =>
-          item.id === temporary.id
-            ? { ...item, uploadError: true }
-            : item,
-        ),
-      );
-      Alert.alert(
-        "Upload impossible",
-        error?.message
-          ? `La photo est visible localement. Détail: ${error.message}`
-          : "La photo est visible localement mais non enregistree.",
-      );
-    } finally {
-      setUploading(false);
-    }
-  }, [loadImages]);
+      try {
+        setUploading(true);
+        await patientDataService.uploadSkinImage(uri);
+        await loadImages();
+      } catch (error) {
+        console.error("Upload failed:", error);
+        setImages((previous) =>
+          previous.map((item) =>
+            item.id === temporary.id ? { ...item, uploadError: true } : item,
+          ),
+        );
+        Alert.alert(
+          "Upload impossible",
+          error?.message
+            ? `La photo est visible localement. Détail: ${error.message}`
+            : "La photo est visible localement mais non enregistree.",
+        );
+      } finally {
+        setUploading(false);
+      }
+    },
+    [loadImages],
+  );
 
   const openGallery = useCallback(async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -224,50 +242,61 @@ export default function ComparisonScreen() {
     ]);
   }, [openCamera, openGallery]);
 
-  const retryUpload = useCallback(async (item) => {
-    const uri = item?.base64 || item?.minio_url;
-    if (!uri) {
-      Alert.alert("Erreur", "Aucune image locale pour reessayer.");
-      return;
-    }
+  const retryUpload = useCallback(
+    async (item) => {
+      const uri = item?.base64 || item?.minio_url;
+      if (!uri) {
+        Alert.alert("Erreur", "Aucune image locale pour reessayer.");
+        return;
+      }
 
-    setImages((previous) => previous.filter((candidate) => candidate.id !== item.id));
-    await uploadImageUri(uri);
-  }, [uploadImageUri]);
-
-  const toggleSelection = useCallback((imageId) => {
-    if (!imageId) {
-      return;
-    }
-
-    const id = String(imageId);
-    const isTemporary = id.startsWith("local-");
-    const image = images.find((item) => String(item.id) === id);
-
-    if (isTemporary) {
-      Alert.alert(
-        "Photo non prete",
-        image?.uploadError
-          ? "L'envoi a echoue. Utilisez Reessayer."
-          : "Attendez la fin de l'envoi pour la comparer.",
+      setImages((previous) =>
+        previous.filter((candidate) => candidate.id !== item.id),
       );
-      return;
-    }
+      await uploadImageUri(uri);
+    },
+    [uploadImageUri],
+  );
 
-    setResult(null);
-    setSelectedIds((previous) => {
-      if (previous.includes(id)) {
-        return previous.filter((current) => current !== id);
+  const toggleSelection = useCallback(
+    (imageId) => {
+      if (!imageId) {
+        return;
       }
 
-      if (previous.filter((current) => selectableIds.has(String(current))).length >= 2) {
-        Alert.alert("Selection", "Veuillez choisir exactement 2 photos.");
-        return previous;
+      const id = String(imageId);
+      const isTemporary = id.startsWith("local-");
+      const image = images.find((item) => String(item.id) === id);
+
+      if (isTemporary) {
+        Alert.alert(
+          "Photo non prete",
+          image?.uploadError
+            ? "L'envoi a echoue. Utilisez Reessayer."
+            : "Attendez la fin de l'envoi pour la comparer.",
+        );
+        return;
       }
 
-      return [...previous, id];
-    });
-  }, [images, selectableIds]);
+      setResult(null);
+      setSelectedIds((previous) => {
+        if (previous.includes(id)) {
+          return previous.filter((current) => current !== id);
+        }
+
+        if (
+          previous.filter((current) => selectableIds.has(String(current)))
+            .length >= 2
+        ) {
+          Alert.alert("Selection", "Veuillez choisir exactement 2 photos.");
+          return previous;
+        }
+
+        return [...previous, id];
+      });
+    },
+    [images, selectableIds],
+  );
 
   const openPreview = useCallback(async (item) => {
     const previewUri = item?.base64 || item?.minio_url;
@@ -315,7 +344,10 @@ export default function ComparisonScreen() {
     try {
       setComparing(true);
       setResult(null);
-      const response = await patientDataService.compareSkinImages(selectedReadyIds[0], selectedReadyIds[1]);
+      const response = await patientDataService.compareSkinImages(
+        selectedReadyIds[0],
+        selectedReadyIds[1],
+      );
       setResult(normalizeCompareResult(response));
     } catch (error) {
       console.error("Compare failed:", error);
@@ -344,16 +376,21 @@ export default function ComparisonScreen() {
           ) : (
             <Upload size={15} color="#FFFFFF" />
           )}
-          <Text style={styles.addButtonText}>{uploading ? "Envoi..." : "Ajouter"}</Text>
+          <Text style={styles.addButtonText}>
+            {uploading ? "Envoi..." : "Ajouter"}
+          </Text>
         </TouchableOpacity>
       </View>
 
       <View style={styles.toolbar}>
-        <Text style={styles.counterText}>{selectedReadyIds.length}/2 selectionnee(s)</Text>
+        <Text style={styles.counterText}>
+          {selectedReadyIds.length}/2 selectionnee(s)
+        </Text>
         <TouchableOpacity
           style={[
             styles.compareButton,
-            (selectedReadyIds.length !== 2 || comparing) && styles.buttonDisabled,
+            (selectedReadyIds.length !== 2 || comparing) &&
+              styles.buttonDisabled,
           ]}
           onPress={handleCompare}
           activeOpacity={0.88}
@@ -364,7 +401,9 @@ export default function ComparisonScreen() {
           ) : (
             <GitCompare size={14} color="#FFFFFF" />
           )}
-          <Text style={styles.compareButtonText}>{comparing ? "Analyse..." : "Comparer"}</Text>
+          <Text style={styles.compareButtonText}>
+            {comparing ? "Analyse..." : "Comparer"}
+          </Text>
         </TouchableOpacity>
       </View>
 
@@ -377,7 +416,9 @@ export default function ComparisonScreen() {
         <ScrollView
           style={styles.content}
           showsVerticalScrollIndicator={false}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
         >
           <ScrollView
             horizontal
@@ -387,7 +428,9 @@ export default function ComparisonScreen() {
             {images.length === 0 ? (
               <View style={styles.emptyCard}>
                 <Text style={styles.emptyTitle}>Aucune photo</Text>
-                <Text style={styles.emptyText}>Ajoutez une photo pour commencer.</Text>
+                <Text style={styles.emptyText}>
+                  Ajoutez une photo pour commencer.
+                </Text>
               </View>
             ) : (
               images.map((item) => {
@@ -400,7 +443,10 @@ export default function ComparisonScreen() {
                 return (
                   <View
                     key={itemId}
-                    style={[styles.imageCard, isSelected && styles.imageCardSelected]}
+                    style={[
+                      styles.imageCard,
+                      isSelected && styles.imageCardSelected,
+                    ]}
                   >
                     <TouchableOpacity
                       style={styles.previewBox}
@@ -408,20 +454,30 @@ export default function ComparisonScreen() {
                       activeOpacity={0.9}
                     >
                       {previewUri ? (
-                        <Image source={{ uri: previewUri }} style={styles.previewImage} />
+                        <Image
+                          source={{ uri: previewUri }}
+                          style={styles.previewImage}
+                        />
                       ) : (
                         <View style={styles.previewFallback}>
                           {previewLoadingId === itemId ? (
-                            <ActivityIndicator size="small" color={COLORS.primary} />
+                            <ActivityIndicator
+                              size="small"
+                              color={COLORS.primary}
+                            />
                           ) : (
-                            <Text style={styles.previewFallbackText}>Apercu</Text>
+                            <Text style={styles.previewFallbackText}>
+                              Apercu
+                            </Text>
                           )}
                         </View>
                       )}
 
                       {isSelected ? (
                         <View style={styles.selectedTag}>
-                          <Text style={styles.selectedTagText}>{selectedIndex === 0 ? "R" : "N"}</Text>
+                          <Text style={styles.selectedTagText}>
+                            {selectedIndex === 0 ? "R" : "N"}
+                          </Text>
                         </View>
                       ) : null}
 
@@ -430,12 +486,26 @@ export default function ComparisonScreen() {
                       </View>
                     </TouchableOpacity>
 
-                    <Text style={styles.metaSource}>{String(item.source || "patient")}</Text>
-                    <Text style={styles.metaDate}>{formatDate(item.uploaded_at)}</Text>
+                    <Text style={styles.metaSource}>
+                      {String(item.source || "patient")}
+                    </Text>
+                    <Text style={styles.metaDate}>
+                      {formatDate(item.uploaded_at)}
+                    </Text>
 
                     {isTemporary ? (
-                      <View style={[styles.localChip, item.uploadError && styles.localChipError]}>
-                        <Text style={[styles.localChipText, item.uploadError && styles.localChipTextError]}>
+                      <View
+                        style={[
+                          styles.localChip,
+                          item.uploadError && styles.localChipError,
+                        ]}
+                      >
+                        <Text
+                          style={[
+                            styles.localChipText,
+                            item.uploadError && styles.localChipTextError,
+                          ]}
+                        >
                           {item.uploadError ? "En attente d'envoi" : "Ajoutee"}
                         </Text>
                       </View>
@@ -462,8 +532,16 @@ export default function ComparisonScreen() {
                       activeOpacity={0.88}
                       disabled={isTemporary}
                     >
-                      <CheckCircle size={13} color={isSelected ? "#FFFFFF" : COLORS.primary} />
-                      <Text style={[styles.selectButtonText, isSelected && styles.selectButtonTextActive]}>
+                      <CheckCircle
+                        size={13}
+                        color={isSelected ? "#FFFFFF" : COLORS.primary}
+                      />
+                      <Text
+                        style={[
+                          styles.selectButtonText,
+                          isSelected && styles.selectButtonTextActive,
+                        ]}
+                      >
                         {isTemporary
                           ? "Upload..."
                           : isSelected
@@ -480,25 +558,35 @@ export default function ComparisonScreen() {
           {result ? (
             <View style={styles.resultCard}>
               <Text style={styles.resultTitle}>{result.verdict}</Text>
-              <Text style={styles.resultSubtitle}>Confiance: {result.confiance}</Text>
+              <Text style={styles.resultSubtitle}>
+                Confiance: {result.confiance}
+              </Text>
               <Text style={styles.resultText}>{result.explication}</Text>
 
               <View style={styles.metricRow}>
                 <View style={styles.metricBox}>
                   <Text style={styles.metricLabel}>Similarite</Text>
-                  <Text style={styles.metricValue}>{toPercentLabel(result.similariteCosine, true)}</Text>
+                  <Text style={styles.metricValue}>
+                    {toPercentLabel(result.similariteCosine, true)}
+                  </Text>
                 </View>
                 <View style={styles.metricBox}>
                   <Text style={styles.metricLabel}>Ref</Text>
-                  <Text style={styles.metricValue}>{toPercentLabel(result.scoreReference, true)}</Text>
+                  <Text style={styles.metricValue}>
+                    {toPercentLabel(result.scoreReference, true)}
+                  </Text>
                 </View>
                 <View style={styles.metricBox}>
                   <Text style={styles.metricLabel}>Nouv</Text>
-                  <Text style={styles.metricValue}>{toPercentLabel(result.scoreNouveau, true)}</Text>
+                  <Text style={styles.metricValue}>
+                    {toPercentLabel(result.scoreNouveau, true)}
+                  </Text>
                 </View>
                 <View style={styles.metricBox}>
                   <Text style={styles.metricLabel}>Delta</Text>
-                  <Text style={styles.metricValue}>{toPercentLabel(result.deltaPct, false)}</Text>
+                  <Text style={styles.metricValue}>
+                    {toPercentLabel(result.deltaPct, false)}
+                  </Text>
                 </View>
               </View>
             </View>
@@ -506,12 +594,26 @@ export default function ComparisonScreen() {
         </ScrollView>
       )}
 
-      <Modal visible={Boolean(zoomUri)} transparent animationType="fade" onRequestClose={() => setZoomUri(null)}>
+      <Modal
+        visible={Boolean(zoomUri)}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setZoomUri(null)}
+      >
         <View style={styles.modalBackdrop}>
-          <TouchableOpacity style={styles.modalClose} onPress={() => setZoomUri(null)}>
+          <TouchableOpacity
+            style={styles.modalClose}
+            onPress={() => setZoomUri(null)}
+          >
             <X size={18} color="#FFFFFF" />
           </TouchableOpacity>
-          {zoomUri ? <Image source={{ uri: zoomUri }} style={styles.modalImage} resizeMode="contain" /> : null}
+          {zoomUri ? (
+            <Image
+              source={{ uri: zoomUri }}
+              style={styles.modalImage}
+              resizeMode="contain"
+            />
+          ) : null}
         </View>
       </Modal>
     </SafeAreaView>

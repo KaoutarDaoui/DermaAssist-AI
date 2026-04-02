@@ -122,12 +122,13 @@ export default function ProfileScreen({ navigation }) {
       setLoading(true);
       setError(null);
 
-      const [profileData, consultations, checkIns, aiMedications] = await Promise.all([
-        patientDataService.getPatientProfile(),
-        patientDataService.getConsultations(),
-        patientDataService.getCheckIns(),
-        patientDataService.getAIMedications().catch(() => []),
-      ]);
+      const [profileData, consultations, checkIns, aiMedications] =
+        await Promise.all([
+          patientDataService.getPatientProfile(),
+          patientDataService.getConsultations(),
+          patientDataService.getCheckIns(),
+          patientDataService.getAIMedications().catch(() => []),
+        ]);
 
       setUserData(profileData);
 
@@ -198,8 +199,13 @@ export default function ProfileScreen({ navigation }) {
         >
           <View style={styles.errorCard}>
             <Text style={styles.errorTitle}>Erreur de chargement</Text>
-            <Text style={styles.errorSubtitle}>Impossible de récupérer les informations du profil.</Text>
-            <TouchableOpacity style={styles.retryButton} onPress={loadPatientData}>
+            <Text style={styles.errorSubtitle}>
+              Impossible de récupérer les informations du profil.
+            </Text>
+            <TouchableOpacity
+              style={styles.retryButton}
+              onPress={loadPatientData}
+            >
               <Text style={styles.retryButtonText}>Réessayer</Text>
             </TouchableOpacity>
           </View>
@@ -208,7 +214,10 @@ export default function ProfileScreen({ navigation }) {
     );
   }
 
-  const patientName = formatValue(userData.full_name || userData.user?.full_name, "Patient");
+  const patientName = formatValue(
+    userData.full_name || userData.user?.full_name,
+    "Patient",
+  );
   const initials = getInitials(patientName);
   const memberSince = formatMemberSince(userData.created_at);
   const isPremium = Boolean(userData.user?.is_premium);
@@ -235,7 +244,9 @@ export default function ProfileScreen({ navigation }) {
 
               <View style={styles.headerInfo}>
                 <Text style={styles.profileName}>{patientName}</Text>
-                <Text style={styles.profileSubtitle}>Membre depuis {memberSince}</Text>
+                <Text style={styles.profileSubtitle}>
+                  Membre depuis {memberSince}
+                </Text>
               </View>
             </View>
 
@@ -245,11 +256,16 @@ export default function ProfileScreen({ navigation }) {
                 isPremium ? styles.statusPremium : styles.statusStandard,
               ]}
             >
-              <Shield size={14} color={isPremium ? COLORS.success : COLORS.textSecondary} />
+              <Shield
+                size={14}
+                color={isPremium ? COLORS.success : COLORS.textSecondary}
+              />
               <Text
                 style={[
                   styles.statusPillText,
-                  isPremium ? styles.statusPremiumText : styles.statusStandardText,
+                  isPremium
+                    ? styles.statusPremiumText
+                    : styles.statusStandardText,
                 ]}
               >
                 {isPremium ? "Abonnement premium actif" : "Compte standard"}
@@ -297,10 +313,26 @@ export default function ProfileScreen({ navigation }) {
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Activité</Text>
             <View style={styles.statsGrid}>
-              <StatCard icon={<CheckCircle size={20} color={COLORS.accent} />} value={stats.checkins} label="Suivis" />
-              <StatCard icon={<Zap size={20} color={COLORS.accent} />} value={stats.consultations} label="Consultations" />
-              <StatCard icon={<FileText size={20} color={COLORS.accent} />} value={stats.photoFollowUps} label="Photos" />
-              <StatCard icon={<Bell size={20} color={COLORS.accent} />} value={stats.adviceReceived} label="Conseils" />
+              <StatCard
+                icon={<CheckCircle size={20} color={COLORS.accent} />}
+                value={stats.checkins}
+                label="Suivis"
+              />
+              <StatCard
+                icon={<Zap size={20} color={COLORS.accent} />}
+                value={stats.consultations}
+                label="Consultations"
+              />
+              <StatCard
+                icon={<FileText size={20} color={COLORS.accent} />}
+                value={stats.photoFollowUps}
+                label="Photos"
+              />
+              <StatCard
+                icon={<Bell size={20} color={COLORS.accent} />}
+                value={stats.adviceReceived}
+                label="Conseils"
+              />
             </View>
           </View>
 
@@ -367,7 +399,10 @@ function StatCard({ icon, value, label }) {
 
 function SettingItem({ icon, title, onPress, isLast = false }) {
   return (
-    <TouchableOpacity style={[styles.settingItem, !isLast && styles.settingItemBorder]} onPress={onPress}>
+    <TouchableOpacity
+      style={[styles.settingItem, !isLast && styles.settingItemBorder]}
+      onPress={onPress}
+    >
       <View style={styles.settingLeft}>
         <View style={styles.settingIconBox}>{icon}</View>
         <Text style={styles.settingTitle}>{title}</Text>

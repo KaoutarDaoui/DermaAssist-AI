@@ -105,7 +105,9 @@ export default function NotificationsScreen({ navigation }) {
   }, [notifications]);
 
   const markAllAsRead = () => {
-    setNotifications((previous) => previous.map((item) => ({ ...item, isRead: true })));
+    setNotifications((previous) =>
+      previous.map((item) => ({ ...item, isRead: true })),
+    );
   };
 
   const handleOpenNotification = (notificationId) => {
@@ -116,14 +118,17 @@ export default function NotificationsScreen({ navigation }) {
         }
 
         return { ...item, isRead: true };
-      })
+      }),
     );
   };
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={styles.backButton}
+        >
           <ChevronLeft size={22} color={COLORS.accent} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Notifications</Text>
@@ -132,7 +137,10 @@ export default function NotificationsScreen({ navigation }) {
         </TouchableOpacity>
       </View>
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.content}
+      >
         <View style={styles.summaryCard}>
           <View style={styles.summaryIconWrap}>
             <Bell size={18} color={COLORS.accent} />
@@ -150,7 +158,9 @@ export default function NotificationsScreen({ navigation }) {
         {notifications.length === 0 ? (
           <View style={styles.emptyCard}>
             <Text style={styles.emptyTitle}>Aucune notification</Text>
-            <Text style={styles.emptyText}>Les nouvelles alertes apparaitront ici.</Text>
+            <Text style={styles.emptyText}>
+              Les nouvelles alertes apparaitront ici.
+            </Text>
           </View>
         ) : (
           notifications.map((item) => {
@@ -160,11 +170,19 @@ export default function NotificationsScreen({ navigation }) {
             return (
               <TouchableOpacity
                 key={item.id}
-                style={[styles.notificationCard, !item.isRead && styles.notificationCardUnread]}
+                style={[
+                  styles.notificationCard,
+                  !item.isRead && styles.notificationCardUnread,
+                ]}
                 activeOpacity={0.9}
                 onPress={() => handleOpenNotification(item.id)}
               >
-                <View style={[styles.notificationIconWrap, { backgroundColor: typeConfig.iconBg }]}>
+                <View
+                  style={[
+                    styles.notificationIconWrap,
+                    { backgroundColor: typeConfig.iconBg },
+                  ]}
+                >
                   <Icon size={16} color={typeConfig.iconColor} />
                 </View>
 

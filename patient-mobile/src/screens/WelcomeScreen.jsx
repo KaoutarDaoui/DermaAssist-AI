@@ -8,7 +8,12 @@ import {
   Dimensions,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { Shield, Stethoscope, Camera, ChevronRight } from "lucide-react-native/icons";
+import {
+  Shield,
+  Stethoscope,
+  Camera,
+  ChevronRight,
+} from "lucide-react-native/icons";
 
 const { width } = Dimensions.get("window");
 
@@ -42,7 +47,8 @@ const WelcomeScreen = ({ navigation }) => {
 
           <Text style={styles.title}>Bienvenue</Text>
           <Text style={styles.subtitle}>
-            Suivez votre peau avec une experience dermatologique claire, moderne et personnalisée.
+            Suivez votre peau avec une experience dermatologique claire, moderne
+            et personnalisée.
           </Text>
 
           <View style={styles.featureList}>

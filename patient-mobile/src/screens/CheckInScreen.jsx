@@ -8,7 +8,12 @@ import {
   TextInput,
   SafeAreaView,
 } from "react-native";
-import { Activity, Calendar, Smile, TrendingUp } from "lucide-react-native/icons";
+import {
+  Activity,
+  Calendar,
+  Smile,
+  TrendingUp,
+} from "lucide-react-native/icons";
 
 const COLORS = {
   primary: "#2D4A85",
@@ -28,8 +33,18 @@ export default function CheckInScreen() {
   const [history] = useState([
     { date: "Aujourd'hui", score: 7, status: "Bon", color: COLORS.success },
     { date: "Hier", score: 6, status: "Acceptable", color: COLORS.accent },
-    { date: "Il y a 2 jours", score: 8, status: "Très bon", color: COLORS.success },
-    { date: "Il y a 3 jours", score: 5, status: "À surveiller", color: "#F59E0B" },
+    {
+      date: "Il y a 2 jours",
+      score: 8,
+      status: "Très bon",
+      color: COLORS.success,
+    },
+    {
+      date: "Il y a 3 jours",
+      score: 5,
+      status: "À surveiller",
+      color: "#F59E0B",
+    },
   ]);
 
   const handleSubmit = () => {
@@ -47,7 +62,9 @@ export default function CheckInScreen() {
         <View style={styles.header}>
           <View>
             <Text style={styles.headerTitle}>Suivi Quotidien</Text>
-            <Text style={styles.headerSubtitle}>Comment vous vous sentez ?</Text>
+            <Text style={styles.headerSubtitle}>
+              Comment vous vous sentez ?
+            </Text>
           </View>
           <View style={styles.headerIconBg}>
             <Activity size={28} color={COLORS.accent} />
@@ -62,7 +79,9 @@ export default function CheckInScreen() {
             </View>
             <View style={{ flex: 1 }}>
               <Text style={styles.cardTitle}>État de votre peau</Text>
-              <Text style={styles.cardSubtitle}>Évaluez votre bien-être (1-10)</Text>
+              <Text style={styles.cardSubtitle}>
+                Évaluez votre bien-être (1-10)
+              </Text>
             </View>
           </View>
 
@@ -72,7 +91,10 @@ export default function CheckInScreen() {
                 style={styles.scoreInput}
                 value={score}
                 onChangeText={(val) => {
-                  if (val === "" || (parseInt(val) >= 1 && parseInt(val) <= 10)) {
+                  if (
+                    val === "" ||
+                    (parseInt(val) >= 1 && parseInt(val) <= 10)
+                  ) {
                     setScore(val);
                   }
                 }}
@@ -141,12 +163,19 @@ export default function CheckInScreen() {
                 </View>
                 <View style={{ flex: 1 }}>
                   <Text style={styles.historyDate}>{checkIn.date}</Text>
-                  <Text style={[styles.historyStatus, { color: checkIn.color }]}>
+                  <Text
+                    style={[styles.historyStatus, { color: checkIn.color }]}
+                  >
                     {checkIn.status}
                   </Text>
                 </View>
               </View>
-              <View style={[styles.scoreDisplayBg, { borderLeftColor: checkIn.color }]}>
+              <View
+                style={[
+                  styles.scoreDisplayBg,
+                  { borderLeftColor: checkIn.color },
+                ]}
+              >
                 <Text style={styles.scoreDisplayNumber}>{checkIn.score}</Text>
                 <Text style={styles.scoreDisplayUnit}>/10</Text>
               </View>

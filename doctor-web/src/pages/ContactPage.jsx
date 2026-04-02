@@ -151,14 +151,12 @@ export default function ContactPage() {
 
               {/* Info Card */}
               <div className="bg-gradient-to-br from-[#0F6E56] to-teal-700 rounded-lg shadow-md p-8 text-white">
-                <h2 className="text-2xl font-bold mb-6">
-                  A propos de Skin+
-                </h2>
+                <h2 className="text-2xl font-bold mb-6">A propos de Skin+</h2>
                 <p className="mb-4">
-                  Skin+ est une plateforme de diagnostic de nouvelle
-                  generation basee sur l'IA, concue pour aider les dermatologues
-                  et les professionnels de sante a prendre des decisions
-                  precises et eclairees sur la sante de la peau.
+                  Skin+ est une plateforme de diagnostic de nouvelle generation
+                  basee sur l'IA, concue pour aider les dermatologues et les
+                  professionnels de sante a prendre des decisions precises et
+                  eclairees sur la sante de la peau.
                 </p>
                 <p className="mb-4">
                   Notre mission est de democratiser l'acces a des analyses

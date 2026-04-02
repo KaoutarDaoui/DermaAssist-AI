@@ -14,21 +14,21 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Mail, Shield, ChevronLeft } from "lucide-react-native/icons";
-import authService from '../services/authService';
+import authService from "../services/authService";
 
-const { width } = Dimensions.get('window');
+const { width } = Dimensions.get("window");
 
 const COLORS = {
-  accent: '#0F6E56',
-  accentDark: '#0A4D3D',
-  accentSoft: '#D6EFE8',
-  textPrimary: '#14222F',
-  textSecondary: '#5E6B76',
-  textMuted: '#8D99A4',
-  border: '#DCE6EB',
-  white: '#FFFFFF',
-  background: '#EEF4F6',
-  danger: '#E65B5B',
+  accent: "#0F6E56",
+  accentDark: "#0A4D3D",
+  accentSoft: "#D6EFE8",
+  textPrimary: "#14222F",
+  textSecondary: "#5E6B76",
+  textMuted: "#8D99A4",
+  border: "#DCE6EB",
+  white: "#FFFFFF",
+  background: "#EEF4F6",
+  danger: "#E65B5B",
 };
 
 export default function LoginScreen({ navigation }) {
@@ -45,14 +45,14 @@ export default function LoginScreen({ navigation }) {
     setLoading(true);
     try {
       const result = await authService.login(username, password);
-      
+
       if (result && result.access_token) {
         navigation.replace("MainApp");
       } else {
         Alert.alert("Erreur", "Echec de la connexion");
       }
     } catch (error) {
-      console.error('Login error:', error);
+      console.error("Login error:", error);
       Alert.alert("Erreur", error.message || "Echec de la connexion");
     } finally {
       setLoading(false);
@@ -61,7 +61,7 @@ export default function LoginScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <KeyboardAvoidingView 
+      <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.container}
       >
@@ -89,7 +89,9 @@ export default function LoginScreen({ navigation }) {
             </View>
 
             <Text style={styles.title}>Connexion</Text>
-            <Text style={styles.subtitle}>Accédez a votre espace patient sécurisé.</Text>
+            <Text style={styles.subtitle}>
+              Accédez a votre espace patient sécurisé.
+            </Text>
 
             <View style={styles.inputContainer}>
               <View style={styles.inputRow}>
@@ -127,8 +129,8 @@ export default function LoginScreen({ navigation }) {
               <Text style={styles.forgotText}>Mot de passe oublié ?</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity 
-              style={[styles.loginButton, loading && { opacity: 0.7 }]} 
+            <TouchableOpacity
+              style={[styles.loginButton, loading && { opacity: 0.7 }]}
               onPress={handleLogin}
               disabled={loading}
               activeOpacity={0.9}
@@ -164,27 +166,27 @@ const styles = StyleSheet.create({
   },
   gradientBackground: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     paddingHorizontal: 16,
   },
   decorCircleTop: {
-    position: 'absolute',
+    position: "absolute",
     top: -70,
     right: -35,
     width: 180,
     height: 180,
     borderRadius: 90,
-    backgroundColor: 'rgba(15, 110, 86, 0.09)',
+    backgroundColor: "rgba(15, 110, 86, 0.09)",
   },
   decorCircleBottom: {
-    position: 'absolute',
+    position: "absolute",
     bottom: -90,
     left: -50,
     width: 220,
     height: 220,
     borderRadius: 110,
-    backgroundColor: 'rgba(15, 110, 86, 0.08)',
+    backgroundColor: "rgba(15, 110, 86, 0.08)",
   },
   card: {
     width: width * 0.9,
@@ -194,17 +196,17 @@ const styles = StyleSheet.create({
     borderColor: COLORS.border,
     paddingVertical: 22,
     paddingHorizontal: 20,
-    shadowColor: '#0F172A',
+    shadowColor: "#0F172A",
     shadowOffset: { width: 0, height: 14 },
     shadowOpacity: 0.09,
     shadowRadius: 24,
     elevation: 8,
   },
   backButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    alignSelf: 'flex-start',
-    backgroundColor: '#F3F8F9',
+    flexDirection: "row",
+    alignItems: "center",
+    alignSelf: "flex-start",
+    backgroundColor: "#F3F8F9",
     borderRadius: 999,
     paddingHorizontal: 10,
     paddingVertical: 6,
@@ -214,10 +216,10 @@ const styles = StyleSheet.create({
   backButtonText: {
     color: COLORS.accent,
     fontSize: 12,
-    fontWeight: '700',
+    fontWeight: "700",
   },
   brandPill: {
-    alignSelf: 'flex-start',
+    alignSelf: "flex-start",
     backgroundColor: COLORS.accentSoft,
     borderRadius: 999,
     paddingHorizontal: 10,
@@ -227,12 +229,12 @@ const styles = StyleSheet.create({
   brandPillText: {
     color: COLORS.accent,
     fontSize: 12,
-    fontWeight: '800',
+    fontWeight: "800",
     letterSpacing: 0.4,
   },
   title: {
     fontSize: 34,
-    fontWeight: '800',
+    fontWeight: "800",
     color: COLORS.textPrimary,
     marginBottom: 4,
   },
@@ -242,19 +244,19 @@ const styles = StyleSheet.create({
     marginBottom: 18,
   },
   inputContainer: {
-    width: '100%',
+    width: "100%",
     marginBottom: 14,
     gap: 10,
   },
   inputRow: {
-    width: '100%',
+    width: "100%",
     minHeight: 52,
     borderRadius: 12,
     borderWidth: 1,
     borderColor: COLORS.border,
-    backgroundColor: '#F8FBFC',
-    flexDirection: 'row',
-    alignItems: 'center',
+    backgroundColor: "#F8FBFC",
+    flexDirection: "row",
+    alignItems: "center",
     paddingHorizontal: 10,
   },
   inputIconBox: {
@@ -262,8 +264,8 @@ const styles = StyleSheet.create({
     height: 30,
     borderRadius: 9,
     backgroundColor: COLORS.accentSoft,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     marginRight: 8,
   },
   input: {
@@ -274,21 +276,21 @@ const styles = StyleSheet.create({
     color: COLORS.textPrimary,
   },
   forgotPass: {
-    alignSelf: 'flex-end',
+    alignSelf: "flex-end",
     marginBottom: 18,
   },
   forgotText: {
     color: COLORS.accent,
     fontSize: 13,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   loginButton: {
-    width: '100%',
+    width: "100%",
     minHeight: 50,
     borderRadius: 12,
     backgroundColor: COLORS.accent,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     shadowColor: COLORS.accent,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.25,
@@ -299,27 +301,27 @@ const styles = StyleSheet.create({
   loginButtonText: {
     color: COLORS.white,
     fontSize: 15,
-    fontWeight: '700',
+    fontWeight: "700",
   },
   registerButton: {
-    width: '100%',
+    width: "100%",
     minHeight: 48,
     borderRadius: 12,
     borderWidth: 1,
     borderColor: COLORS.border,
-    backgroundColor: '#F8FBFC',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#F8FBFC",
+    alignItems: "center",
+    justifyContent: "center",
   },
   registerButtonText: {
     color: COLORS.accentDark,
     fontSize: 14,
-    fontWeight: '700',
+    fontWeight: "700",
   },
   registerText: {
     color: COLORS.textSecondary,
     fontSize: 13,
-    textAlign: 'center',
+    textAlign: "center",
     marginTop: 12,
   },
   errorInline: {
@@ -328,19 +330,19 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   socialSection: {
-    display: 'none',
+    display: "none",
   },
   divider: {
-    display: 'none',
+    display: "none",
     backgroundColor: COLORS.border,
   },
   socialText: {
-    display: 'none',
+    display: "none",
   },
   registerSection: {
-    display: 'none',
+    display: "none",
   },
   registerLink: {
-    display: 'none',
+    display: "none",
   },
 });

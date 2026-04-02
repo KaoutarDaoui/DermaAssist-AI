@@ -9,7 +9,12 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { ChevronLeft, Pill, Stethoscope, Image as ImageIcon } from "lucide-react-native/icons";
+import {
+  ChevronLeft,
+  Pill,
+  Stethoscope,
+  Image as ImageIcon,
+} from "lucide-react-native/icons";
 import patientDataService from "../services/patientDataService";
 
 const COLORS = {
@@ -50,7 +55,8 @@ const formatConfidence = (confidence) => {
   }
 
   if (typeof confidence === "object") {
-    const preferred = confidence.percentage ?? confidence.score ?? confidence.value;
+    const preferred =
+      confidence.percentage ?? confidence.score ?? confidence.value;
     if (preferred !== null && preferred !== undefined && preferred !== "") {
       return String(preferred);
     }
@@ -80,7 +86,8 @@ export default function ConsultationDetailsScreen({ navigation, route }) {
       try {
         setLoading(true);
         setError(null);
-        const response = await patientDataService.getAIResultDetails(aiResultId);
+        const response =
+          await patientDataService.getAIResultDetails(aiResultId);
 
         if (!isActive) {
           return;
@@ -117,12 +124,16 @@ export default function ConsultationDetailsScreen({ navigation, route }) {
   const diagnosis = details?.diagnosis || "Maladie non disponible";
   const confidence = formatConfidence(details?.confidence);
   const dateLabel = formatFullDateTime(details?.generated_at);
-  const skinPhotoUri = details?.skin_photo?.image_url || details?.skin_photo?.image_data;
+  const skinPhotoUri =
+    details?.skin_photo?.image_url || details?.skin_photo?.image_data;
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={styles.backButton}
+        >
           <ChevronLeft size={22} color={COLORS.accent} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Détails Consultation</Text>
@@ -139,13 +150,21 @@ export default function ConsultationDetailsScreen({ navigation, route }) {
           <Text style={styles.errorText}>{error}</Text>
           <TouchableOpacity
             style={styles.retryButton}
-            onPress={() => navigation.replace("ConsultationDetails", { aiResultId, sequentialNumber })}
+            onPress={() =>
+              navigation.replace("ConsultationDetails", {
+                aiResultId,
+                sequentialNumber,
+              })
+            }
           >
             <Text style={styles.retryButtonText}>Réessayer</Text>
           </TouchableOpacity>
         </View>
       ) : (
-        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.content}
+        >
           <View style={styles.card}>
             <Text style={styles.cardLabel}>Analyse</Text>
             <Text style={styles.cardTitle}>#{sequentialNumber || "—"}</Text>
@@ -168,14 +187,27 @@ export default function ConsultationDetailsScreen({ navigation, route }) {
             </View>
 
             {medications.length === 0 ? (
-              <Text style={styles.emptyText}>Aucun médicament proposé pour cette consultation.</Text>
+              <Text style={styles.emptyText}>
+                Aucun médicament proposé pour cette consultation.
+              </Text>
             ) : (
               medications.map((med, index) => (
-                <View key={`${med.name || "med"}-${index}`} style={styles.medicationItem}>
-                  <Text style={styles.medicationName}>{med.name || "Médicament"}</Text>
-                  <Text style={styles.medicationMeta}>Classe: {med.drug_class || "—"}</Text>
-                  <Text style={styles.medicationMeta}>Posologie: {med.dosage || "—"}</Text>
-                  <Text style={styles.medicationMeta}>Indication: {med.indication || "—"}</Text>
+                <View
+                  key={`${med.name || "med"}-${index}`}
+                  style={styles.medicationItem}
+                >
+                  <Text style={styles.medicationName}>
+                    {med.name || "Médicament"}
+                  </Text>
+                  <Text style={styles.medicationMeta}>
+                    Classe: {med.drug_class || "—"}
+                  </Text>
+                  <Text style={styles.medicationMeta}>
+                    Posologie: {med.dosage || "—"}
+                  </Text>
+                  <Text style={styles.medicationMeta}>
+                    Indication: {med.indication || "—"}
+                  </Text>
                 </View>
               ))
             )}
@@ -188,10 +220,16 @@ export default function ConsultationDetailsScreen({ navigation, route }) {
             </View>
 
             {skinPhotoUri ? (
-              <Image source={{ uri: skinPhotoUri }} style={styles.skinImage} resizeMode="cover" />
+              <Image
+                source={{ uri: skinPhotoUri }}
+                style={styles.skinImage}
+                resizeMode="cover"
+              />
             ) : (
               <View style={styles.photoPlaceholder}>
-                <Text style={styles.emptyText}>Aucune photo disponible pour cette consultation.</Text>
+                <Text style={styles.emptyText}>
+                  Aucune photo disponible pour cette consultation.
+                </Text>
               </View>
             )}
           </View>

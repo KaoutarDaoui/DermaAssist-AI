@@ -1,16 +1,18 @@
-import authService from './authService';
-import { Platform } from 'react-native';
+import authService from "./authService";
+import { Platform } from "react-native";
 
 const API_URL =
   process.env.EXPO_PUBLIC_API_URL ||
-  (Platform.OS === 'android' ? 'http://10.0.2.2:8000' : 'http://localhost:8000');
+  (Platform.OS === "android"
+    ? "http://10.0.2.2:8000"
+    : "http://localhost:8000");
 
 class PatientDataService {
   async getCurrentPatientId() {
     try {
       const profile = await this.getPatientProfile();
       if (!profile?.id) {
-        throw new Error('Patient ID not found');
+        throw new Error("Patient ID not found");
       }
 
       return profile.id;
@@ -23,12 +25,12 @@ class PatientDataService {
     try {
       const headers = await authService.getAuthHeaders();
       const response = await fetch(`${API_URL}/mobile/patient/profile`, {
-        method: 'GET',
+        method: "GET",
         headers,
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch patient profile');
+        throw new Error("Failed to fetch patient profile");
       }
 
       return await response.json();
@@ -41,12 +43,12 @@ class PatientDataService {
     try {
       const headers = await authService.getAuthHeaders();
       const response = await fetch(`${API_URL}/mobile/patient/consultations`, {
-        method: 'GET',
+        method: "GET",
         headers,
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch consultations');
+        throw new Error("Failed to fetch consultations");
       }
 
       return await response.json();
@@ -59,12 +61,12 @@ class PatientDataService {
     try {
       const headers = await authService.getAuthHeaders();
       const response = await fetch(`${API_URL}/mobile/patient/advice`, {
-        method: 'GET',
+        method: "GET",
         headers,
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch advice');
+        throw new Error("Failed to fetch advice");
       }
 
       return await response.json();
@@ -77,12 +79,12 @@ class PatientDataService {
     try {
       const headers = await authService.getAuthHeaders();
       const response = await fetch(`${API_URL}/mobile/patient/ai-medications`, {
-        method: 'GET',
+        method: "GET",
         headers,
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch AI medications');
+        throw new Error("Failed to fetch AI medications");
       }
 
       return await response.json();
@@ -94,13 +96,16 @@ class PatientDataService {
   async getAIResultsHistory() {
     try {
       const headers = await authService.getAuthHeaders();
-      const response = await fetch(`${API_URL}/mobile/patient/ai-results-history`, {
-        method: 'GET',
-        headers,
-      });
+      const response = await fetch(
+        `${API_URL}/mobile/patient/ai-results-history`,
+        {
+          method: "GET",
+          headers,
+        },
+      );
 
       if (!response.ok) {
-        throw new Error('Failed to fetch AI results history');
+        throw new Error("Failed to fetch AI results history");
       }
 
       return await response.json();
@@ -112,13 +117,16 @@ class PatientDataService {
   async getAIResultDetails(aiResultId) {
     try {
       const headers = await authService.getAuthHeaders();
-      const response = await fetch(`${API_URL}/mobile/patient/ai-results/${aiResultId}`, {
-        method: 'GET',
-        headers,
-      });
+      const response = await fetch(
+        `${API_URL}/mobile/patient/ai-results/${aiResultId}`,
+        {
+          method: "GET",
+          headers,
+        },
+      );
 
       if (!response.ok) {
-        throw new Error('Failed to fetch AI result details');
+        throw new Error("Failed to fetch AI result details");
       }
 
       return await response.json();
@@ -131,12 +139,12 @@ class PatientDataService {
     try {
       const headers = await authService.getAuthHeaders();
       const response = await fetch(`${API_URL}/mobile/patient/checkins`, {
-        method: 'GET',
+        method: "GET",
         headers,
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch check-ins');
+        throw new Error("Failed to fetch check-ins");
       }
 
       return await response.json();
@@ -148,15 +156,18 @@ class PatientDataService {
   async getSkinImages(patientIdOverride = null) {
     try {
       const headers = await authService.getAuthHeaders();
-      const patientId = patientIdOverride || await this.getCurrentPatientId();
+      const patientId = patientIdOverride || (await this.getCurrentPatientId());
 
-      const response = await fetch(`${API_URL}/patients/${patientId}/skin-images`, {
-        method: 'GET',
-        headers,
-      });
+      const response = await fetch(
+        `${API_URL}/patients/${patientId}/skin-images`,
+        {
+          method: "GET",
+          headers,
+        },
+      );
 
       if (!response.ok) {
-        throw new Error('Failed to fetch skin images');
+        throw new Error("Failed to fetch skin images");
       }
 
       return await response.json();
@@ -168,15 +179,18 @@ class PatientDataService {
   async getSkinImage(imageId, patientIdOverride = null) {
     try {
       const headers = await authService.getAuthHeaders();
-      const patientId = patientIdOverride || await this.getCurrentPatientId();
+      const patientId = patientIdOverride || (await this.getCurrentPatientId());
 
-      const response = await fetch(`${API_URL}/patients/${patientId}/skin-images/${imageId}`, {
-        method: 'GET',
-        headers,
-      });
+      const response = await fetch(
+        `${API_URL}/patients/${patientId}/skin-images/${imageId}`,
+        {
+          method: "GET",
+          headers,
+        },
+      );
 
       if (!response.ok) {
-        throw new Error('Failed to fetch skin image detail');
+        throw new Error("Failed to fetch skin image detail");
       }
 
       return await response.json();
@@ -203,8 +217,12 @@ class PatientDataService {
         }));
 
       return normalizedImages.sort((first, second) => {
-        const firstDate = first?.uploaded_at ? new Date(first.uploaded_at).getTime() : 0;
-        const secondDate = second?.uploaded_at ? new Date(second.uploaded_at).getTime() : 0;
+        const firstDate = first?.uploaded_at
+          ? new Date(first.uploaded_at).getTime()
+          : 0;
+        const secondDate = second?.uploaded_at
+          ? new Date(second.uploaded_at).getTime()
+          : 0;
         return secondDate - firstDate;
       });
     } catch (error) {
@@ -228,13 +246,16 @@ class PatientDataService {
         this.getCurrentPatientId(),
       ]);
 
-      const response = await fetch(`${API_URL}/patients/${patientId}/skin-images/progression`, {
-        method: 'GET',
-        headers,
-      });
+      const response = await fetch(
+        `${API_URL}/patients/${patientId}/skin-images/progression`,
+        {
+          method: "GET",
+          headers,
+        },
+      );
 
       if (!response.ok) {
-        throw new Error('Failed to fetch skin progression');
+        throw new Error("Failed to fetch skin progression");
       }
 
       return await response.json();
@@ -251,42 +272,45 @@ class PatientDataService {
       ]);
 
       if (!token) {
-        throw new Error('No access token available');
+        throw new Error("No access token available");
       }
 
-      const fileName = imageUri?.split('/').pop() || `photo-${Date.now()}.jpg`;
+      const fileName = imageUri?.split("/").pop() || `photo-${Date.now()}.jpg`;
       const lowerName = fileName.toLowerCase();
-      const mimeType = lowerName.endsWith('.png') ? 'image/png' : 'image/jpeg';
+      const mimeType = lowerName.endsWith(".png") ? "image/png" : "image/jpeg";
 
       const formData = new FormData();
 
       // Expo web needs a Blob/File, while native expects the { uri, name, type } object.
-      if (Platform.OS === 'web') {
+      if (Platform.OS === "web") {
         const imageResponse = await fetch(imageUri);
         if (!imageResponse.ok) {
-          throw new Error('Unable to read selected image');
+          throw new Error("Unable to read selected image");
         }
 
         const imageBlob = await imageResponse.blob();
-        formData.append('file', imageBlob, fileName);
+        formData.append("file", imageBlob, fileName);
       } else {
-        formData.append('file', {
+        formData.append("file", {
           uri: imageUri,
           name: fileName,
           type: mimeType,
         });
       }
 
-      const response = await fetch(`${API_URL}/patients/${patientId}/skin-images`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
+      const response = await fetch(
+        `${API_URL}/patients/${patientId}/skin-images`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
         },
-        body: formData,
-      });
+      );
 
       if (!response.ok) {
-        let detail = 'Failed to upload skin image';
+        let detail = "Failed to upload skin image";
         try {
           const errorData = await response.json();
           detail = errorData?.detail || detail;
@@ -311,13 +335,16 @@ class PatientDataService {
 
       const query = `image_ref_id=${encodeURIComponent(referenceImageId)}&image_new_id=${encodeURIComponent(newImageId)}&include_overlay=false`;
 
-      const response = await fetch(`${API_URL}/patients/${patientId}/skin-images/compare?${query}`, {
-        method: 'POST',
-        headers,
-      });
+      const response = await fetch(
+        `${API_URL}/patients/${patientId}/skin-images/compare?${query}`,
+        {
+          method: "POST",
+          headers,
+        },
+      );
 
       if (!response.ok) {
-        let detail = 'Failed to compare skin images';
+        let detail = "Failed to compare skin images";
         try {
           const errorData = await response.json();
           detail = errorData?.detail || detail;

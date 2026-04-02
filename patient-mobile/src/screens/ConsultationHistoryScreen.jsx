@@ -65,7 +65,8 @@ const formatConfidence = (confidence) => {
   }
 
   if (typeof confidence === "object") {
-    const preferred = confidence.percentage ?? confidence.score ?? confidence.value;
+    const preferred =
+      confidence.percentage ?? confidence.score ?? confidence.value;
     if (preferred !== null && preferred !== undefined && preferred !== "") {
       return String(preferred);
     }
@@ -174,7 +175,9 @@ export default function ConsultationHistoryScreen({ navigation }) {
             </View>
             <View style={styles.dateTexts}>
               <Text style={styles.dateText}>{dateLabel}</Text>
-              {timeLabel ? <Text style={styles.timeText}>{timeLabel}</Text> : null}
+              {timeLabel ? (
+                <Text style={styles.timeText}>{timeLabel}</Text>
+              ) : null}
             </View>
           </View>
         </View>
@@ -241,7 +244,9 @@ export default function ConsultationHistoryScreen({ navigation }) {
               <FileText size={24} color={COLORS.textLight} />
             </View>
             <Text style={styles.emptyTitle}>Aucune consultation trouvée</Text>
-            <Text style={styles.emptySubtitle}>Ajoutez une analyse pour voir l'historique ici.</Text>
+            <Text style={styles.emptySubtitle}>
+              Ajoutez une analyse pour voir l'historique ici.
+            </Text>
           </View>
         }
       />

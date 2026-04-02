@@ -171,7 +171,10 @@ export default function PhotoUploadScreen({ navigation }) {
                 <X size={18} color={COLORS.danger} />
               </TouchableOpacity>
             </View>
-            <Image source={{ uri: selectedImage }} style={styles.previewImage} />
+            <Image
+              source={{ uri: selectedImage }}
+              style={styles.previewImage}
+            />
             <TouchableOpacity style={styles.changeButton} onPress={pickImage}>
               <ImageIcon size={18} color={COLORS.accent} />
               <Text style={styles.changeButtonText}>Changer l'image</Text>
@@ -182,7 +185,9 @@ export default function PhotoUploadScreen({ navigation }) {
             <View style={styles.uploadIconBg}>
               <Camera size={48} color={COLORS.accent} />
             </View>
-            <Text style={styles.uploadPromptTitle}>Aucune image sélectionnée</Text>
+            <Text style={styles.uploadPromptTitle}>
+              Aucune image sélectionnée
+            </Text>
             <Text style={styles.uploadPromptSubtitle}>
               Sélectionnez ou prenez une photo pour débuter
             </Text>
@@ -226,7 +231,10 @@ export default function PhotoUploadScreen({ navigation }) {
 
         {/* Send Button */}
         <TouchableOpacity
-          style={[styles.sendButton, !selectedImage && styles.sendButtonDisabled]}
+          style={[
+            styles.sendButton,
+            !selectedImage && styles.sendButtonDisabled,
+          ]}
           onPress={handleUpload}
           disabled={!selectedImage || uploading}
           activeOpacity={0.85}

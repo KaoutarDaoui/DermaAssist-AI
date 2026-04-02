@@ -6,6 +6,7 @@ Interface web pour les dermatologues - Gestion des dossiers patients, analyse d'
 
 ```bash
 npm install
+npm install chart.js react-chartjs-2
 ```
 
 ## Développement

@@ -130,7 +130,9 @@ export default function HomeScreen({ navigation }) {
         }
 
         setPatientProfile(profile);
-        setConsultations(Array.isArray(consultationsData) ? consultationsData : []);
+        setConsultations(
+          Array.isArray(consultationsData) ? consultationsData : [],
+        );
         setDashboardError(null);
       } catch (error) {
         console.error("Error loading dashboard data:", error);
@@ -148,8 +150,14 @@ export default function HomeScreen({ navigation }) {
     };
   }, []);
 
-  const patientFullName = useMemo(() => getPatientDisplayName(patientProfile), [patientProfile]);
-  const patientInitials = useMemo(() => getPatientInitials(patientFullName), [patientFullName]);
+  const patientFullName = useMemo(
+    () => getPatientDisplayName(patientProfile),
+    [patientProfile],
+  );
+  const patientInitials = useMemo(
+    () => getPatientInitials(patientFullName),
+    [patientFullName],
+  );
 
   const recentConsultations = useMemo(() => {
     return [...consultations]
@@ -209,31 +217,48 @@ export default function HomeScreen({ navigation }) {
             </View>
           </View>
 
-          {dashboardError ? <Text style={styles.dataErrorText}>{dashboardError}</Text> : null}
+          {dashboardError ? (
+            <Text style={styles.dataErrorText}>{dashboardError}</Text>
+          ) : null}
 
           <View style={styles.alertCard}>
             <View style={styles.alertPill}>
               <Text style={styles.alertPillText}>Du Dr Karim Benali</Text>
             </View>
             <View style={styles.alertTitleRow}>
-              <Text style={styles.alertTitle}>Évitez l'exposition au soleil aujourd'hui</Text>
+              <Text style={styles.alertTitle}>
+                Évitez l'exposition au soleil aujourd'hui
+              </Text>
               <AlertTriangle size={18} color={COLORS.accent} />
             </View>
-            <Text style={styles.alertSubtitle}>L'indice UV est ÉLEVÉ à Boumerdès - appliquez SPF 50+</Text>
+            <Text style={styles.alertSubtitle}>
+              L'indice UV est ÉLEVÉ à Boumerdès - appliquez SPF 50+
+            </Text>
             <Text style={styles.alertDate}>Mis à jour aujourd'hui</Text>
           </View>
 
           <View style={styles.metricRow}>
             {metrics.map((metric) => {
               const Icon = metric.icon;
-              const chipStyle = metric.tone === "warning" ? styles.metricWarning : styles.metricInfo;
+              const chipStyle =
+                metric.tone === "warning"
+                  ? styles.metricWarning
+                  : styles.metricInfo;
               return (
                 <View key={metric.id} style={[styles.metricChip, chipStyle]}>
-                  <Icon size={14} color={metric.tone === "warning" ? COLORS.warning : COLORS.info} />
+                  <Icon
+                    size={14}
+                    color={
+                      metric.tone === "warning" ? COLORS.warning : COLORS.info
+                    }
+                  />
                   <Text
                     style={[
                       styles.metricChipText,
-                      { color: metric.tone === "warning" ? "#9A5A0A" : "#1F5FB8" },
+                      {
+                        color:
+                          metric.tone === "warning" ? "#9A5A0A" : "#1F5FB8",
+                      },
                     ]}
                   >
                     {metric.label}
@@ -253,8 +278,12 @@ export default function HomeScreen({ navigation }) {
               <GitCompare size={20} color={COLORS.accent} />
             </View>
             <View style={styles.comparisonBody}>
-              <Text style={styles.comparisonTitle}>Comparer mes photos de suivi</Text>
-              <Text style={styles.comparisonSubtitle}>Sélectionnez 2 photos et lancez une comparaison</Text>
+              <Text style={styles.comparisonTitle}>
+                Comparer mes photos de suivi
+              </Text>
+              <Text style={styles.comparisonSubtitle}>
+                Sélectionnez 2 photos et lancez une comparaison
+              </Text>
             </View>
             <ChevronRight size={16} color={COLORS.accent} />
           </TouchableOpacity>
@@ -307,20 +336,27 @@ export default function HomeScreen({ navigation }) {
             <Text style={styles.sectionLabel}>Mes consultations</Text>
             <View style={styles.recentLegend}>
               <Stethoscope size={13} color={COLORS.textMuted} />
-              <Text style={styles.recentLegendText}>{recentConsultations.length} résultat(s)</Text>
+              <Text style={styles.recentLegendText}>
+                {recentConsultations.length} résultat(s)
+              </Text>
             </View>
           </View>
 
           <View style={styles.recentCard}>
             {recentConsultations.length === 0 ? (
-              <Text style={styles.emptyStateText}>Aucune consultation disponible pour le moment.</Text>
+              <Text style={styles.emptyStateText}>
+                Aucune consultation disponible pour le moment.
+              </Text>
             ) : (
               recentConsultations.map((consultation, index) => {
                 const doctorName = consultation?.doctor?.full_name || "Médecin";
                 const status = formatConsultationStatus(consultation?.status);
                 const dateLabel = formatConsultationDate(consultation?.date);
                 const noteText = consultation?.notes || "Sans note clinique";
-                const rowKey = consultation?.id || consultation?.consultation_id || `consultation-${index}`;
+                const rowKey =
+                  consultation?.id ||
+                  consultation?.consultation_id ||
+                  `consultation-${index}`;
 
                 return (
                   <TouchableOpacity
@@ -337,7 +373,10 @@ export default function HomeScreen({ navigation }) {
                       <Text style={styles.recentNote} numberOfLines={1}>
                         {doctorName}
                       </Text>
-                      <Text style={styles.consultationSubtext} numberOfLines={1}>
+                      <Text
+                        style={styles.consultationSubtext}
+                        numberOfLines={1}
+                      >
                         {noteText}
                       </Text>
                     </View>
@@ -352,9 +391,15 @@ export default function HomeScreen({ navigation }) {
             )}
           </View>
 
-          <TouchableOpacity style={styles.footerCta} activeOpacity={0.9} onPress={handleOpenTreatment}>
+          <TouchableOpacity
+            style={styles.footerCta}
+            activeOpacity={0.9}
+            onPress={handleOpenTreatment}
+          >
             <Upload size={16} color={COLORS.accent} />
-            <Text style={styles.footerCtaText}>Ouvrir le plan de traitement</Text>
+            <Text style={styles.footerCtaText}>
+              Ouvrir le plan de traitement
+            </Text>
             <ChevronRight size={14} color={COLORS.accent} />
           </TouchableOpacity>
         </ScrollView>

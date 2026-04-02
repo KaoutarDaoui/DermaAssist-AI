@@ -78,7 +78,12 @@ export default function TreatmentScreen() {
   const treatmentRows = useMemo(() => {
     return medications.map((medication) => {
       const rawStatus = String(medication?.status || "propose").toLowerCase();
-      const mappedStatus = rawStatus === "completed" ? "completed" : rawStatus === "pending" ? "pending" : "active";
+      const mappedStatus =
+        rawStatus === "completed"
+          ? "completed"
+          : rawStatus === "pending"
+            ? "pending"
+            : "active";
 
       return {
         id: medication.id,
@@ -88,15 +93,20 @@ export default function TreatmentScreen() {
         dosage: medication.dosage || "Posologie non précisée",
         indication: medication.indication || "Indication non précisée",
         icon: mappedStatus === "completed" ? CheckCircle : Pill,
-        color: mappedStatus === "completed" ? COLORS.success : mappedStatus === "pending" ? COLORS.warning : COLORS.accent,
+        color:
+          mappedStatus === "completed"
+            ? COLORS.success
+            : mappedStatus === "pending"
+              ? COLORS.warning
+              : COLORS.accent,
       };
     });
   }, [medications]);
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView 
-        style={styles.container} 
+      <ScrollView
+        style={styles.container}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 100 }}
       >
@@ -112,12 +122,16 @@ export default function TreatmentScreen() {
         </View>
 
         {/* Active Treatments */}
-        <Text style={styles.sectionTitle}>Médicaments proposés par le médecin</Text>
+        <Text style={styles.sectionTitle}>
+          Médicaments proposés par le médecin
+        </Text>
 
         {loading ? (
           <View style={styles.loadingBlock}>
             <ActivityIndicator size="small" color={COLORS.accent} />
-            <Text style={styles.loadingText}>Chargement des traitements...</Text>
+            <Text style={styles.loadingText}>
+              Chargement des traitements...
+            </Text>
           </View>
         ) : null}
 
@@ -133,17 +147,35 @@ export default function TreatmentScreen() {
 
         {!loading && !error
           ? treatmentRows.map((treatment) => (
-              <TouchableOpacity key={treatment.id} style={styles.treatmentCard} activeOpacity={0.9}>
+              <TouchableOpacity
+                key={treatment.id}
+                style={styles.treatmentCard}
+                activeOpacity={0.9}
+              >
                 <View style={styles.treatmentHeader}>
-                  <View style={[styles.statusIcon, { backgroundColor: `${treatment.color}20` }]}>
+                  <View
+                    style={[
+                      styles.statusIcon,
+                      { backgroundColor: `${treatment.color}20` },
+                    ]}
+                  >
                     <treatment.icon size={20} color={treatment.color} />
                   </View>
                   <View style={styles.treatmentInfo}>
                     <Text style={styles.treatmentName}>{treatment.name}</Text>
-                    <Text style={styles.treatmentDuration}>{treatment.duration}</Text>
+                    <Text style={styles.treatmentDuration}>
+                      {treatment.duration}
+                    </Text>
                   </View>
-                  <View style={[styles.statusBadge, { backgroundColor: `${treatment.color}20` }]}>
-                    <Text style={[styles.statusText, { color: treatment.color }]}>
+                  <View
+                    style={[
+                      styles.statusBadge,
+                      { backgroundColor: `${treatment.color}20` },
+                    ]}
+                  >
+                    <Text
+                      style={[styles.statusText, { color: treatment.color }]}
+                    >
                       {treatment.status === "active"
                         ? "Actif"
                         : treatment.status === "completed"
@@ -160,7 +192,9 @@ export default function TreatmentScreen() {
 
                 <View style={styles.indicationRow}>
                   <Text style={styles.indicationLabel}>Indication:</Text>
-                  <Text style={styles.indicationValue}>{treatment.indication}</Text>
+                  <Text style={styles.indicationValue}>
+                    {treatment.indication}
+                  </Text>
                 </View>
               </TouchableOpacity>
             ))
@@ -179,25 +213,28 @@ export default function TreatmentScreen() {
 
         {/* Contact Doctor */}
         <TouchableOpacity style={styles.contactCard}>
-          <AlertCircle size={24} color={COLORS.white} style={{ marginRight: 12 }} />
+          <AlertCircle
+            size={24}
+            color={COLORS.white}
+            style={{ marginRight: 12 }}
+          />
           <View style={styles.contactText}>
             <Text style={styles.contactTitle}>Avez des questions?</Text>
             <Text style={styles.contactSubtitle}>Contactez votre médecin</Text>
           </View>
         </TouchableOpacity>
-
       </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: { 
-    flex: 1, 
+  safeArea: {
+    flex: 1,
     backgroundColor: COLORS.background,
   },
-  container: { 
-    flex: 1, 
+  container: {
+    flex: 1,
     paddingHorizontal: 20,
   },
   header: {
@@ -207,14 +244,14 @@ const styles = StyleSheet.create({
     marginTop: 30,
     marginBottom: 30,
   },
-  title: { 
-    fontSize: 22, 
-    fontWeight: "bold", 
+  title: {
+    fontSize: 22,
+    fontWeight: "bold",
     color: COLORS.textDark,
   },
-  subtitle: { 
-    fontSize: 14, 
-    color: COLORS.textLight, 
+  subtitle: {
+    fontSize: 14,
+    color: COLORS.textLight,
     marginTop: 4,
   },
   headerIcon: {

@@ -54,20 +54,29 @@ export default function HelpSupportScreen({ navigation }) {
     try {
       const canOpen = await Linking.canOpenURL(telUrl);
       if (!canOpen) {
-        Alert.alert("Information", "Impossible de lancer un appel depuis cet appareil.");
+        Alert.alert(
+          "Information",
+          "Impossible de lancer un appel depuis cet appareil.",
+        );
         return;
       }
 
       await Linking.openURL(telUrl);
     } catch (error) {
-      Alert.alert("Information", "Impossible de lancer un appel depuis cet appareil.");
+      Alert.alert(
+        "Information",
+        "Impossible de lancer un appel depuis cet appareil.",
+      );
     }
   };
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={styles.backButton}
+        >
           <ChevronLeft size={22} color={COLORS.accent} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Aide et assistance</Text>
@@ -91,9 +100,17 @@ export default function HelpSupportScreen({ navigation }) {
 
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Questions frequentes</Text>
-          <Text style={styles.listItem}>- Comment ajouter une photo ? Ouvrez Comparaison puis appuyez sur Ajouter.</Text>
-          <Text style={styles.listItem}>- Comment consulter mes analyses ? Ouvrez l'onglet Consultations.</Text>
-          <Text style={styles.listItem}>- Donnees du profil ? Rendez-vous dans Profil pour voir et gerer vos informations.</Text>
+          <Text style={styles.listItem}>
+            - Comment ajouter une photo ? Ouvrez Comparaison puis appuyez sur
+            Ajouter.
+          </Text>
+          <Text style={styles.listItem}>
+            - Comment consulter mes analyses ? Ouvrez l'onglet Consultations.
+          </Text>
+          <Text style={styles.listItem}>
+            - Donnees du profil ? Rendez-vous dans Profil pour voir et gerer vos
+            informations.
+          </Text>
         </View>
 
         <View style={styles.card}>
@@ -119,7 +136,9 @@ export default function HelpSupportScreen({ navigation }) {
             </View>
           </TouchableOpacity>
 
-          <Text style={styles.supportHours}>Disponibilite support: du lundi au vendredi, 08:30 - 17:00.</Text>
+          <Text style={styles.supportHours}>
+            Disponibilite support: du lundi au vendredi, 08:30 - 17:00.
+          </Text>
         </View>
 
         <View style={styles.card}>

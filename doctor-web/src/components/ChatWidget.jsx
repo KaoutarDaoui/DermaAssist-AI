@@ -1,11 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import {
-  MessageSquare,
-  X,
-  Send,
-  Loader,
-  ChevronDown,
-} from "lucide-react";
+import { MessageSquare, X, Send, Loader, ChevronDown } from "lucide-react";
 import toast from "react-hot-toast";
 import { ai } from "../services/api";
 

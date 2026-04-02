@@ -1,55 +1,57 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { useAuthStore } from '../services/authStore'
-import { auth } from '../services/api'
-import toast from 'react-hot-toast'
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuthStore } from "../services/authStore";
+import { auth } from "../services/api";
+import toast from "react-hot-toast";
 
 export default function LoginPage() {
-  const navigate = useNavigate()
-  const setAuth = useAuthStore((state) => state.setAuth)
-  const [loading, setLoading] = useState(false)
+  const navigate = useNavigate();
+  const setAuth = useAuthStore((state) => state.setAuth);
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-  })
+    email: "",
+    password: "",
+  });
 
   const handleChange = (e) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
-    })
-  }
+    });
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    setLoading(true)
+    e.preventDefault();
+    setLoading(true);
 
     try {
-      const response = await auth.login(formData.email, formData.password)
-      const { access_token, refresh_token } = response.data
-      
-      setAuth(
-        { email: formData.email },
-        access_token,
-        refresh_token
-      )
-      
-      toast.success('Login successful')
-      navigate('/dashboard')
+      const response = await auth.login(formData.email, formData.password);
+      const { access_token, refresh_token } = response.data;
+
+      setAuth({ email: formData.email }, access_token, refresh_token);
+
+      toast.success("Login successful");
+      navigate("/dashboard");
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'Login failed')
+      toast.error(error.response?.data?.detail || "Login failed");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
       <div className="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
-        <h1 className="text-3xl font-bold text-center mb-8 text-gray-800">
-          Skin+
-        </h1>
-        
+        <div className="flex justify-center mb-8">
+          <div className="bg-[#0A3F34] rounded-2xl px-5 py-3">
+            <img
+              src="/logo/white_logoSkin.png"
+              alt="Skin+ logo"
+              className="h-14 w-auto object-contain"
+            />
+          </div>
+        </div>
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -86,7 +88,7 @@ export default function LoginPage() {
             disabled={loading}
             className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition disabled:opacity-50"
           >
-            {loading ? 'Signing in...' : 'Sign In'}
+            {loading ? "Signing in..." : "Sign In"}
           </button>
         </form>
 
@@ -95,5 +97,5 @@ export default function LoginPage() {
         </p>
       </div>
     </div>
-  )
+  );
 }
