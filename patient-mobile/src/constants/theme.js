@@ -1,11 +1,24 @@
 export const colors = {
-  primary: "#2563eb",    // Soft blue
-  secondary: "#10b981",  // Green accent
-  accent: "#f59e0b",     // Orange/amber
+  primary: "#0F6E56",    // Skin+ primary green
+  secondary: "#0d5a47",  // Slightly darker green
+  accent: "#10b981",     // Light green for secondary things
   danger: "#ef4444",     // Red
   success: "#10b981",    // Green
   warning: "#f59e0b",    // Amber
   
+  // Specific semantic for verdicts
+  bgAmelioration: "#f0fdf4",
+  borderAmelioration: "#4ade80",
+  textAmelioration: "#15803d",
+  
+  bgAggravation: "#fef2f2",
+  borderAggravation: "#f87171",
+  textAggravation: "#b91c1c",
+
+  bgStable: "#fffbeb",
+  borderStable: "#fbbf24",
+  textStable: "#b45309",
+
   // Grays
   dark: "#1f2937",       // Dark gray
   gray: "#6b7280",       // Medium gray
