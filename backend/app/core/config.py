@@ -41,6 +41,9 @@ class Settings(BaseSettings):
     LLM_PROVIDER: str = "mistral"  # ou "gemini"
     MISTRAL_API_KEY: str = ""
     GEMINI_API_KEY: str = ""
+    CLAUDE_API_KEY: str = ""
+    ANTHROPIC_API_KEY: str = ""
+    CLAUDE_MODEL: str = "claude-3-haiku-20240307"
     
     # Environment
     ENVIRONMENT: str = "development"

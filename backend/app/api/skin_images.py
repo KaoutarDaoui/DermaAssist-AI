@@ -15,7 +15,6 @@ from pathlib import Path
 
 router = APIRouter(prefix="/patients", tags=["Skin Images"])
 
-
 def _get_overlay_fn():
     module3_path = Path(__file__).resolve().parents[2] / "ai" / "modele3_COMP"
     if str(module3_path) not in sys.path:
@@ -33,7 +32,6 @@ def _get_overlay_fn():
 #   5. DELETE /skin-images/{image_id}
 #   6. POST /skin-images/compare
 # ════════════════════════════════════════════════════════════════
-
 @router.get("/{patient_id}/skin-images", response_model=List[SkinImageResponse])
 def get_patient_skin_images(patient_id: str, db: Session = Depends(get_db)):
     patient = db.query(Patient).filter(Patient.id == patient_id).first()

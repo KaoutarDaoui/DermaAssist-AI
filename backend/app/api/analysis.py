@@ -63,6 +63,24 @@ class AIResultCreateRequest(BaseModel):
     env_snapshot: Optional[Dict[str, Any]] = None
 
 
+class QuestionAnswerItem(BaseModel):
+    """A clinical question with the patient's selected answer."""
+    index: int
+    question: str
+    selected_option: str
+
+
+class RefineAnalysisRequest(BaseModel):
+    """Request body for refining analysis with patient question answers."""
+    image_id: str
+    question_answers: List[QuestionAnswerItem]
+    age: Optional[int] = None
+    sex: Optional[str] = None
+    site: Optional[str] = None
+    wilaya: Optional[str] = None
+    saison: Optional[str] = None
+
+
 @router.post("/{patient_id}/advanced-analysis")
 async def advanced_analysis(
     patient_id: str,
@@ -123,12 +141,22 @@ async def advanced_analysis(
         fitzpatrick_value = str(fitzpatrick_raw).replace("TYPE_", "").upper()
         fitzpatrick_num = fitzpatrick_map.get(fitzpatrick_value, 3)
 
-        patient_age = patient.age if patient.age and patient.age > 0 else 30
-        
-        # Map city (wilaya) enum to string value for new model
-        wilaya_raw = patient.city.value if patient.city else "nord"
-        patient_wilaya = str(wilaya_raw).lower().replace("wilaya_", "") if wilaya_raw else "nord"
-        patient_season = "ete"  # Default season
+        patient_age = request.age if request.age is not None else (patient.age if patient.age and patient.age > 0 else 30)
+        patient_sex = request.sex if request.sex else "unknown"
+        patient_site = request.site if request.site else "unknown"
+
+        if request.wilaya:
+            patient_wilaya = request.wilaya.lower()
+        else:
+            wilaya_raw = patient.city.value if patient.city else "nord"
+            patient_wilaya = str(wilaya_raw).lower().replace("wilaya_", "") if wilaya_raw else "nord"
+
+        patient_season = request.saison if request.saison else "ete"
+        patient_context_sex = patient_sex.lower()
+        if patient_context_sex == "male":
+            patient_context_sex = "homme"
+        elif patient_context_sex == "female":
+            patient_context_sex = "femme"
 
         # 1) CNN prediction
         cnn_module = importlib.import_module("Modele1_CNN.cnn_service")
@@ -136,8 +164,8 @@ async def advanced_analysis(
         module1_result = cnn_service.predict(
             image_bytes=skin_image.image_data,
             age=patient_age,
-            sex="unknown",
-            site="unknown",
+            sex=patient_sex,
+            site=patient_site,
             wilaya=patient_wilaya,
             saison=patient_season,
             top_k=3,
@@ -160,7 +188,7 @@ async def advanced_analysis(
 
         patient_context = PatientContext(
             age=patient_age,
-            sexe="femme",
+            sexe=patient_context_sex,
             fitzpatrick=fitzpatrick_value,
             ville=patient_wilaya,
             antecedents=patient.medical_history.split(",") if patient.medical_history else [],
@@ -827,4 +855,361 @@ def get_consultation_skin_image(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to retrieve skin image: {str(e)}"
+        )
+
+
+@router.post("/{patient_id}/refine-analysis")
+async def refine_analysis(
+    patient_id: str,
+    request: RefineAnalysisRequest,
+    db: Session = Depends(get_db)
+):
+    """
+    Refine the AI analysis based on patient's answers to clinical questions.
+    
+    This endpoint:
+    1. Retrieves the patient and skin image
+    2. Re-runs Module 1 CNN prediction
+    3. Calls RAG pipeline with question_answers parameter
+    4. Returns refined analysis (analyse_affinee)
+    
+    Request:
+    {
+        "image_id": "uuid",
+        "question_answers": [
+            {"index": 0, "question": "Avez-vous des antécédents?", "selected_option": "Oui"},
+            {"index": 1, "question": "Question 2", "selected_option": "Non"},
+            ...
+        ]
+    }
+    
+    Response:
+    {
+        "status": "success",
+        "analyse_affinee": "Analyse personnalisée basée sur les réponses",
+        "plan_prise_en_charge": ["étape 1", "étape 2"],
+        "medicaments_a_eviter": ["med1 (raison)"],
+        "delai_urgence": "Consultation dans 2 semaines"
+    }
+    """
+    try:
+        image_id = request.image_id
+        if not image_id:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="image_id is required"
+            )
+        
+        if not request.question_answers:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="question_answers is required"
+            )
+        
+        # Get patient
+        patient = db.query(Patient).filter(Patient.id == patient_id).first()
+        if not patient:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Patient not found"
+            )
+        
+        # Get skin image
+        skin_image = db.query(SkinImage).filter(
+            SkinImage.id == image_id,
+            SkinImage.patient_id == patient_id
+        ).first()
+        
+        if not skin_image:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Image not found"
+            )
+        
+        if not skin_image.image_data:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Image binary data is missing"
+            )
+        
+        # Module 1 inputs from patient profile
+        fitzpatrick_map = {
+            "I": 1,
+            "II": 2,
+            "III": 3,
+            "IV": 4,
+            "V": 5,
+            "VI": 6,
+        }
+        fitzpatrick_raw = patient.fitzpatrick_type.value if patient.fitzpatrick_type else "III"
+        fitzpatrick_value = str(fitzpatrick_raw).replace("TYPE_", "").upper()
+        fitzpatrick_num = fitzpatrick_map.get(fitzpatrick_value, 3)
+
+        patient_age = request.age if request.age is not None else (patient.age if patient.age and patient.age > 0 else 30)
+        patient_sex = request.sex if request.sex else "unknown"
+        patient_site = request.site if request.site else "unknown"
+
+        if request.wilaya:
+            patient_wilaya = request.wilaya.lower()
+        else:
+            wilaya_raw = patient.city.value if patient.city else "nord"
+            patient_wilaya = str(wilaya_raw).lower().replace("wilaya_", "") if wilaya_raw else "nord"
+
+        patient_season = request.saison if request.saison else "ete"
+        patient_context_sex = patient_sex.lower()
+        if patient_context_sex == "male":
+            patient_context_sex = "homme"
+        elif patient_context_sex == "female":
+            patient_context_sex = "femme"
+
+        # 1) CNN prediction
+        cnn_module = importlib.import_module("Modele1_CNN.cnn_service")
+        cnn_service = cnn_module.get_cnn_service()
+        module1_result = cnn_service.predict(
+            image_bytes=skin_image.image_data,
+            age=patient_age,
+            sex=patient_sex,
+            site=patient_site,
+            wilaya=patient_wilaya,
+            saison=patient_season,
+            top_k=3,
+        )
+
+        # 2) RAG pipeline with question answers
+        rag_module = importlib.import_module("modele2_RAG.rag_pipeline")
+        alert_module = importlib.import_module("modele2_RAG.alert_engine")
+
+        DermAssistRAG = rag_module.DermAssistRAG
+        Module1Output = rag_module.Module1Output
+        PatientContext = alert_module.PatientContext
+
+        module1_output = Module1Output(
+            condition_id=module1_result.get("condition_id", "unknown"),
+            condition_name=module1_result.get("condition_name", "Unknown"),
+            confidence=float(module1_result.get("confidence") or 0),
+            top_alternatives=module1_result.get("top_alternatives", []),
+        )
+
+        patient_context = PatientContext(
+            age=patient_age,
+            sexe=patient_context_sex,
+            fitzpatrick=fitzpatrick_value,
+            ville=patient_wilaya,
+            antecedents=patient.medical_history.split(",") if patient.medical_history else [],
+            medicaments_actuels=[],
+        )
+
+        # Format question_answers to match RAG pipeline expectations.
+        # rag_pipeline.generate_analyse_affinee reads qa.get("question") and qa.get("answer").
+        question_answers_list = [
+            {
+                "index": qa.index,
+                "question": qa.question,
+                "answer": qa.selected_option,
+                "selected_option": qa.selected_option,
+            }
+            for qa in request.question_answers
+        ]
+
+        # Call RAG with question_answers to generate refined analysis
+        rag = DermAssistRAG()
+        rag_response = rag.process(
+            module1_output,
+            patient_context,
+            question_answers=question_answers_list
+        )
+
+        affinee_data = (
+            rag_response.analyse_affinee_data
+            if isinstance(rag_response.analyse_affinee_data, dict)
+            else {}
+        )
+        llm_error = affinee_data.get("error") if isinstance(affinee_data, dict) else None
+        llm_provider = affinee_data.get("_llm_provider") if isinstance(affinee_data, dict) else None
+        llm_model = affinee_data.get("_llm_model") if isinstance(affinee_data, dict) else None
+        llm_source = llm_provider if affinee_data and not llm_error and llm_provider else "fallback"
+
+        base_confidence_pct = round(float(module1_result.get("confidence") or 0) * 100, 1)
+        raw_revised_confidence = affinee_data.get("confiance_revisee_pct")
+        try:
+            revised_confidence_pct = float(raw_revised_confidence)
+        except (TypeError, ValueError):
+            revised_confidence_pct = base_confidence_pct
+        revised_confidence_pct = max(0.0, min(100.0, round(revised_confidence_pct, 1)))
+        confidence_delta_pct = round(revised_confidence_pct - base_confidence_pct, 1)
+
+        decision_diagnostique = affinee_data.get("decision_diagnostique")
+        if decision_diagnostique not in {
+            "diagnostic_renforce",
+            "diagnostic_incertain",
+            "revoir_alternatives",
+        }:
+            if confidence_delta_pct >= 5:
+                decision_diagnostique = "diagnostic_renforce"
+            elif confidence_delta_pct <= -5:
+                decision_diagnostique = "revoir_alternatives"
+            else:
+                decision_diagnostique = "diagnostic_incertain"
+
+        paragraphe_confiance = (
+            affinee_data.get("paragraphe_confiance")
+            or rag_response.analyse_affinee
+            or "Les réponses cliniques ne permettent pas de trancher clairement."
+        )
+
+        analyse_affinee_text = (
+            rag_response.analyse_affinee
+            or affinee_data.get("analyse_affinee")
+            or paragraphe_confiance
+        )
+
+        alternatives_prioritaires = []
+        raw_alternatives = affinee_data.get("alternatives_prioritaires")
+        if isinstance(raw_alternatives, list):
+            for idx, alt in enumerate(raw_alternatives[:3], start=1):
+                if isinstance(alt, dict):
+                    nom = (
+                        alt.get("nom")
+                        or alt.get("name")
+                        or alt.get("condition")
+                        or alt.get("maladie")
+                    )
+                    if not nom:
+                        continue
+                    try:
+                        priorite = int(alt.get("priorite", idx))
+                    except (TypeError, ValueError):
+                        priorite = idx
+                    alternatives_prioritaires.append(
+                        {
+                            "nom": str(nom),
+                            "priorite": priorite,
+                            "raison": str(alt.get("raison", "")),
+                        }
+                    )
+                elif isinstance(alt, (str, int, float, bool)):
+                    alternatives_prioritaires.append(
+                        {
+                            "nom": str(alt),
+                            "priorite": idx,
+                            "raison": "À vérifier avec l'examen clinique.",
+                        }
+                    )
+
+        if not alternatives_prioritaires:
+            top_alts = module1_result.get("top_alternatives", [])
+            if isinstance(top_alts, list):
+                for idx, alt in enumerate(top_alts[:3], start=1):
+                    if not isinstance(alt, dict):
+                        continue
+                    alt_name = (
+                        alt.get("name")
+                        or alt.get("condition_name")
+                        or alt.get("condition_id")
+                    )
+                    if not alt_name:
+                        continue
+                    alternatives_prioritaires.append(
+                        {
+                            "nom": str(alt_name),
+                            "priorite": idx,
+                            "raison": "Alternative CNN à re-prioriser selon les réponses cliniques.",
+                            "confidence_pct": round(float(alt.get("confidence") or 0) * 100, 1),
+                        }
+                    )
+
+        patient_alerts = (
+            rag_response.alertes_patient
+            if isinstance(rag_response.alertes_patient, list)
+            else []
+        )
+        medicaments_a_eviter = []
+
+        raw_avoid_from_gemini = affinee_data.get("medicaments_a_eviter")
+        if isinstance(raw_avoid_from_gemini, list):
+            for item in raw_avoid_from_gemini:
+                if isinstance(item, dict):
+                    medicament_name = item.get("medicament") or item.get("nom")
+                    if not medicament_name:
+                        continue
+                    medicaments_a_eviter.append(
+                        {
+                            "medicament": str(medicament_name),
+                            "raison": str(item.get("raison", "")),
+                        }
+                    )
+                elif isinstance(item, (str, int, float, bool)):
+                    medicaments_a_eviter.append(
+                        {
+                            "medicament": str(item),
+                            "raison": "Signalé par l'analyse affinée Gemini.",
+                        }
+                    )
+
+        for alert in patient_alerts:
+            if not isinstance(alert, dict):
+                continue
+            if alert.get("type") != "medicament_a_eviter":
+                continue
+            alert_medicament = str(alert.get("medicament", "Unknown"))
+            already_present = any(
+                m.get("medicament", "").lower() == alert_medicament.lower()
+                for m in medicaments_a_eviter
+                if isinstance(m, dict)
+            )
+            if not already_present:
+                medicaments_a_eviter.append(
+                    {
+                        "medicament": alert_medicament,
+                        "raison": str(alert.get("raison", "")),
+                    }
+                )
+
+        plan_prise_en_charge = affinee_data.get("plan_prise_en_charge")
+        if not isinstance(plan_prise_en_charge, list):
+            plan_prise_en_charge = (
+                rag_response.medicaments if isinstance(rag_response.medicaments, list) else []
+            )
+
+        delai_urgence = affinee_data.get("delai_urgence")
+        if not isinstance(delai_urgence, str) or not delai_urgence.strip():
+            delai_urgence = rag_response.urgence if rag_response.urgence else "À déterminer"
+
+        return {
+            "status": "success",
+            "message": "Analysis refined based on question answers",
+            "patient_id": str(patient.id),
+            "image_id": str(skin_image.id),
+            "condition": {
+                "id": module1_result.get("condition_id"),
+                "name": module1_result.get("condition_name"),
+                "confidence": float(module1_result.get("confidence") or 0),
+            },
+            "refined_analysis": {
+                "analyse_affinee": analyse_affinee_text,
+                "paragraphe_confiance": paragraphe_confiance,
+                "confiance_initiale_pct": base_confidence_pct,
+                "confiance_revisee_pct": revised_confidence_pct,
+                "variation_confiance_pct": confidence_delta_pct,
+                "decision_diagnostique": decision_diagnostique,
+                "alternatives_prioritaires": alternatives_prioritaires,
+                "plan_prise_en_charge": plan_prise_en_charge,
+                "medicaments_a_eviter": medicaments_a_eviter,
+                "delai_urgence": delai_urgence,
+                "llm_source": llm_source,
+                "llm_model": llm_model,
+                "llm_error": llm_error,
+            },
+            "questions_processed": len(request.question_answers),
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        import traceback
+        print(f"Error during refined analysis: {e}")
+        print(traceback.format_exc())
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Refined analysis failed: {str(e)}"
         )

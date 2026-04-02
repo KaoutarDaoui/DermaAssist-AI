@@ -17,7 +17,7 @@ from app.models.rag_analysis import AIAnalysis, ClinicalQuestion, Treatment, Ale
 from app.models.chat_message import ChatMessage
 
 
-=======
+
 from app.api import auth, patients, consultations, images, ai, advice, checkins, skin_images, analysis, mobile, chat
 
 # Initialiser l'application FastAPI
