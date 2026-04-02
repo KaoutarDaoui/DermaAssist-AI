@@ -12,7 +12,7 @@ class ChatMessage(Base):
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     patient_id = Column(UUID(as_uuid=True), ForeignKey("patients.id", ondelete="CASCADE"), nullable=False)
-    consultation_id = Column(String, ForeignKey("consultations.id", ondelete="SET NULL"), nullable=True)
+    consultation_id = Column(UUID(as_uuid=True), ForeignKey("consultations.id", ondelete="SET NULL"), nullable=True)
     
     # Message content
     user_message = Column(Text, nullable=False)

@@ -101,8 +101,7 @@ export const advice = {
 };
 
 export const skinComparison = {
-  getImages: (patientId) =>
-    apiClient.get(`/patients/${patientId}/skin-images`),
+  getImages: (patientId) => apiClient.get(`/patients/${patientId}/skin-images`),
 
   getImage: (patientId, imageId) =>
     apiClient.get(`/patients/${patientId}/skin-images/${imageId}`),
@@ -126,5 +125,4 @@ export const skinComparison = {
   getProgression: (patientId) =>
     apiClient.get(`/patients/${patientId}/skin-images/progression`),
 };
-
 export default apiClient;

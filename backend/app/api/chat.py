@@ -8,13 +8,24 @@ from app.schemas.chat import (
     ChatSendMessageResponse,
     ChatHistoryResponse
 )
-from app.core.security import verify_token
+from app.core.security import decode_token
 import uuid
 
 router = APIRouter(prefix="/chat", tags=["chat"])
 
-# Initialize chat service
-chat_service = ChatService()
+# Lazy initialization of chat service (to allow .env to load properly)
+_chat_service = None
+
+def get_chat_service() -> ChatService:
+    """Get or initialize the chat service lazily"""
+    global _chat_service
+    if _chat_service is None:
+        try:
+            _chat_service = ChatService()
+        except ValueError:
+            # If Gemini API key is not set, return None and handle gracefully
+            return None
+    return _chat_service
 
 
 @router.post("/send-message", response_model=ChatSendMessageResponse)
@@ -31,13 +42,17 @@ async def send_message(
     try:
         # Verify token and get patient_id
         token = authorization.replace("Bearer ", "")
-        payload = verify_token(token)
+        payload = decode_token(token)
         patient_id = payload.get("sub")
         
         if not patient_id:
             raise HTTPException(status_code=401, detail="Invalid token")
         
         # Send message to chat service
+        chat_service = get_chat_service()
+        if chat_service is None:
+            raise HTTPException(status_code=503, detail="Chat service unavailable - Gemini API key not configured")
+        
         result = chat_service.send_message(
             db=db,
             patient_id=patient_id,
@@ -77,13 +92,17 @@ async def get_chat_history(
     try:
         # Verify token and get patient_id
         token = authorization.replace("Bearer ", "")
-        payload = verify_token(token)
+        payload = decode_token(token)
         patient_id = payload.get("sub")
         
         if not patient_id:
             raise HTTPException(status_code=401, detail="Invalid token")
         
         # Get chat history
+        chat_service = get_chat_service()
+        if chat_service is None:
+            raise HTTPException(status_code=503, detail="Chat service unavailable - Gemini API key not configured")
+        
         messages = chat_service.get_chat_history(db, patient_id, limit)
         
         return ChatHistoryResponse(
@@ -110,13 +129,17 @@ async def delete_chat_history(
     try:
         # Verify token and get patient_id
         token = authorization.replace("Bearer ", "")
-        payload = verify_token(token)
+        payload = decode_token(token)
         patient_id = payload.get("sub")
         
         if not patient_id:
             raise HTTPException(status_code=401, detail="Invalid token")
         
         # Delete chat history
+        chat_service = get_chat_service()
+        if chat_service is None:
+            raise HTTPException(status_code=503, detail="Chat service unavailable - Gemini API key not configured")
+        
         success = chat_service.delete_chat_history(db, patient_id)
         
         return {

@@ -39,6 +39,9 @@ export default function ConsultationFormPage() {
     site: "unknown",
     saison: "ete",
   });
+  const [refinedAnalysis, setRefinedAnalysis] = useState(null);
+  const [refiningAnalysis, setRefiningAnalysis] = useState(false);
+  const [refineError, setRefineError] = useState("");
 
   const toDisplayText = (value, fallback = "N/A") => {
     if (value === null || value === undefined || value === "") return fallback;
@@ -162,6 +165,157 @@ export default function ConsultationFormPage() {
         return null;
       })
       .filter(Boolean);
+  };
+
+  const normalizeRefinedAnalysis = (rawAnalysis) => {
+    if (!rawAnalysis || typeof rawAnalysis !== "object") {
+      return {
+        analyse_affinee: typeof rawAnalysis === "string" ? rawAnalysis : "",
+        paragraphe_confiance: "",
+        confiance_initiale_pct: null,
+        confiance_revisee_pct: null,
+        variation_confiance_pct: null,
+        decision_diagnostique: "",
+        alternatives_prioritaires: [],
+        llm_source: "fallback",
+        llm_model: "",
+        llm_error: "",
+        plan_prise_en_charge: [],
+        medicaments_a_eviter: [],
+        delai_urgence: "",
+      };
+    }
+
+    const toNumberOrNull = (value) => {
+      const n = Number(value);
+      return Number.isFinite(n) ? n : null;
+    };
+
+    const rawPlan = Array.isArray(rawAnalysis.plan_prise_en_charge)
+      ? rawAnalysis.plan_prise_en_charge
+      : [];
+    const normalizedPlan = rawPlan
+      .map((step) => {
+        if (
+          typeof step === "string" ||
+          typeof step === "number" ||
+          typeof step === "boolean"
+        ) {
+          return String(step);
+        }
+        if (step && typeof step === "object") {
+          return toDisplayText(
+            step.step ||
+              step.texte ||
+              step.text ||
+              step.description ||
+              step.nom ||
+              step.indication,
+            "",
+          );
+        }
+        return "";
+      })
+      .filter(Boolean);
+
+    const rawAvoid = Array.isArray(rawAnalysis.medicaments_a_eviter)
+      ? rawAnalysis.medicaments_a_eviter
+      : [];
+    const normalizedAvoid = rawAvoid
+      .map((item, idx) => {
+        if (
+          typeof item === "string" ||
+          typeof item === "number" ||
+          typeof item === "boolean"
+        ) {
+          return {
+            medicament: String(item),
+            raison: "",
+          };
+        }
+
+        if (item && typeof item === "object") {
+          return {
+            medicament: toDisplayText(
+              item.medicament || item.nom || item.name,
+              `Alerte ${idx + 1}`,
+            ),
+            raison: toDisplayText(
+              item.raison || item.reason || item.message,
+              "",
+            ),
+          };
+        }
+
+        return null;
+      })
+      .filter(Boolean);
+
+    const rawAlternatives = Array.isArray(rawAnalysis.alternatives_prioritaires)
+      ? rawAnalysis.alternatives_prioritaires
+      : [];
+    const normalizedAlternatives = rawAlternatives
+      .map((item, idx) => {
+        if (
+          typeof item === "string" ||
+          typeof item === "number" ||
+          typeof item === "boolean"
+        ) {
+          return {
+            nom: String(item),
+            priorite: idx + 1,
+            raison: "À vérifier cliniquement",
+            confidence_pct: null,
+          };
+        }
+
+        if (item && typeof item === "object") {
+          const nom = toDisplayText(
+            item.nom || item.name || item.condition || item.maladie,
+            "",
+          );
+          if (!nom) return null;
+
+          const priorite = Number(item.priorite);
+          const confidencePct = toNumberOrNull(
+            item.confidence_pct ?? item.confidence,
+          );
+
+          return {
+            nom,
+            priorite: Number.isFinite(priorite) ? priorite : idx + 1,
+            raison: toDisplayText(item.raison || item.reason, ""),
+            confidence_pct: confidencePct,
+          };
+        }
+
+        return null;
+      })
+      .filter(Boolean)
+      .sort((a, b) => a.priorite - b.priorite);
+
+    return {
+      analyse_affinee: toDisplayText(rawAnalysis.analyse_affinee, ""),
+      paragraphe_confiance: toDisplayText(rawAnalysis.paragraphe_confiance, ""),
+      confiance_initiale_pct: toNumberOrNull(
+        rawAnalysis.confiance_initiale_pct,
+      ),
+      confiance_revisee_pct: toNumberOrNull(rawAnalysis.confiance_revisee_pct),
+      variation_confiance_pct: toNumberOrNull(
+        rawAnalysis.variation_confiance_pct,
+      ),
+      decision_diagnostique: toDisplayText(
+        rawAnalysis.decision_diagnostique,
+        "",
+      ),
+      alternatives_prioritaires: normalizedAlternatives,
+      llm_source: toDisplayText(rawAnalysis.llm_source, "fallback"),
+      llm_model: toDisplayText(rawAnalysis.llm_model, ""),
+      llm_error: toDisplayText(rawAnalysis.llm_error, ""),
+      plan_prise_en_charge: normalizedPlan,
+      medicaments_a_eviter: normalizedAvoid,
+      delai_urgence: toDisplayText(rawAnalysis.delai_urgence, ""),
+    };
   };
 
   const displayedIllness =
@@ -316,6 +470,8 @@ export default function ConsultationFormPage() {
         setImageFile(file);
         setShowAnalysis(false);
         setAdvancedResults(null);
+        setRefinedAnalysis(null);
+        setRefineError("");
         setSelectedQuestionOptions({});
         setSelectedTreatments({});
         setCustomTreatments([]);
@@ -357,15 +513,10 @@ export default function ConsultationFormPage() {
         ? Math.floor(
             (new Date() - new Date(patient.birth_date)) /
               (365.25 * 24 * 60 * 60 * 1000),
-      // Calculate age from birth_date
-      const age = patient?.birth_date
-        ? Math.floor(
-            (new Date() - new Date(patient.birth_date)) / (365.25 * 24 * 60 * 60 * 1000)
           )
         : null;
 
-      // 2) Run Module 1 WITH CLINICAL INFORMATION for accurate analysis
-
+      // 2) Run Module 1 with clinical information
       const analysisResponse = await axios.post(
         `${API_URL}/patients/${patientId}/analyze-skin-image`,
         {
@@ -381,6 +532,8 @@ export default function ConsultationFormPage() {
       console.log("Analysis completed:", analysisResponse.data);
       setAnalysisResults(analysisResponse.data);
       setAdvancedResults(null);
+      setRefinedAnalysis(null);
+      setRefineError("");
       setSelectedQuestionOptions({});
       setSelectedTreatments({});
       setCustomTreatments([]);
@@ -407,14 +560,30 @@ export default function ConsultationFormPage() {
       return;
     }
 
+    const age = patient?.birth_date
+      ? Math.floor(
+          (new Date() - new Date(patient.birth_date)) /
+            (365.25 * 24 * 60 * 60 * 1000),
+        )
+      : null;
+
     setAdvancedAnalyzing(true);
     try {
       const response = await axios.post(
         `${API_URL}/patients/${patientId}/advanced-analysis`,
-        { image_id: String(analysisResults.image_id) },
+        {
+          image_id: String(analysisResults.image_id),
+          age,
+          sex: consultationDetails.sex,
+          site: consultationDetails.site,
+          saison: consultationDetails.saison,
+          wilaya: patient?.city || "nord",
+        },
       );
 
       setAdvancedResults(response.data?.rag || null);
+      setRefinedAnalysis(null);
+      setRefineError("");
       setSelectedQuestionOptions({});
       setSelectedTreatments({});
       setCustomTreatments([]);
@@ -431,6 +600,120 @@ export default function ConsultationFormPage() {
     } finally {
       setAdvancedAnalyzing(false);
     }
+  };
+
+  // Refine analysis only when the doctor clicks the button.
+  const allQuestionsAnswered = () => {
+    if (clinicalQuestions.length === 0) return false;
+    return clinicalQuestions.every(
+      (_, idx) => selectedQuestionOptions[idx] !== undefined,
+    );
+  };
+
+  const handleRefineAnalysis = async () => {
+    if (!analysisResults?.image_id) {
+      const msg = "Veuillez d'abord lancer l'analyse initiale.";
+      setRefineError(msg);
+      toast.error(msg);
+      return;
+    }
+
+    if (clinicalQuestions.length === 0) {
+      const msg = "Aucune question clinique disponible pour l'analyse affinée.";
+      setRefineError(msg);
+      toast.error(msg);
+      return;
+    }
+
+    if (!allQuestionsAnswered()) {
+      const unansweredCount = clinicalQuestions.filter(
+        (_, idx) => selectedQuestionOptions[idx] === undefined,
+      ).length;
+      const msg = `Veuillez répondre à toutes les questions avant d'analyser (${unansweredCount} restante${unansweredCount > 1 ? "s" : ""}).`;
+      setRefineError(msg);
+      toast.error(msg);
+      return;
+    }
+
+    setRefiningAnalysis(true);
+    setRefineError("");
+    try {
+      const age = patient?.birth_date
+        ? Math.floor(
+            (new Date() - new Date(patient.birth_date)) /
+              (365.25 * 24 * 60 * 60 * 1000),
+          )
+        : null;
+
+      // Format question answers for the API
+      const questionAnswers = clinicalQuestions
+        .map((question, idx) => {
+          if (selectedQuestionOptions[idx] !== undefined) {
+            return {
+              index: idx,
+              question: question.text,
+              selected_option: question.options[selectedQuestionOptions[idx]],
+            };
+          }
+          return null;
+        })
+        .filter(Boolean);
+
+      const response = await axios.post(
+        `${API_URL}/patients/${patientId}/refine-analysis`,
+        {
+          image_id: String(analysisResults.image_id),
+          question_answers: questionAnswers,
+          age,
+          sex: consultationDetails.sex,
+          site: consultationDetails.site,
+          saison: consultationDetails.saison,
+          wilaya: patient?.city || "nord",
+        },
+      );
+
+      console.log("Refined analysis:", response.data);
+      const normalizedRefinedAnalysis = normalizeRefinedAnalysis(
+        response.data?.refined_analysis,
+      );
+      setRefinedAnalysis(normalizedRefinedAnalysis);
+      toast.success("Analyse affinée générée avec succès.");
+    } catch (error) {
+      console.error("Error during refined analysis:", error);
+      const errorMsg =
+        error.response?.data?.detail ||
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to refine analysis";
+      setRefineError(errorMsg);
+      toast.error(errorMsg);
+    } finally {
+      setRefiningAnalysis(false);
+    }
+  };
+
+  const getDecisionLabel = (decision) => {
+    if (decision === "diagnostic_renforce") return "Diagnostic renforcé";
+    if (decision === "revoir_alternatives") return "Revoir les alternatives";
+    if (decision === "diagnostic_incertain") return "Diagnostic incertain";
+    return toDisplayText(decision, "Décision non précisée");
+  };
+
+  const getDecisionBadgeClass = (decision) => {
+    if (decision === "diagnostic_renforce") {
+      return "bg-emerald-100 text-emerald-700 border border-emerald-200";
+    }
+    if (decision === "revoir_alternatives") {
+      return "bg-amber-100 text-amber-700 border border-amber-200";
+    }
+    return "bg-slate-100 text-slate-700 border border-slate-200";
+  };
+
+  const getDeltaClass = (delta) => {
+    if (typeof delta !== "number") return "text-slate-700";
+    if (delta > 0) return "text-emerald-700";
+    if (delta < 0) return "text-amber-700";
+    return "text-slate-700";
   };
 
   if (loading) {
@@ -980,14 +1263,16 @@ export default function ConsultationFormPage() {
                                             <button
                                               key={`${questionIdx}-${optionIdx}`}
                                               type="button"
-                                              onClick={() =>
+                                              onClick={() => {
+                                                setRefinedAnalysis(null);
+                                                setRefineError("");
                                                 setSelectedQuestionOptions(
                                                   (prev) => ({
                                                     ...prev,
                                                     [questionIdx]: optionIdx,
                                                   }),
-                                                )
-                                              }
+                                                );
+                                              }}
                                               className={`px-4 py-2 rounded-full font-medium text-sm transition-all transform hover:scale-105 border-2 ${
                                                 isSelected
                                                   ? "border-[#0F6E56] bg-gradient-to-r from-[#0F6E56] to-emerald-500 text-white shadow-lg shadow-emerald-500/30"
@@ -1005,6 +1290,178 @@ export default function ConsultationFormPage() {
                               </div>
                             </div>
                           ))}
+
+                          <div className="pt-2 border-t border-gray-100 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                            <p className="text-xs text-gray-500">
+                              Cliquez sur Analyser après avoir répondu à toutes
+                              les questions.
+                            </p>
+                            <button
+                              type="button"
+                              onClick={handleRefineAnalysis}
+                              disabled={refiningAnalysis}
+                              className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#0F6E56] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#0d5a47] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                            >
+                              {refiningAnalysis
+                                ? "Analyse en cours..."
+                                : "Analyser"}
+                            </button>
+                          </div>
+
+                          {refineError && (
+                            <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3">
+                              <p className="text-sm text-red-700">
+                                {refineError}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Refined Analysis Section */}
+                    {refinedAnalysis && (
+                      <div className="rounded-xl border border-gray-200 bg-white overflow-hidden shadow-sm">
+                        <div className="px-8 py-4 border-b border-gray-200 bg-[#0F6E56]">
+                          <div className="flex items-center justify-between gap-3">
+                            <p className="text-xs tracking-widest uppercase font-bold text-white flex items-center gap-2">
+                              <span>Analyse Affinée Personnalisée</span>
+                              {refiningAnalysis && (
+                                <div className="relative w-4 h-4">
+                                  <div className="absolute inset-0 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                </div>
+                              )}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="p-8 space-y-6">
+                          {/* Confiance diagnostique révisée */}
+                          {(refinedAnalysis.paragraphe_confiance ||
+                            refinedAnalysis.confiance_revisee_pct !== null) && (
+                            <div className="rounded-lg bg-slate-50 border border-slate-200 p-6 space-y-4">
+                              <div className="flex flex-wrap items-center justify-between gap-2">
+                                <p className="text-xs tracking-widest uppercase font-bold text-slate-700">
+                                  Interprétation clinique
+                                </p>
+                                {refinedAnalysis.llm_model && (
+                                  <p className="text-[11px] text-slate-500 font-medium">
+                                    {refinedAnalysis.llm_model}
+                                  </p>
+                                )}
+                                <span
+                                  className={`px-3 py-1 rounded-full text-xs font-semibold ${getDecisionBadgeClass(
+                                    refinedAnalysis.decision_diagnostique,
+                                  )}`}
+                                >
+                                  {getDecisionLabel(
+                                    refinedAnalysis.decision_diagnostique,
+                                  )}
+                                </span>
+                              </div>
+
+                              {refinedAnalysis.paragraphe_confiance && (
+                                <p className="text-sm text-slate-700 leading-relaxed">
+                                  {refinedAnalysis.paragraphe_confiance}
+                                </p>
+                              )}
+
+                              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                <div className="rounded-md bg-white border border-slate-200 p-3">
+                                  <p className="text-[11px] uppercase tracking-widest text-slate-500 font-semibold">
+                                    Confiance initiale
+                                  </p>
+                                  <p className="text-lg font-bold text-slate-800 mt-1">
+                                    {refinedAnalysis.confiance_initiale_pct !==
+                                    null
+                                      ? `${refinedAnalysis.confiance_initiale_pct}%`
+                                      : "N/A"}
+                                  </p>
+                                </div>
+
+                                <div className="rounded-md bg-white border border-slate-200 p-3">
+                                  <p className="text-[11px] uppercase tracking-widest text-slate-500 font-semibold">
+                                    Confiance révisée
+                                  </p>
+                                  <p className="text-lg font-bold text-slate-800 mt-1">
+                                    {refinedAnalysis.confiance_revisee_pct !==
+                                    null
+                                      ? `${refinedAnalysis.confiance_revisee_pct}%`
+                                      : "N/A"}
+                                  </p>
+                                </div>
+
+                                <div className="rounded-md bg-white border border-slate-200 p-3">
+                                  <p className="text-[11px] uppercase tracking-widest text-slate-500 font-semibold">
+                                    Variation
+                                  </p>
+                                  <p
+                                    className={`text-lg font-bold mt-1 ${getDeltaClass(
+                                      refinedAnalysis.variation_confiance_pct,
+                                    )}`}
+                                  >
+                                    {refinedAnalysis.variation_confiance_pct !==
+                                    null
+                                      ? `${
+                                          refinedAnalysis.variation_confiance_pct >
+                                          0
+                                            ? "+"
+                                            : ""
+                                        }${
+                                          refinedAnalysis.variation_confiance_pct
+                                        }%`
+                                      : "N/A"}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Analyse Affinée */}
+                          {refinedAnalysis.analyse_affinee && (
+                            <div className="rounded-lg bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 p-6">
+                              <p className="text-xs tracking-widest uppercase font-bold text-[#0F6E56] mb-3">
+                                Analyse Détaillée
+                              </p>
+                              <p className="text-gray-700 leading-relaxed text-sm">
+                                {refinedAnalysis.analyse_affinee}
+                              </p>
+                            </div>
+                          )}
+
+                          {/* Médicaments à Éviter */}
+                          {refinedAnalysis.medicaments_a_eviter &&
+                            refinedAnalysis.medicaments_a_eviter.length > 0 && (
+                              <div>
+                                <p className="text-xs tracking-widest uppercase font-bold text-red-600 mb-3">
+                                  Médicaments à Éviter
+                                </p>
+                                <div className="space-y-2">
+                                  {refinedAnalysis.medicaments_a_eviter.map(
+                                    (med, idx) => (
+                                      <div
+                                        key={idx}
+                                        className="flex gap-3 p-3 bg-red-50 rounded-lg border border-red-200 hover:bg-red-100 transition-colors"
+                                      >
+                                        <span className="text-red-600 font-bold flex-shrink-0">
+                                          ●
+                                        </span>
+                                        <div className="flex-1">
+                                          <p className="text-sm font-semibold text-red-700">
+                                            {med.medicament}
+                                          </p>
+                                          {med.raison && (
+                                            <p className="text-xs text-red-600 mt-1">
+                                              {med.raison}
+                                            </p>
+                                          )}
+                                        </div>
+                                      </div>
+                                    ),
+                                  )}
+                                </div>
+                              </div>
+                            )}
                         </div>
                       </div>
                     )}
