@@ -13,7 +13,7 @@ import {
   Stethoscope,
   Camera,
   ChevronRight,
-} from "lucide-react-native/icons";
+} from "lucide-react-native";
 
 const { width } = Dimensions.get("window");
 

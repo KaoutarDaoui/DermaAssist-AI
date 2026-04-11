@@ -16,7 +16,7 @@ import {
   FileText,
   GitCompare,
   User,
-} from "lucide-react-native/icons";
+} from "lucide-react-native";
 
 // Import screens
 import WelcomeScreen from "./src/screens/WelcomeScreen";

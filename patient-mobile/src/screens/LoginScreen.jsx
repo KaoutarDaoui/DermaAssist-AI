@@ -13,7 +13,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { Mail, Shield, ChevronLeft } from "lucide-react-native/icons";
+import { Mail, Shield, ChevronLeft } from "lucide-react-native";
 import authService from "../services/authService";
 
 const { width } = Dimensions.get("window");

@@ -14,7 +14,7 @@ import {
   Pill,
   Stethoscope,
   Image as ImageIcon,
-} from "lucide-react-native/icons";
+} from "lucide-react-native";
 import patientDataService from "../services/patientDataService";
 
 const COLORS = {

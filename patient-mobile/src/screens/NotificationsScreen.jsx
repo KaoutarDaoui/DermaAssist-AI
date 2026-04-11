@@ -13,7 +13,7 @@ import {
   CircleCheck as CheckCircle,
   MessageSquare,
   TriangleAlert as AlertTriangle,
-} from "lucide-react-native/icons";
+} from "lucide-react-native";
 
 const COLORS = {
   background: "#F2F6F7",

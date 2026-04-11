@@ -3,6 +3,7 @@
     "name": "Skin+ Patient",
     "slug": "dermassist-patient",
     "version": "1.0.0",
+    "sdkVersion": "54.0.0",
     "assetBundlePatterns": ["**/*"],
     "platforms": ["ios", "android", "web"],
     "ios": {

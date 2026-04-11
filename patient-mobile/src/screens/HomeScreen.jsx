@@ -19,7 +19,7 @@ import {
   Sun,
   Wind,
   Upload,
-} from "lucide-react-native/icons";
+} from "lucide-react-native";
 import patientDataService from "../services/patientDataService";
 
 const COLORS = {
@@ -433,19 +433,22 @@ const styles = StyleSheet.create({
   headerGreeting: {
     fontSize: 18,
     color: COLORS.textSecondary,
-    fontWeight: "500",
+    fontWeight: "400",
+    fontFamily: "System",
   },
   headerName: {
     marginTop: 2,
-    fontSize: 30,
-    lineHeight: 34,
+    fontSize: 32,
+    lineHeight: 38,
     color: COLORS.textPrimary,
-    fontWeight: "800",
+    fontWeight: "500",
+    fontFamily: "System",
+    letterSpacing: 0.2,
   },
   dataErrorText: {
     color: COLORS.danger,
     fontSize: 13,
-    fontWeight: "600",
+    fontWeight: "400",
     marginBottom: 10,
   },
   headerActions: {
@@ -463,7 +466,7 @@ const styles = StyleSheet.create({
   },
   avatarText: {
     color: "#FFFFFF",
-    fontWeight: "700",
+    fontWeight: "500",
     fontSize: 14,
   },
   notificationButton: {
@@ -494,7 +497,7 @@ const styles = StyleSheet.create({
   },
   alertPillText: {
     color: "#236A60",
-    fontWeight: "600",
+    fontWeight: "500",
     fontSize: 12,
   },
   alertTitleRow: {
@@ -506,21 +509,25 @@ const styles = StyleSheet.create({
   alertTitle: {
     flex: 1,
     color: COLORS.textPrimary,
-    fontSize: 28,
-    lineHeight: 31,
-    fontWeight: "800",
+    fontSize: 26,
+    lineHeight: 32,
+    fontWeight: "500",
+    fontFamily: "System",
+    letterSpacing: 0.3,
   },
   alertSubtitle: {
     marginTop: 6,
     color: "#315A55",
     fontSize: 15,
-    fontWeight: "500",
+    fontWeight: "400",
+    fontFamily: "System",
+    lineHeight: 22,
   },
   alertDate: {
     marginTop: 4,
     color: "#6B837F",
     fontSize: 12,
-    fontWeight: "500",
+    fontWeight: "400",
   },
   metricRow: {
     flexDirection: "row",
@@ -544,7 +551,7 @@ const styles = StyleSheet.create({
   },
   metricChipText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   sectionHeader: {
     marginTop: 14,
@@ -554,17 +561,20 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   sectionLabel: {
-    fontSize: 33,
-    lineHeight: 35,
+    fontSize: 32,
+    lineHeight: 38,
     color: COLORS.textPrimary,
-    fontWeight: "800",
+    fontWeight: "500",
     marginTop: 4,
     marginBottom: 8,
+    fontFamily: "System",
+    letterSpacing: 0.3,
   },
   sectionAction: {
     color: COLORS.accent,
-    fontWeight: "700",
+    fontWeight: "500",
     fontSize: 14,
+    fontFamily: "System",
   },
   comparisonCard: {
     backgroundColor: COLORS.surface,
@@ -589,15 +599,19 @@ const styles = StyleSheet.create({
   },
   comparisonTitle: {
     color: COLORS.textPrimary,
-    fontSize: 18,
+    fontSize: 17,
     lineHeight: 22,
-    fontWeight: "800",
+    fontWeight: "500",
+    fontFamily: "System",
+    letterSpacing: 0.2,
   },
   comparisonSubtitle: {
     marginTop: 3,
     color: COLORS.textSecondary,
     fontSize: 13,
-    fontWeight: "500",
+    fontWeight: "400",
+    fontFamily: "System",
+    lineHeight: 18,
   },
   adviceCard: {
     backgroundColor: COLORS.surface,
@@ -626,7 +640,7 @@ const styles = StyleSheet.create({
   },
   adviceTagText: {
     fontSize: 11,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   adviceTagTextMedication: {
     color: "#187E6D",
@@ -642,19 +656,23 @@ const styles = StyleSheet.create({
   adviceTime: {
     color: COLORS.textMuted,
     fontSize: 12,
-    fontWeight: "600",
+    fontWeight: "400",
   },
   adviceTitle: {
     color: COLORS.textPrimary,
-    fontSize: 28,
-    lineHeight: 30,
-    fontWeight: "800",
+    fontSize: 26,
+    lineHeight: 32,
+    fontWeight: "500",
+    fontFamily: "System",
+    letterSpacing: 0.2,
   },
   adviceSubtitle: {
     marginTop: 3,
     color: COLORS.textSecondary,
     fontSize: 16,
-    fontWeight: "500",
+    fontWeight: "400",
+    fontFamily: "System",
+    lineHeight: 22,
   },
   recentLegend: {
     flexDirection: "row",
@@ -665,7 +683,7 @@ const styles = StyleSheet.create({
   recentLegendText: {
     color: COLORS.textMuted,
     fontSize: 12,
-    fontWeight: "600",
+    fontWeight: "400",
   },
   recentCard: {
     backgroundColor: COLORS.surface,
@@ -710,13 +728,15 @@ const styles = StyleSheet.create({
   },
   scoreBadgeText: {
     color: "#FFFFFF",
-    fontWeight: "800",
+    fontWeight: "500",
     fontSize: 13,
   },
   recentNote: {
     color: COLORS.textPrimary,
     fontSize: 14,
-    fontWeight: "600",
+    fontWeight: "500",
+    fontFamily: "System",
+    lineHeight: 20,
   },
   consultationInfo: {
     flex: 1,
@@ -725,7 +745,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
     color: COLORS.textMuted,
     fontSize: 12,
-    fontWeight: "500",
+    fontWeight: "400",
   },
   consultationMeta: {
     alignItems: "flex-end",
@@ -734,17 +754,17 @@ const styles = StyleSheet.create({
   recentDate: {
     color: COLORS.textPrimary,
     fontSize: 12,
-    fontWeight: "600",
+    fontWeight: "500",
   },
   consultationStatus: {
     color: COLORS.accent,
     fontSize: 11,
-    fontWeight: "700",
+    fontWeight: "500",
   },
   emptyStateText: {
     color: COLORS.textSecondary,
     fontSize: 14,
-    fontWeight: "500",
+    fontWeight: "400",
     textAlign: "center",
     paddingVertical: 14,
   },
@@ -763,7 +783,8 @@ const styles = StyleSheet.create({
   },
   footerCtaText: {
     color: COLORS.accent,
-    fontWeight: "700",
+    fontWeight: "500",
     fontSize: 13,
+    fontFamily: "System",
   },
 });

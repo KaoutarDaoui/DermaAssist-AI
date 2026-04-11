@@ -24,7 +24,7 @@ import {
   LogOut,
   Zap,
   ChevronRight,
-} from "lucide-react-native/icons";
+} from "lucide-react-native";
 import authService from "../services/authService";
 import patientDataService from "../services/patientDataService";
 

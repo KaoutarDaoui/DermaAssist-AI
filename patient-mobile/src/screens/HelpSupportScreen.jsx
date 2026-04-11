@@ -15,7 +15,7 @@ import {
   Mail,
   Phone,
   Shield,
-} from "lucide-react-native/icons";
+} from "lucide-react-native";
 
 const COLORS = {
   background: "#F2F6F7",

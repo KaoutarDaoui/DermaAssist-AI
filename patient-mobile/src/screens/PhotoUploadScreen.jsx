@@ -21,7 +21,7 @@ import {
   CircleAlert as AlertCircle,
   Send,
   X,
-} from "lucide-react-native/icons";
+} from "lucide-react-native";
 import patientDataService from "../services/patientDataService";
 
 const COLORS = {

@@ -13,7 +13,7 @@ import {
   Calendar,
   Smile,
   TrendingUp,
-} from "lucide-react-native/icons";
+} from "lucide-react-native";
 
 const COLORS = {
   primary: "#2D4A85",
