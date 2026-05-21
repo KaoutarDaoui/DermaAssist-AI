@@ -94,7 +94,6 @@ DermaAssist-AI/
 Services optionnels pour un mode complet:
 
 - PostgreSQL
-- Redis
 - MinIO (ou S3 compatible)
 
 ### Option A: setup automatique
